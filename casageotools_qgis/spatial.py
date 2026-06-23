@@ -14,6 +14,10 @@
 #
 #  SPDX-License-Identifier: Apache-2.0
 
+__all__ = [
+    "CasaGeoToolsIsolinesAlgorithm",
+]
+
 import importlib
 from typing import Any, LiteralString, override
 
@@ -38,15 +42,17 @@ from qgis.core import (
 )
 from qgis.PyQt.QtCore import QCoreApplication, QMetaType
 
+from casageotools_qgis import resources
+
 
 def _get_api_key() -> str:
     return QgsSettings().value("casaGeoTools/APIKey", "", type=str)
 
 
-class CasaGeoToolsSpatialAlgorithm(QgsProcessingAlgorithm):
+class CasaGeoToolsAbstractSpatialAlgorithm(QgsProcessingAlgorithm):
     @override
     def group(self) -> str:
-        return self.__tr("Spatial algorithms")
+        return self.__tr("Spatial", "Group")
 
     @override
     def groupId(self) -> str:
@@ -79,7 +85,7 @@ class CasaGeoToolsSpatialAlgorithm(QgsProcessingAlgorithm):
         )
 
 
-class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsSpatialAlgorithm):
+class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
     INPUT = "INPUT"
     OUTPUT = "OUTPUT"
     RANGES = "RANGES"
@@ -90,11 +96,26 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsSpatialAlgorithm):
 
     @override
     def displayName(self) -> str:
-        return self.__tr("Calculate isolines")
+        return self.__tr("Isolines", "Algorithm")
 
     @override
     def name(self) -> str:
         return "isolines"
+
+    @override
+    def shortDescription(self) -> str:
+        return self.__tr("Calculates isolines around locations.")
+
+    @override
+    def shortHelpString(self) -> str:
+        return self.__tr("""
+        Calculates isolines around locations.
+        The input points will be converted into EPSG:4326 and the resulting isolines are EPSG:4326 polygons. There may be multiple output polygons for a single input point. 
+        """)
+
+    @override
+    def helpUrl(self) -> str:
+        return resources.help_url("algorithms/spatial/isolines.html").toString()
 
     @override
     def createInstance(self) -> QgsProcessingAlgorithm | None:
@@ -293,7 +314,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsSpatialAlgorithm):
             feedback.setProgressText(self.__tr("Converting results"))
 
         for result in results.itertuples():
-            feature = QgsFeature(fields=fields)
+            feature = QgsFeature(fields)
             feature.setGeometry(QgsGeometry.from_shapely(result.geometry))  # pyright: ignore[reportAttributeAccessIssue]
             feature.setAttributes([
                 result.id,  # pyright: ignore[reportAttributeAccessIssue]

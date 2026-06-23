@@ -31,8 +31,10 @@ from qgis.PyQt.QtGui import (
 )
 
 from . import resources
+from .coder import CasaGeoToolsAddressSearchAlgorithm, CasaGeoToolsPOISearchAlgorithm
 from .maindialog import CasaGeoToolsMainDialog
 from .resources import PLUGIN_I18N_DIRECTORY, PLUGIN_IDENTIFIER
+from .spatial import CasaGeoToolsIsolinesAlgorithm
 
 # class CasaGeoToolsPluginTranslationComponent:
 #     translator: QTranslator
@@ -158,9 +160,8 @@ class CasaGeoToolsProcessingProvider(QgsProcessingProvider):
         """
         Loads all algorithms belonging to this provider.
         """
-        from .coder import CasaGeoToolsPOISearchAlgorithm
-        from .spatial import CasaGeoToolsIsolinesAlgorithm
 
+        # self.addAlgorithm(CasaGeoToolsAddressSearchAlgorithm())
         self.addAlgorithm(CasaGeoToolsPOISearchAlgorithm())
         self.addAlgorithm(CasaGeoToolsIsolinesAlgorithm())
 

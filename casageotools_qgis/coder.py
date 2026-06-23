@@ -14,12 +14,17 @@
 #
 #  SPDX-License-Identifier: Apache-2.0
 
+__all__ = [
+    "CasaGeoToolsAddressSearchAlgorithm",
+    "CasaGeoToolsPOISearchAlgorithm",
+]
+
 import importlib
 from typing import Any, LiteralString, override
 
-from qgis._core import QgsField
 from qgis.core import (
     Qgis,
+    QgsField,
     QgsFields,
     QgsProcessingAlgorithm,
     QgsProcessingContext,
@@ -28,6 +33,8 @@ from qgis.core import (
     QgsProcessingParameterFeatureSource,
 )
 from qgis.PyQt.QtCore import QCoreApplication, QMetaType
+
+from casageotools_qgis import resources
 
 # def DECLARE_TR_FUNCTIONS[T: type](cls: T) -> T:
 #     setattr(
@@ -38,10 +45,10 @@ from qgis.PyQt.QtCore import QCoreApplication, QMetaType
 #     return cls
 
 
-class CasaGeoToolsGeocodingAlgorithm(QgsProcessingAlgorithm):
+class CasaGeoToolsAbstractGeocodingAlgorithm(QgsProcessingAlgorithm):
     @override
     def group(self) -> str:
-        return self.__tr("Geocoding algorithms")
+        return self.__tr("Coder", "Group")
 
     @override
     def groupId(self) -> str:
@@ -71,17 +78,25 @@ class CasaGeoToolsGeocodingAlgorithm(QgsProcessingAlgorithm):
         )
 
 
-class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsGeocodingAlgorithm):
+class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm):
     INPUT = "INPUT"
     OUTPUT = "OUTPUT"
 
     @override
     def displayName(self) -> str:
-        return self.__tr("Geocode addresses")
+        return self.__tr("Address search", "Algorithm")
 
     @override
     def name(self) -> str:
         return "address"
+
+    @override
+    def shortDescription(self) -> str:
+        return self.__tr("Geocodes addresses.")
+
+    @override
+    def helpUrl(self) -> str:
+        return resources.help_url().toString()
 
     @override
     def createInstance(self) -> QgsProcessingAlgorithm | None:
@@ -114,7 +129,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsGeocodingAlgorithm):
         )
 
 
-class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsGeocodingAlgorithm):
+class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm):
     """
     This is an example algorithm that takes a vector layer and
     creates a new identical one.
@@ -137,7 +152,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsGeocodingAlgorithm):
 
     @override
     def displayName(self) -> str:
-        return self.__tr("Search for POIs")
+        return self.__tr("POI search", "Algorithm")
 
     @override
     def name(self) -> str:
