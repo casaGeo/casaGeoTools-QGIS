@@ -1,0 +1,212 @@
+#!/bin/bash
+#  Copyright 2026 casaGeo Data + Services GmbH <info@casageo.de>
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+#
+#  SPDX-License-Identifier: Apache-2.0
+
+# SC2120: Function references arguments, but none are ever passed.
+# SC2317: Command appears to be unreachable.
+# SC2329: This function is never invoked.
+# shellcheck disable=SC2120,SC2317,SC2329
+set -Ceuo pipefail
+
+PLUGIN_ID=$(uv version --output-format=json | jq -er '.package_name | sub("-"; "_")')
+
+PLUGINDIR="./$PLUGIN_ID"
+
+# Requires:
+# - QGIS 3 or 4 for the PyQGIS API
+# - qt6-qtbase-devel for rcc
+# - qt6-linguist for lupdate-pro and lrelease-pro
+# - python3-pyqt6-base for pyuic6
+
+QGIS_PYTHON=/usr/bin/python3
+QGIS_PROFILE=default
+
+PATH+=":/usr/lib64/qt6/bin"
+PATH+=":/usr/lib64/qt6/libexec"
+#PATH+=":/usr/lib64/qt5/bin"
+
+##############
+# Main Tasks #
+##############
+
+setup-venv() {
+	uv venv --python="$QGIS_PYTHON" --system-site-packages
+	# uv pip install --editable ..
+	uv sync
+}
+
+translate() {
+	lupdate
+}
+
+build() {
+	build-metadata
+	build-translations
+	build-forms-and-resources
+	build-help
+}
+
+deploy() {
+	local plugindir datadir
+	plugindir=$(realpath -- "$PLUGINDIR")
+	datadir=$(application-data-directory)
+	ln -sfvT -- "$plugindir" "$datadir/QGIS/QGIS3/profiles/$QGIS_PROFILE/python/plugins/$PLUGIN_ID" 2>/dev/null || true
+	ln -sfvT -- "$plugindir" "$datadir/QGIS/QGIS4/profiles/$QGIS_PROFILE/python/plugins/$PLUGIN_ID" 2>/dev/null || true
+}
+
+undeploy() {
+	local datadir
+	datadir=$(application-data-directory)
+	rm -fv -- "$datadir/QGIS/QGIS3/profiles/$QGIS_PROFILE/python/plugins/$PLUGIN_ID"
+	rm -fv -- "$datadir/QGIS/QGIS4/profiles/$QGIS_PROFILE/python/plugins/$PLUGIN_ID"
+}
+
+package() {
+	build
+
+	build-zip
+}
+
+clean() {
+	rm -f -- \
+		"$PLUGINDIR/LICENSE"      \
+		"$PLUGINDIR/metadata.txt" \
+		"$PLUGINDIR/help"         \
+		"$PLUGINDIR/i18n"/*.qm    \
+		"$PLUGINDIR/ui"/*.py      \
+		# EOA
+	sphinx-make clean
+}
+
+###############
+# Build Tasks #
+###############
+
+build-metadata() {
+	ln -fT -- LICENSE  "$PLUGINDIR/LICENSE"
+	plugin-metadata >| "$PLUGINDIR/metadata.txt"
+}
+
+build-translations() {
+	lrelease
+}
+
+build-forms-and-resources() {
+	pyuic6 -- "$PLUGINDIR/ui"
+	sed -i 's/^from PyQt6/from qgis.PyQt/' -- "$PLUGINDIR/ui"/*.py
+}
+
+build-help() {
+	sphinx-make html
+	ln -fT -- docs/LICENSE docs/_build/html/LICENSE
+	ln -sfrT -- docs/_build/html "$PLUGINDIR/help"
+}
+
+build-zip() {
+	local zipname zipfile
+	#zipfile="dist/${PLUGIN_ID//_/-}-$PLUGIN_VERSION.zip"
+	zipname=$(uv version --output-format=json | jq -er '"\(.package_name)-\(.version)"')
+	zipfile="dist/$zipname.zip"
+
+	# These must currently be equal for the ZIP file to include the correct
+	# plugin path. You can work around this with symlinks, if necessary.
+	[[ "$PLUGINDIR" == "./$PLUGIN_ID" ]]
+
+	rm -f "$zipfile"
+	zip -r -MM "$zipfile" "$PLUGIN_ID" -x '*/__pycache__/*' '*/.buildinfo*' \
+		'*/.git*' '*.pyc' '*.ts' '*.ui'
+}
+
+#######################
+# Supplementary Tasks #
+#######################
+
+lupdate() {
+	lupdate-pro -tr-function-alias='tr+=__tr' casageotools_qgis.pro "$@"
+}
+
+lrelease() {
+	lrelease-pro casageotools_qgis.pro "$@"
+}
+
+sphinx-make() {
+	make -C docs SPHINXBUILD='uv run sphinx-build' "$@"
+}
+
+#set-temporary-home() {
+#	local template tmpdir
+#	template=$(realpath -- build.XXXXXXXXXX)
+#	tmpdir=$(mktemp --directory -- "$template")
+#	# shellcheck disable=SC2064
+#	trap "rm -rf -- ${tmpdir@Q}" EXIT
+#
+#	# pb_tool uses $HOME on Linux and $APPDATA/$USERPROFILE on Windows.
+#	export HOME="$tmpdir"
+#	export USERPROFILE="$tmpdir"
+#	export APPDATA="$USERPROFILE/AppData"
+#}
+
+#confparse() {
+#	uv run python - "$@" <<-\CONFPARSE
+#	import sys
+#	from configparser import ConfigParser
+#	_, filename, section, key = sys.argv
+#	config = ConfigParser()
+#	config.read(filename)
+#	print(config[section][key])
+#	CONFPARSE
+#}
+
+application-data-directory() {
+	: 'Return the system-specific data directory for GUI applications.'
+	case "$OSTYPE" in
+	linux-gnu*)     printf '%s\n' "${XDG_DATA_HOME:-$HOME/.local/share}" ;;
+	darwin*)        printf '%s\n' "$HOME/Library/Application Support"    ;;
+	cygwin*|msys*)  printf '%s\n' "$APPDATA"                             ;;
+	*)              return 1                                             ;;
+	esac
+}
+
+plugin-metadata() {
+	# This file contains plugin metadata. It should be included when packaging.
+	# See https://docs.qgis.org/3.44/en/docs/pyqgis_developer_cookbook/plugins/plugins.html#metadata-txt
+	cat <<-METADATA
+	[general]
+	name = $(yq -r '.tool.qgis.metadata.general.name // ""' pyproject.toml)
+	version = $(yq -r '.project.version // ""' pyproject.toml)
+	author = $(yq -r '.project.authors[0].name // ""' pyproject.toml)
+	email = $(yq -r '.project.authors[0].email // ""' pyproject.toml)
+	description = $(yq -r '.project.description // ""' pyproject.toml)
+	qgisMinimumVersion = $(yq -r '.tool.qgis.metadata.general.qgisMinimumVersion // ""' pyproject.toml)
+	qgisMaximumVersion = $(yq -r '.tool.qgis.metadata.general.qgisMaximumVersion // ""' pyproject.toml)
+	experimental = $(yq -r '.tool.qgis.metadata.general.experimental // false' pyproject.toml)
+	deprecated = $(yq -r '.tool.qgis.metadata.general.deprecated // false' pyproject.toml)
+	tags = $(yq -r '.tool.qgis.metadata.general.tags // [] | join(",")' pyproject.toml)
+	homepage = $(yq -r '.project.urls.Homepage // ""' pyproject.toml)
+	repository = $(yq -r '.project.urls.Source // ""' pyproject.toml)
+	tracker = $(yq -r '.project.urls.Issues // ""' pyproject.toml)
+	icon = $(yq -r '.tool.qgis.metadata.general.icon // ""' pyproject.toml)
+	category = $(yq -r '.tool.qgis.metadata.general.category // ""' pyproject.toml)
+	plugin_dependencies = $(yq -r '.tool.qgis.metadata.general.plugin_dependencies // [] | join(",")' pyproject.toml)
+	server = $(yq -r '.tool.qgis.metadata.general.server // false' pyproject.toml)
+	hasProcessingProvider = $(yq -r '.tool.qgis.metadata.general.hasProcessingProvider // false' pyproject.toml)
+	METADATA
+	sed -e '1c about ='     -e '/^\s*<!--.*-->\s*$/d' -e '/./,$!d' -e 's/^/\t/' README.md
+	sed -e '1c changelog =' -e '/^\s*<!--.*-->\s*$/d' -e '/./,$!d' -e 's/^/\t/' CHANGELOG.md
+}
+
+while [[ ${1-} == +([[:word:]])=* ]]; do declare -- "$1"; shift; done
+time { set -x; "$@"; }; exit;

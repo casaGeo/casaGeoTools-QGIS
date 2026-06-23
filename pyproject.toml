@@ -1,0 +1,89 @@
+[project]
+name = "casaGeoTools-QGIS"
+version = "0.1.0"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+description = "HERE Connector for QGIS"
+readme = "README.md"
+authors = [{ name = "casaGeo Data + Services GmbH", email = "info@casageo.de" }]
+requires-python = ">=3.12"
+dependencies = [
+    "casageotools",
+]
+
+[project.urls]
+Homepage = "https://www.casageo.de/en/here-connector-for-python.html"
+# TODO: Point this to the QGIS plugin section
+Documentation = "https://casageotools.readthedocs.io"
+# TODO: Point this to qgis/
+Source = "https://github.com/casaGeo/casaGeoTools"
+# TODO: Add QGIS issue tag.
+Issues = "https://github.com/casaGeo/casaGeoTools/issues"
+# TODO: Point this to qgis/CHANGELOG.md
+Changelog = "https://github.com/casaGeo/casaGeoTools/blob/main/CHANGELOG.md"
+
+[dependency-groups]
+dev = [
+    "basedpyright==1.39.5",
+    "ruff==0.15.12",
+    "sphinx==9.1.0",
+]
+
+[tool.basedpyright]
+typeCheckingMode = "standard"
+allowedUntypedLibraries = ["qgis"]
+ignore = ["casageotools_qgis/ui/*.py"]
+
+# See https://docs.qgis.org/3.44/en/docs/pyqgis_developer_cookbook/plugins/plugins.html#metadata-txt
+[tool.qgis.metadata.general]
+name = "casaGeoTools for QGIS"
+qgisMinimumVersion = "3.44"  # QgsGeometry.from_shapely()
+qgisMaximumVersion = "4.99"
+experimental = true
+tags = ["analysis", "geocoding", "routing"]
+icon = "assets/casageotools.png"
+category = "Vector"
+hasProcessingProvider = true
+
+[tool.ruff.format]
+preview = true
+
+[tool.ruff.lint]
+select = [
+    "A",
+    "B",
+    "E",
+    "F",
+    "G",
+    "N",
+    "C4",
+    "PD",
+    "UP",
+    "FBT",
+    "FLY",
+    "ISC",
+    "NPY",
+    "PIE",
+    "PLE",
+    "PLW",
+    "RUF",
+    "SIM",
+    "TRY",
+    "YTT",
+    "FURB",
+    "PERF",
+]
+ignore = [
+    "E501",
+    "N802",
+    "N803",
+    "PD008",
+    "RUF001",
+    "RUF002",
+    "RUF003",
+    "SIM102",
+    "TRY003",
+]
+
+[tool.uv.sources]
+casageotools = { path = ".." }
