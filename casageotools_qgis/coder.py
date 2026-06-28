@@ -20,7 +20,7 @@ __all__ = [
 ]
 
 import importlib
-from typing import Any, LiteralString, override
+from typing import TYPE_CHECKING, Any, LiteralString, override
 
 from qgis.core import (
     Qgis,
@@ -34,7 +34,10 @@ from qgis.core import (
 )
 from qgis.PyQt.QtCore import QCoreApplication, QMetaType
 
-from casageotools_qgis import resources
+from . import resources
+
+if TYPE_CHECKING:
+    from .plugin import CasaGeoToolsPlugin
 
 # def DECLARE_TR_FUNCTIONS[T: type](cls: T) -> T:
 #     setattr(
@@ -46,6 +49,10 @@ from casageotools_qgis import resources
 
 
 class CasaGeoToolsAbstractGeocodingAlgorithm(QgsProcessingAlgorithm):
+    def __init__(self, plugin: "CasaGeoToolsPlugin"):
+        super().__init__()
+        self.plugin = plugin
+
     @override
     def group(self) -> str:
         return self.__tr("Coder", "Group")
@@ -100,7 +107,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm)
 
     @override
     def createInstance(self) -> QgsProcessingAlgorithm | None:
-        return CasaGeoToolsAddressSearchAlgorithm()
+        return CasaGeoToolsAddressSearchAlgorithm(self.plugin)
 
     @override
     def initAlgorithm(self, configuration: dict[str, Any] | None = None) -> None:
@@ -160,7 +167,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm):
 
     @override
     def createInstance(self) -> QgsProcessingAlgorithm | None:
-        return CasaGeoToolsPOISearchAlgorithm()
+        return CasaGeoToolsPOISearchAlgorithm(self.plugin)
 
     @override
     def initAlgorithm(self, configuration: dict[str, Any] | None = None) -> None:

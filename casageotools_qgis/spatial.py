@@ -19,7 +19,7 @@ __all__ = [
 ]
 
 import importlib
-from typing import Any, LiteralString, override
+from typing import TYPE_CHECKING, Any, LiteralString, override
 
 from qgis.core import (
     Qgis,
@@ -38,18 +38,20 @@ from qgis.core import (
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterString,
     QgsProject,
-    QgsSettings,
 )
 from qgis.PyQt.QtCore import QCoreApplication, QMetaType
 
-from casageotools_qgis import resources
+from . import resources
 
-
-def _get_api_key() -> str:
-    return QgsSettings().value("casaGeoTools/APIKey", "", type=str)
+if TYPE_CHECKING:
+    from .plugin import CasaGeoToolsPlugin
 
 
 class CasaGeoToolsAbstractSpatialAlgorithm(QgsProcessingAlgorithm):
+    def __init__(self, plugin: "CasaGeoToolsPlugin"):
+        super().__init__()
+        self.plugin = plugin
+
     @override
     def group(self) -> str:
         return self.__tr("Spatial", "Group")
@@ -68,7 +70,7 @@ class CasaGeoToolsAbstractSpatialAlgorithm(QgsProcessingAlgorithm):
             except ImportError as err:
                 return False, f"The {module} module could not be imported: {err}"
 
-        if not _get_api_key():
+        if not self.plugin.setting_apikey.value():
             return False, "Please input your API key in the settings"
 
         return True, ""
@@ -119,7 +121,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
 
     @override
     def createInstance(self) -> QgsProcessingAlgorithm | None:
-        return CasaGeoToolsIsolinesAlgorithm()
+        return CasaGeoToolsIsolinesAlgorithm(self.plugin)
 
     @override
     def initAlgorithm(self, configuration: dict[str, Any] | None = None) -> None:
@@ -244,7 +246,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
         import casageo.tools
         from geopandas import GeoDataFrame
 
-        client = casageo.tools.CasaGeoClient(_get_api_key())
+        client = casageo.tools.CasaGeoClient(self.plugin.setting_apikey.value())
 
         epsg4326 = QgsCoordinateReferenceSystem.fromEpsgId(4326)
         assert epsg4326.isValid()
