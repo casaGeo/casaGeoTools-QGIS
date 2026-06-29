@@ -71,6 +71,12 @@ class CasaGeoToolsAbstractGeocodingAlgorithm(QgsProcessingAlgorithm):
 
         return True, ""
 
+    @override
+    def helpUrl(self) -> str:
+        return self.plugin.help_url(
+            f"algorithms/{self.groupId()}/{self.name()}.html"
+        ).toString()
+
     @staticmethod
     def __tr(
         sourceText: LiteralString,
@@ -98,10 +104,6 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm)
     @override
     def shortDescription(self) -> str:
         return self.__tr("Geocodes addresses.")
-
-    @override
-    def helpUrl(self) -> str:
-        return self.plugin.help_url().toString()
 
     @override
     def createInstance(self) -> QgsProcessingAlgorithm | None:

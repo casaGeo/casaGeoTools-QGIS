@@ -73,6 +73,12 @@ class CasaGeoToolsAbstractSpatialAlgorithm(QgsProcessingAlgorithm):
 
         return True, ""
 
+    @override
+    def helpUrl(self) -> str:
+        return self.plugin.help_url(
+            f"algorithms/{self.groupId()}/{self.name()}.html"
+        ).toString()
+
     @staticmethod
     def __tr(
         sourceText: LiteralString,
@@ -112,10 +118,6 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
         Calculates isolines around locations.
         The input points will be converted into EPSG:4326 and the resulting isolines are EPSG:4326 polygons. There may be multiple output polygons for a single input point. 
         """)
-
-    @override
-    def helpUrl(self) -> str:
-        return self.plugin.help_url("algorithms/spatial/isolines.html").toString()
 
     @override
     def createInstance(self) -> QgsProcessingAlgorithm | None:
