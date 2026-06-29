@@ -22,6 +22,7 @@ from qgis.core import (
     QgsProcessingProvider,
     QgsSettingsEntryString,
     QgsSettingsTree,
+    QgsSettingsTreeNode,
 )
 from qgis.gui import QgisInterface
 from qgis.PyQt.QtCore import (
@@ -37,6 +38,7 @@ from qgis.PyQt.QtGui import (
 
 from . import resources
 from .resources import PLUGIN_I18N_DIRECTORY, PLUGIN_IDENTIFIER
+from .utils import ensure
 
 if TYPE_CHECKING:
     from .maindialog import CasaGeoToolsMainDialog
@@ -67,11 +69,6 @@ if TYPE_CHECKING:
 #
 
 
-def ensure[T](value: T | None) -> T:
-    assert value is not None
-    return value
-
-
 class CasaGeoToolsPlugin:
     def __init__(self, iface: QgisInterface) -> None:
         self.iface = iface
@@ -99,11 +96,11 @@ class CasaGeoToolsPlugin:
         return CasaGeoToolsMainDialog()
 
     @cached_property
-    def settings(self):
+    def settings(self) -> QgsSettingsTreeNode:
         return ensure(QgsSettingsTree.createPluginTreeNode(PLUGIN_IDENTIFIER))
 
     @cached_property
-    def setting_apikey(self):
+    def setting_apikey(self) -> QgsSettingsEntryString:
         return QgsSettingsEntryString(
             "apikey",
             PLUGIN_IDENTIFIER,

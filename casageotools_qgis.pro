@@ -9,6 +9,7 @@ SOURCES = \
     casageotools_qgis/coder.py \
     casageotools_qgis/maindialog.py \
     casageotools_qgis/models.py \
+    casageotools_qgis/utils.py \
     casageotools_qgis/plugin.py \
     casageotools_qgis/resources.py \
     casageotools_qgis/settingswidget.py \
