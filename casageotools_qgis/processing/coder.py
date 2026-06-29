@@ -34,10 +34,8 @@ from qgis.core import (
 )
 from qgis.PyQt.QtCore import QCoreApplication, QMetaType
 
-from . import resources
-
 if TYPE_CHECKING:
-    from .plugin import CasaGeoToolsPlugin
+    from ..plugin import CasaGeoToolsPlugin
 
 # def DECLARE_TR_FUNCTIONS[T: type](cls: T) -> T:
 #     setattr(
@@ -103,7 +101,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm)
 
     @override
     def helpUrl(self) -> str:
-        return resources.help_url().toString()
+        return self.plugin.help_url().toString()
 
     @override
     def createInstance(self) -> QgsProcessingAlgorithm | None:

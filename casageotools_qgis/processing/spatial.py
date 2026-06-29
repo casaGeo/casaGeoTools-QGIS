@@ -41,10 +41,8 @@ from qgis.core import (
 )
 from qgis.PyQt.QtCore import QCoreApplication, QMetaType
 
-from . import resources
-
 if TYPE_CHECKING:
-    from .plugin import CasaGeoToolsPlugin
+    from ..plugin import CasaGeoToolsPlugin
 
 
 class CasaGeoToolsAbstractSpatialAlgorithm(QgsProcessingAlgorithm):
@@ -117,7 +115,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
 
     @override
     def helpUrl(self) -> str:
-        return resources.help_url("algorithms/spatial/isolines.html").toString()
+        return self.plugin.help_url("algorithms/spatial/isolines.html").toString()
 
     @override
     def createInstance(self) -> QgsProcessingAlgorithm | None:

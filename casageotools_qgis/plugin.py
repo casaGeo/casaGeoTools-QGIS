@@ -14,12 +14,12 @@
 #
 #  SPDX-License-Identifier: Apache-2.0
 
+import os
 from functools import cached_property
-from typing import TYPE_CHECKING, LiteralString, override
+from typing import TYPE_CHECKING, LiteralString
 
 from qgis.core import (
     QgsApplication,
-    QgsProcessingProvider,
     QgsSettingsEntryString,
     QgsSettingsTree,
     QgsSettingsTreeNode,
@@ -30,6 +30,7 @@ from qgis.PyQt.QtCore import (
     QLocale,
     Qt,
     QTranslator,
+    QUrl,
 )
 from qgis.PyQt.QtGui import (
     QAction,
@@ -37,12 +38,17 @@ from qgis.PyQt.QtGui import (
     QIcon,
 )
 
-from . import resources
-from .resources import PLUGIN_I18N_DIRECTORY, PLUGIN_IDENTIFIER
+from .resources import (
+    PLUGIN_ASSETS_DIRECTORY,
+    PLUGIN_HELP_DIRECTORY,
+    PLUGIN_I18N_DIRECTORY,
+    PLUGIN_IDENTIFIER,
+)
 from .utils import ensure
 
 if TYPE_CHECKING:
     from .maindialog import CasaGeoToolsMainDialog
+    from .processing import CasaGeoToolsProcessingProvider
     from .settingsdialog import CasaGeoToolsSettingsDialog
 
 
@@ -72,18 +78,14 @@ if TYPE_CHECKING:
 
 
 class CasaGeoToolsPlugin:
-    def __init__(self, iface: QgisInterface) -> None:
-        self.iface = iface
-        self._settings_dialog: CasaGeoToolsSettingsDialog | None = None
-
     @cached_property
     def icon(self) -> QIcon:
-        return resources.casageotools_icon()
+        return QIcon(os.path.join(PLUGIN_ASSETS_DIRECTORY, "casageotools.png"))
 
     @cached_property
     def action_main(self) -> QAction:
         action = QAction(self.icon, self.__tr("casaGeoTools"))
-        action.triggered.connect(self.show_settings)
+        action.triggered.connect(self.show_settings_dialog)
         # action.triggered.connect(self.dialog_main.show)
         return action
 
@@ -92,12 +94,6 @@ class CasaGeoToolsPlugin:
         action = QAction(self.icon, self.__tr("casaGeoTools Documentation"))
         action.triggered.connect(self.show_help)
         return action
-
-    @cached_property
-    def dialog_main(self) -> "CasaGeoToolsMainDialog":
-        from .maindialog import CasaGeoToolsMainDialog
-
-        return CasaGeoToolsMainDialog()
 
     @cached_property
     def settings(self) -> QgsSettingsTreeNode:
@@ -112,16 +108,15 @@ class CasaGeoToolsPlugin:
             maxLength=64,
         )
 
-    @cached_property
-    def translator(self) -> QTranslator:
-        return QTranslator()
+    def __init__(self, iface: QgisInterface) -> None:
+        self.iface = iface
+        self.translator: QTranslator = QTranslator()
+        self.processing_provider: CasaGeoToolsProcessingProvider | None = None
+        self.is_processing_initialized = False
+        self.is_fully_initialized = False
 
-    @cached_property
-    def processing_provider(self) -> "CasaGeoToolsProcessingProvider":
-        return CasaGeoToolsProcessingProvider(self)
-
-    def initGui(self) -> None:
-        """Called when the plugin is loaded."""
+        self._main_dialog: CasaGeoToolsMainDialog | None = None
+        self._settings_dialog: CasaGeoToolsSettingsDialog | None = None
 
         if self.translator.load(
             QLocale(), PLUGIN_IDENTIFIER, ".", PLUGIN_I18N_DIRECTORY
@@ -135,6 +130,20 @@ class CasaGeoToolsPlugin:
         # should register itself automatically).
         self.settings.registerChildSetting(self.setting_apikey, None)
 
+    def initProcessing(self) -> None:
+        """Initialize only the processing components of this plugin."""
+        from .processing import CasaGeoToolsProcessingProvider
+
+        self.processing_provider = CasaGeoToolsProcessingProvider(self)
+        if processingRegistry := QgsApplication.processingRegistry():
+            processingRegistry.addProvider(self.processing_provider)
+
+        self.is_processing_initialized = True
+
+    def initGui(self) -> None:
+        """Initialize the graphical and processing components of this plugin."""
+        self.initProcessing()
+
         self.iface.addToolBarIcon(self.action_main)
         self.iface.addPluginToMenu("&casaGeoTools", self.action_main)
         self.iface.addPluginToVectorMenu("&casaGeoTools", self.action_main)
@@ -142,27 +151,55 @@ class CasaGeoToolsPlugin:
         if pluginHelpMenu := self.iface.pluginHelpMenu():
             pluginHelpMenu.addAction(self.action_help)
 
-        if processingRegistry := QgsApplication.processingRegistry():
-            processingRegistry.addProvider(self.processing_provider)
+        self.is_fully_initialized = True
 
-    def unload(self) -> None:
-        """Called when the plugin is unloaded."""
-
-        if processingRegistry := QgsApplication.processingRegistry():
-            processingRegistry.removeProvider(self.processing_provider)
-
-        if pluginHelpMenu := self.iface.pluginHelpMenu():
-            pluginHelpMenu.removeAction(self.action_help)
+    def unloadGui(self) -> None:
+        """Unload the graphical components of this plugin."""
 
         self.iface.removeToolBarIcon(self.action_main)
         self.iface.removePluginMenu("&casaGeoTools", self.action_main)
         self.iface.removePluginVectorMenu("&casaGeoTools", self.action_main)
 
-        QgsSettingsTree.unregisterPluginTreeNode(PLUGIN_IDENTIFIER)
+        if pluginHelpMenu := self.iface.pluginHelpMenu():
+            pluginHelpMenu.removeAction(self.action_help)
 
+    def unloadProcessing(self) -> None:
+        """Unload the processing components of this plugin."""
+
+        if processingRegistry := QgsApplication.processingRegistry():
+            processingRegistry.removeProvider(self.processing_provider)
+
+    def unload(self) -> None:
+        """Called when the plugin is unloaded."""
+
+        if self.is_fully_initialized:
+            self.unloadGui()
+
+        if self.is_processing_initialized:
+            self.unloadProcessing()
+
+        QgsSettingsTree.unregisterPluginTreeNode(PLUGIN_IDENTIFIER)
         QCoreApplication.removeTranslator(self.translator)
 
-    def show_settings(self) -> None:
+    def help_file(self, path: str = "index.html") -> str:
+        return os.path.join(PLUGIN_HELP_DIRECTORY, path)
+
+    def help_url(self, path: str = "index.html") -> QUrl:
+        return QUrl.fromLocalFile(self.help_file(path))
+
+    def show_main_dialog(self) -> None:
+        """Show the main dialog."""
+        from .maindialog import CasaGeoToolsMainDialog
+
+        if self._main_dialog is None:
+            dialog = CasaGeoToolsMainDialog()
+            dialog.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
+            dialog.destroyed.connect(lambda: setattr(self, "_main_dialog", None))
+            self._main_dialog = dialog
+
+        self._main_dialog.open()
+
+    def show_settings_dialog(self) -> None:
         """Show the plugin settings dialog."""
         from .settingsdialog import CasaGeoToolsSettingsDialog
 
@@ -173,73 +210,21 @@ class CasaGeoToolsPlugin:
             self._settings_dialog = dialog
 
         self._settings_dialog.open()
+        # self._settings_dialog.show()
+        # self._settings_dialog.activateWindow()
+        # self._settings_dialog.raise_()
 
-    @staticmethod
-    def show_help() -> None:
+    def show_help(self) -> None:
         """Show the plugin documentation."""
         # We would like to use qgis.utils.showPluginHelp(), but that
         # function is currently broken because it passes a path with
         # file:// prefix to QUrl.fromLocalFile().
-        QDesktopServices.openUrl(resources.help_url())
+        QDesktopServices.openUrl(self.help_url())
 
     # def initProcessing(self):
     #     """Init Processing provider for QGIS >= 3.8."""
     #     self.provider = CasaGeoToolsProcessingProvider()
     #     QgsApplication.processingRegistry().addProvider(self.provider)
-
-    @staticmethod
-    def __tr(
-        sourceText: LiteralString,
-        disambiguation: LiteralString | None = None,
-        /,
-        n: int = -1,
-    ) -> str:
-        return QCoreApplication.translate(
-            __class__.__name__, sourceText, disambiguation, n
-        )
-
-
-class CasaGeoToolsProcessingProvider(QgsProcessingProvider):
-    def __init__(self, plugin: CasaGeoToolsPlugin):
-        super().__init__()
-        self.plugin = plugin
-
-    @override
-    def id(self):
-        return PLUGIN_IDENTIFIER
-
-    @override
-    def name(self):
-        return self.__tr("casaGeoTools")
-
-    @override
-    def icon(self):
-        return resources.casageotools_icon()
-
-    @override
-    def loadAlgorithms(self):
-        """
-        Loads all algorithms belonging to this provider.
-        """
-        from .coder import (
-            # CasaGeoToolsAddressSearchAlgorithm,
-            CasaGeoToolsPOISearchAlgorithm,
-        )
-        from .spatial import CasaGeoToolsIsolinesAlgorithm
-
-        # self.addAlgorithm(CasaGeoToolsAddressSearchAlgorithm(self.plugin))
-        self.addAlgorithm(CasaGeoToolsPOISearchAlgorithm(self.plugin))
-        self.addAlgorithm(CasaGeoToolsIsolinesAlgorithm(self.plugin))
-
-    # @override
-    # def longName(self):
-    #     return self.__tr("casaGeoTools for QGIS (version {version})").format(
-    #         version=self.versionInfo(),
-    #     )
-    #
-    # @override
-    # def versionInfo(self):
-    #     return resources.plugin_version()
 
     @staticmethod
     def __tr(

@@ -17,9 +17,6 @@
 import os
 from typing import cast
 
-from qgis.PyQt.QtCore import QUrl
-from qgis.PyQt.QtGui import QIcon
-
 PLUGIN_DIRECTORY = os.path.dirname(cast(str, __file__))
 PLUGIN_IDENTIFIER = os.path.basename(PLUGIN_DIRECTORY)
 
@@ -30,14 +27,6 @@ PLUGIN_I18N_DIRECTORY = os.path.join(PLUGIN_DIRECTORY, "i18n")
 
 def R(path: str | os.PathLike[str]) -> str:
     return os.path.join(PLUGIN_DIRECTORY, path)
-
-
-def casageotools_icon() -> QIcon:
-    return QIcon(os.path.join(PLUGIN_ASSETS_DIRECTORY, "casageotools.png"))
-
-
-def help_url(path: str = "index.html") -> QUrl:
-    return QUrl.fromLocalFile(os.path.join(PLUGIN_HELP_DIRECTORY, path))
 
 
 # def plugin_version() -> str:
