@@ -1,8 +1,7 @@
 FORMS = \
     casageotools_qgis/ui/LicenseKeyEntryDialog.ui \
     casageotools_qgis/ui/MainDialog.ui \
-    casageotools_qgis/ui/SettingsDialog.ui \
-    casageotools_qgis/ui/SettingsWidget.ui
+    casageotools_qgis/ui/SettingsDialog.ui
 
 SOURCES = \
     casageotools_qgis/__init__.py \
@@ -12,7 +11,7 @@ SOURCES = \
     casageotools_qgis/utils.py \
     casageotools_qgis/plugin.py \
     casageotools_qgis/resources.py \
-    casageotools_qgis/settingswidget.py \
+    casageotools_qgis/settingsdialog.py \
     casageotools_qgis/spatial.py
 
 TRANSLATIONS = \

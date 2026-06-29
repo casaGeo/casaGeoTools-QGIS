@@ -28,6 +28,7 @@ from qgis.gui import QgisInterface
 from qgis.PyQt.QtCore import (
     QCoreApplication,
     QLocale,
+    Qt,
     QTranslator,
 )
 from qgis.PyQt.QtGui import (
@@ -42,6 +43,7 @@ from .utils import ensure
 
 if TYPE_CHECKING:
     from .maindialog import CasaGeoToolsMainDialog
+    from .settingsdialog import CasaGeoToolsSettingsDialog
 
 
 # class CasaGeoToolsPluginTranslationComponent:
@@ -72,6 +74,7 @@ if TYPE_CHECKING:
 class CasaGeoToolsPlugin:
     def __init__(self, iface: QgisInterface) -> None:
         self.iface = iface
+        self._settings_dialog: CasaGeoToolsSettingsDialog | None = None
 
     @cached_property
     def icon(self) -> QIcon:
@@ -80,7 +83,8 @@ class CasaGeoToolsPlugin:
     @cached_property
     def action_main(self) -> QAction:
         action = QAction(self.icon, self.__tr("casaGeoTools"))
-        action.triggered.connect(self.dialog_main.show)
+        action.triggered.connect(self.show_settings)
+        # action.triggered.connect(self.dialog_main.show)
         return action
 
     @cached_property
@@ -157,6 +161,18 @@ class CasaGeoToolsPlugin:
         QgsSettingsTree.unregisterPluginTreeNode(PLUGIN_IDENTIFIER)
 
         QCoreApplication.removeTranslator(self.translator)
+
+    def show_settings(self) -> None:
+        """Show the plugin settings dialog."""
+        from .settingsdialog import CasaGeoToolsSettingsDialog
+
+        if self._settings_dialog is None:
+            dialog = CasaGeoToolsSettingsDialog(self)
+            dialog.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
+            dialog.destroyed.connect(lambda: setattr(self, "_settings_dialog", None))
+            self._settings_dialog = dialog
+
+        self._settings_dialog.open()
 
     @staticmethod
     def show_help() -> None:
