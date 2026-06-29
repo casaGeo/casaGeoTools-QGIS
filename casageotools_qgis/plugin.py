@@ -204,14 +204,14 @@ class CasaGeoToolsPlugin:
         from .settingsdialog import CasaGeoToolsSettingsDialog
 
         if self._settings_dialog is None:
-            dialog = CasaGeoToolsSettingsDialog(self)
+            dialog = CasaGeoToolsSettingsDialog(self, self.iface.mainWindow())
             dialog.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
             dialog.destroyed.connect(lambda: setattr(self, "_settings_dialog", None))
             self._settings_dialog = dialog
 
-        self._settings_dialog.open()
-        # self._settings_dialog.show()
-        # self._settings_dialog.activateWindow()
+        # self._settings_dialog.open()
+        self._settings_dialog.show()
+        self._settings_dialog.activateWindow()
         # self._settings_dialog.raise_()
 
     def show_help(self) -> None:
