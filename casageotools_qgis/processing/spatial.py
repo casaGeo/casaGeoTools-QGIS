@@ -18,7 +18,6 @@ __all__ = [
     "CasaGeoToolsIsolinesAlgorithm",
 ]
 
-import importlib
 from typing import TYPE_CHECKING, Any, override
 
 from qgis.core import (
@@ -29,7 +28,6 @@ from qgis.core import (
     QgsFeatureSink,
     QgsField,
     QgsFields,
-    QgsGeometry,
     QgsProcessingAlgorithm,
     QgsProcessingContext,
     QgsProcessingFeedback,
@@ -41,18 +39,15 @@ from qgis.core import (
 )
 from qgis.PyQt.QtCore import QMetaType
 
-from ..utils import TrMethod
+from ..utils import TrMethod, geometry_as_shapely, geometry_from_shapely
+from . import CasaGeoToolsAbstractProcessingAlgorithm
 
 if TYPE_CHECKING:
-    from ..plugin import CasaGeoToolsPlugin
+    from geopandas import GeoDataFrame
 
 
-class CasaGeoToolsAbstractSpatialAlgorithm(QgsProcessingAlgorithm):
+class CasaGeoToolsAbstractSpatialAlgorithm(CasaGeoToolsAbstractProcessingAlgorithm):
     __tr = TrMethod()
-
-    def __init__(self, plugin: "CasaGeoToolsPlugin"):
-        super().__init__()
-        self.plugin = plugin
 
     @override
     def group(self) -> str:
@@ -63,28 +58,13 @@ class CasaGeoToolsAbstractSpatialAlgorithm(QgsProcessingAlgorithm):
         return "spatial"
 
     @override
-    def canExecute(self) -> tuple[bool, str]:
-        for module in ["casageo.tools", "casageo.spatial", "geopandas"]:
-            try:
-                importlib.import_module(module)
-            except ModuleNotFoundError:
-                return False, f"The {module} module is not installed"
-            except ImportError as err:
-                return False, f"The {module} module could not be imported: {err}"
-
-        if not self.plugin.settingApikey.value():
-            return False, "Please input your API key in the settings"
-
-        return True, ""
-
-    @override
-    def helpUrl(self) -> str:
-        return self.plugin.helpUrl(
-            f"algorithms/{self.groupId()}/{self.name()}.html"
-        ).toString()
+    def requiredPythonModules(self) -> list[str]:
+        return ["casageo.tools", "casageo.spatial", "geopandas"]
 
 
 class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
+    __tr = TrMethod()
+
     INPUT = "INPUT"
     OUTPUT = "OUTPUT"
     RANGES = "RANGES"
@@ -92,8 +72,6 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
     TRANSPORT_MODE = "TRANSPORT_MODE"
     ROUTING_MODE = "ROUTING_MODE"
     DIRECTION = "DIRECTION"
-
-    __tr = TrMethod()
 
     @override
     def displayName(self) -> str:
@@ -121,7 +99,14 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
     @override
     def initAlgorithm(self, configuration: dict[str, Any] | None = None) -> None:
         try:
-            import casageo.tools._consts
+            from casageo.tools._consts import (
+                # FIXME: These constants should be exposed by casageo.spatial.
+                DIRECTION_TYPES,
+                RANGE_UNITS,
+                ROUTING_MODES,
+                TRANSPORT_MODES,
+            )
+
         except ImportError:
             return
 
@@ -145,15 +130,15 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
         self.addParameter(
             QgsProcessingParameterString(
                 self.RANGES,
-                self.__tr("Ranges (separated by semicolons"),
+                self.__tr("Ranges (separated by semicolons)"),
             )
         )
         self.addParameter(
             QgsProcessingParameterEnum(
                 self.RANGES_UNIT,
                 self.__tr("Ranges unit"),
-                options=casageo.tools._consts.RANGE_UNITS,
-                defaultValue=casageo.tools._consts.RANGE_UNITS[0],
+                options=RANGE_UNITS,
+                defaultValue=RANGE_UNITS[0],
                 usesStaticStrings=True,
             )
         )
@@ -161,8 +146,8 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
             QgsProcessingParameterEnum(
                 self.TRANSPORT_MODE,
                 self.__tr("Transport mode"),
-                options=casageo.tools._consts.TRANSPORT_MODES,
-                defaultValue=casageo.tools._consts.TRANSPORT_MODES[0],
+                options=TRANSPORT_MODES,
+                defaultValue=TRANSPORT_MODES[0],
                 usesStaticStrings=True,
             )
         )
@@ -170,8 +155,8 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
             QgsProcessingParameterEnum(
                 self.ROUTING_MODE,
                 self.__tr("Routing mode"),
-                options=casageo.tools._consts.ROUTING_MODES,
-                defaultValue=casageo.tools._consts.ROUTING_MODES[0],
+                options=ROUTING_MODES,
+                defaultValue=ROUTING_MODES[0],
                 usesStaticStrings=True,
             )
         )
@@ -179,56 +164,11 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
             QgsProcessingParameterEnum(
                 self.DIRECTION,
                 self.__tr("Direction"),
-                options=casageo.tools._consts.DIRECTION_TYPES,
-                defaultValue=casageo.tools._consts.DIRECTION_TYPES[0],
+                options=DIRECTION_TYPES,
+                defaultValue=DIRECTION_TYPES[0],
                 usesStaticStrings=True,
             )
         )
-
-    def _get_ranges(
-        self,
-        parameters: dict[str, Any],
-        context: QgsProcessingContext,
-    ) -> list[float]:
-        ranges_str = self.parameterAsString(parameters, self.RANGES, context)
-        return [float(r) for r in ranges_str.split(";")]
-
-    def _get_ranges_unit(
-        self,
-        parameters: dict[str, Any],
-        context: QgsProcessingContext,
-    ) -> str:
-        return self.parameterAsString(parameters, self.RANGES_UNIT, context)
-
-    def _get_transport_mode(
-        self,
-        parameters: dict[str, Any],
-        context: QgsProcessingContext,
-    ) -> str:
-        import casageo.tools._consts
-
-        index = self.parameterAsEnum(parameters, self.TRANSPORT_MODE, context)
-        return casageo.tools._consts.TRANSPORT_MODES[index]
-
-    def _get_routing_mode(
-        self,
-        parameters: dict[str, Any],
-        context: QgsProcessingContext,
-    ) -> str:
-        import casageo.tools._consts
-
-        index = self.parameterAsEnum(parameters, self.ROUTING_MODE, context)
-        return casageo.tools._consts.ROUTING_MODES[index]
-
-    def _get_direction(
-        self,
-        parameters: dict[str, Any],
-        context: QgsProcessingContext,
-    ) -> str:
-        import casageo.tools._consts
-
-        index = self.parameterAsEnum(parameters, self.DIRECTION, context)
-        return casageo.tools._consts.DIRECTION_TYPES[index]
 
     @override
     def processAlgorithm(
@@ -237,14 +177,112 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback | None,
     ) -> dict[str, Any]:
-        import casageo.spatial
-        import casageo.tools
+
+        if feedback is not None:
+            feedback.setProgressText(self.__tr("Converting input geometries"))
+
+        queries = self._convertInputGeometries(parameters, context, feedback)
+
+        if feedback is not None:
+            feedback.setProgressText(self.__tr("Calculating isolines"))
+
+        results = self._calculateIsolines(parameters, context, feedback, queries)
+
+        if feedback is not None:
+            feedback.setProgressText(self.__tr("Converting results"))
+
+        return self._writeOutputGeometries(parameters, context, feedback, results)
+
+    def _convertInputGeometries(
+        self,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback | None,
+    ) -> "GeoDataFrame":
+        """Convert input geometries into an EPSG:4326 GeoDataFrame."""
         from geopandas import GeoDataFrame
 
-        client = casageo.tools.CasaGeoClient(self.plugin.settingApikey.value())
+        source = self.parameterAsSource(
+            parameters,
+            self.INPUT,
+            context,
+        )
+        assert source is not None
 
-        epsg4326 = QgsCoordinateReferenceSystem.fromEpsgId(4326)
-        assert epsg4326.isValid()
+        into_epsg4326 = QgsCoordinateTransform(
+            source.sourceCrs(),
+            QgsCoordinateReferenceSystem.fromEpsgId(4326),
+            QgsProject.instance(),
+        )
+
+        inputs = []
+        for feature in source.getFeatures():  # pyright: ignore[reportGeneralTypeIssues]
+            position = feature.geometry()
+            if position.isEmpty():
+                if feedback is not None:
+                    feedback.pushInfo(
+                        self.__tr(
+                            "Skipping feature {featid} due to empty geometry"
+                        ).format(featid=feature.id())
+                    )
+                continue
+
+            position.transform(into_epsg4326)
+            if position.isEmpty():
+                if feedback is not None:
+                    feedback.pushInfo(
+                        self.__tr(
+                            "Skipping feature {featid} due to reprojection failure"
+                        ).format(featid=feature.id())
+                    )
+                continue
+
+            inputs.append({"position": geometry_as_shapely(position)})
+
+        return GeoDataFrame(inputs, geometry="position", crs="EPSG:4326")
+
+    def _calculateIsolines(
+        self,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback | None,
+        queries: "GeoDataFrame",
+    ) -> "GeoDataFrame":
+        """Calculate isolines using the casaGeoTools library."""
+        import casageo.spatial
+        from casageo.tools._consts import (
+            # FIXME: These constants should be exposed by casageo.spatial.
+            DIRECTION_TYPES,
+            ROUTING_MODES,
+            TRANSPORT_MODES,
+        )
+
+        client = self.casaGeoClient()
+
+        ranges = self.parameterAsString(parameters, self.RANGES, context).split(";")
+        ranges_unit = self.parameterAsString(parameters, self.RANGES_UNIT, context)
+        transport_index = self.parameterAsEnum(parameters, self.TRANSPORT_MODE, context)
+        routing_index = self.parameterAsEnum(parameters, self.ROUTING_MODE, context)
+        direction_index = self.parameterAsEnum(parameters, self.DIRECTION, context)
+
+        defaults = {
+            "ranges": [float(r) for r in ranges],
+            "ranges_unit": ranges_unit,
+            "transport_mode": TRANSPORT_MODES[transport_index],
+            "routing_mode": ROUTING_MODES[routing_index],
+            "direction": DIRECTION_TYPES[direction_index],
+        }
+
+        return casageo.spatial.isolines(client, queries, defaults)
+
+    def _writeOutputGeometries(
+        self,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback | None,
+        results: "GeoDataFrame",
+    ) -> dict[str, str]:
+        """Convert results to features and write them to the feature sink."""
 
         fields = QgsFields([
             QgsField("id", QMetaType.Type.Int),
@@ -254,71 +292,26 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
             QgsField("rangevalue", QMetaType.Type.Double),
         ])
 
-        source = self.parameterAsSource(
-            parameters,
-            self.INPUT,
-            context,
-        )
-        assert source is not None
-
         sink, dest_id = self.parameterAsSink(
             parameters,
             self.OUTPUT,
             context,
             fields,
             Qgis.WkbType.Polygon,
-            epsg4326,
+            QgsCoordinateReferenceSystem.fromEpsgId(4326),
         )
         assert sink is not None
 
-        defaults = {
-            "ranges": self._get_ranges(parameters, context),
-            "ranges_unit": self._get_ranges_unit(parameters, context),
-            "transport_mode": self._get_transport_mode(parameters, context),
-            "routing_mode": self._get_routing_mode(parameters, context),
-            "direction": self._get_direction(parameters, context),
-        }
-
-        if feedback is not None:
-            feedback.setProgressText(self.__tr("Converting input geometries"))
-
-        into_epsg4326 = QgsCoordinateTransform(
-            source.sourceCrs(),
-            epsg4326,
-            QgsProject.instance(),
-        )
-
-        inputs = []
-        for feature in source.getFeatures():  # pyright: ignore[reportGeneralTypeIssues]
-            position = feature.geometry()
-            if position.isEmpty():
-                continue
-
-            position.transform(into_epsg4326)
-            if position.isEmpty():
-                continue
-
-            inputs.append({"position": position.as_shapely()})
-
-        queries = GeoDataFrame(inputs, geometry="position", crs=epsg4326.authid())
-
-        if feedback is not None:
-            feedback.setProgressText(self.__tr("Calculating isolines"))
-
-        results = casageo.spatial.isolines(client, queries, defaults)
-
-        if feedback is not None:
-            feedback.setProgressText(self.__tr("Converting results"))
-
+        result: Any  # Make Pyright shut up about the named tuples.
         for result in results.itertuples():
             feature = QgsFeature(fields)
-            feature.setGeometry(QgsGeometry.from_shapely(result.geometry))  # pyright: ignore[reportAttributeAccessIssue]
+            feature.setGeometry(geometry_from_shapely(result.geometry))
             feature.setAttributes([
-                result.id,  # pyright: ignore[reportAttributeAccessIssue]
-                result.subid,  # pyright: ignore[reportAttributeAccessIssue]
-                result.rangetype,  # pyright: ignore[reportAttributeAccessIssue]
-                result.rangeunit,  # pyright: ignore[reportAttributeAccessIssue]
-                result.rangevalue,  # pyright: ignore[reportAttributeAccessIssue]
+                result.id,
+                result.subid,
+                result.rangetype,
+                result.rangeunit,
+                result.rangevalue,
             ])
             sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
 

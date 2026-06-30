@@ -14,9 +14,14 @@
 #
 #  SPDX-License-Identifier: Apache-2.0
 
-from typing import LiteralString
+
+from typing import TYPE_CHECKING, LiteralString
 
 from qgis.PyQt.QtCore import QCoreApplication
+
+if TYPE_CHECKING:
+    from qgis.core import QgsGeometry
+    from shapely.geometry.base import BaseGeometry as ShapelyBaseGeometry
 
 
 class TrMethod:
@@ -45,6 +50,16 @@ class TrMethod:
 def ensure[T](value: T | None, /) -> T:
     assert value is not None
     return value
+
+
+def geometry_as_shapely(geometry: "QgsGeometry", /) -> "ShapelyBaseGeometry":
+    # See https://qgis.org/pyqgis/master/core/QgsGeometry.html#qgis.core.QgsGeometry.as_shapely
+    return geometry.as_shapely()  # pyright: ignore[reportAttributeAccessIssue]
+
+
+def geometry_from_shapely(geometry: "ShapelyBaseGeometry", /) -> "QgsGeometry":
+    # See https://qgis.org/pyqgis/master/core/QgsGeometry.html#qgis.core.QgsGeometry.from_shapely
+    return QgsGeometry.from_shapely(geometry)  # pyright: ignore[reportAttributeAccessIssue]
 
 
 # class Box[T: "QObject"]:

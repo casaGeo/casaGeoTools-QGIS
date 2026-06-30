@@ -4,16 +4,34 @@
 <context>
     <name>CasaGeoToolsAbstractGeocodingAlgorithm</name>
     <message>
-        <location filename="../processing/coder.py" line="52"/>
+        <location filename="../processing/coder.py" line="45"/>
         <source>Coder</source>
         <comment>Group</comment>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
+    <name>CasaGeoToolsAbstractProcessingAlgorithm</name>
+    <message>
+        <location filename="../processing/__init__.py" line="92"/>
+        <source>The {module} module is not installed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/__init__.py" line="96"/>
+        <source>The {module} module could not be imported: {err}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/__init__.py" line="100"/>
+        <source>Please input your API key in the settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>CasaGeoToolsAbstractSpatialAlgorithm</name>
     <message>
-        <location filename="../processing/spatial.py" line="59"/>
+        <location filename="../processing/spatial.py" line="54"/>
         <source>Spatial</source>
         <comment>Group</comment>
         <translation type="unfinished"></translation>
@@ -22,13 +40,13 @@
 <context>
     <name>CasaGeoToolsAddressSearchAlgorithm</name>
     <message>
-        <location filename="../processing/coder.py" line="85"/>
+        <location filename="../processing/coder.py" line="64"/>
         <source>Address search</source>
         <comment>Algorithm</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/coder.py" line="93"/>
+        <location filename="../processing/coder.py" line="72"/>
         <source>Geocodes addresses.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -36,18 +54,18 @@
 <context>
     <name>CasaGeoToolsIsolinesAlgorithm</name>
     <message>
-        <location filename="../processing/spatial.py" line="100"/>
+        <location filename="../processing/spatial.py" line="78"/>
         <source>Isolines</source>
         <comment>Algorithm</comment>
-        <translation type="unfinished">Isochronen</translation>
+        <translation>Isochronen berechnen</translation>
     </message>
     <message>
-        <location filename="../processing/spatial.py" line="108"/>
+        <location filename="../processing/spatial.py" line="86"/>
         <source>Calculates isolines around locations.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/spatial.py" line="112"/>
+        <location filename="../processing/spatial.py" line="90"/>
         <source>
         Calculates isolines around locations.
         The input points will be converted into EPSG:4326 and the resulting isolines are EPSG:4326 polygons. There may be multiple output polygons for a single input point. 
@@ -55,53 +73,63 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/spatial.py" line="134"/>
+        <location filename="../processing/spatial.py" line="119"/>
         <source>Input layer</source>
         <translation type="unfinished">Eingabe-Layer</translation>
     </message>
     <message>
-        <location filename="../processing/spatial.py" line="141"/>
+        <location filename="../processing/spatial.py" line="126"/>
         <source>Output layer</source>
         <translation type="unfinished">Ausgabe-Layer</translation>
     </message>
     <message>
-        <location filename="../processing/spatial.py" line="148"/>
-        <source>Ranges (separated by semicolons</source>
+        <location filename="../processing/spatial.py" line="133"/>
+        <source>Ranges (separated by semicolons)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/spatial.py" line="154"/>
+        <location filename="../processing/spatial.py" line="139"/>
         <source>Ranges unit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/spatial.py" line="163"/>
+        <location filename="../processing/spatial.py" line="148"/>
         <source>Transport mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/spatial.py" line="172"/>
+        <location filename="../processing/spatial.py" line="157"/>
         <source>Routing mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/spatial.py" line="181"/>
+        <location filename="../processing/spatial.py" line="166"/>
         <source>Direction</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/spatial.py" line="283"/>
+        <location filename="../processing/spatial.py" line="182"/>
         <source>Converting input geometries</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/spatial.py" line="306"/>
+        <location filename="../processing/spatial.py" line="187"/>
         <source>Calculating isolines</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/spatial.py" line="311"/>
+        <location filename="../processing/spatial.py" line="192"/>
         <source>Converting results</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/spatial.py" line="225"/>
+        <source>Skipping feature {featid} due to empty geometry</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/spatial.py" line="235"/>
+        <source>Skipping feature {featid} due to reprojection failure</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -151,18 +179,18 @@
 <context>
     <name>CasaGeoToolsPOISearchAlgorithm</name>
     <message>
-        <location filename="../processing/coder.py" line="140"/>
-        <source>POI search</source>
+        <location filename="../processing/coder.py" line="119"/>
+        <source>POI Search</source>
         <comment>Algorithm</comment>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">POI-Suche</translation>
     </message>
     <message>
-        <location filename="../processing/coder.py" line="175"/>
+        <location filename="../processing/coder.py" line="154"/>
         <source>Input layer</source>
         <translation type="unfinished">Eingabe-Layer</translation>
     </message>
     <message>
-        <location filename="../processing/coder.py" line="183"/>
+        <location filename="../processing/coder.py" line="162"/>
         <source>Output layer</source>
         <translation type="unfinished">Ausgabe-Layer</translation>
     </message>
@@ -170,46 +198,46 @@
 <context>
     <name>CasaGeoToolsPlugin</name>
     <message>
-        <location filename="../plugin.py" line="86"/>
+        <location filename="../plugin.py" line="85"/>
         <source>casaGeoTools</source>
         <comment>Plugin name</comment>
         <translation type="unfinished">casaGeoTools</translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="95"/>
+        <location filename="../plugin.py" line="94"/>
         <source>casaGeoTools Settings</source>
         <comment>Settings action</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="103"/>
+        <location filename="../plugin.py" line="102"/>
         <source>casaGeoTools Documentation</source>
         <comment>Help action</comment>
         <translation type="unfinished">casaGeoTools-Dokumentation</translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="107"/>
+        <location filename="../plugin.py" line="106"/>
         <source>Open casaGeoTools plugin documentation in the browser</source>
         <comment>Help action</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="122"/>
+        <location filename="../plugin.py" line="121"/>
         <source>Your casaGeo API Key</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="131"/>
+        <location filename="../plugin.py" line="130"/>
         <source>Preferred output language</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="140"/>
+        <location filename="../plugin.py" line="139"/>
         <source>Preferred unit system</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="148"/>
+        <location filename="../plugin.py" line="147"/>
         <source>Preferred political view</source>
         <translation type="unfinished"></translation>
     </message>

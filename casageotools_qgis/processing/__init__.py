@@ -16,12 +16,14 @@
 
 from typing import TYPE_CHECKING, override
 
-from qgis.core import QgsProcessingProvider
+from qgis.core import QgsProcessingAlgorithm, QgsProcessingProvider
 
 from ..resources import PLUGIN_IDENTIFIER
 from ..utils import TrMethod
 
 if TYPE_CHECKING:
+    from casageo.tools import CasaGeoClient
+
     from ..plugin import CasaGeoToolsPlugin
 
 
@@ -68,3 +70,52 @@ class CasaGeoToolsProcessingProvider(QgsProcessingProvider):
     # @override
     # def versionInfo(self):
     #     return resources.plugin_version()
+
+
+class CasaGeoToolsAbstractProcessingAlgorithm(QgsProcessingAlgorithm):
+    __tr = TrMethod()
+
+    @override
+    def __init__(self, plugin: "CasaGeoToolsPlugin") -> None:
+        super().__init__()
+        self.plugin = plugin
+
+    @override
+    def canExecute(self) -> tuple[bool, str]:
+        import importlib
+
+        for module in self.requiredPythonModules():
+            try:
+                importlib.import_module(module)
+            except ModuleNotFoundError:
+                return False, self.__tr(
+                    "The {module} module is not installed",
+                ).format(module=module)
+            except ImportError as err:
+                return False, self.__tr(
+                    "The {module} module could not be imported: {err}",
+                ).format(module=module, err=err)
+
+        if not self.plugin.settingApikey.value():
+            return False, self.__tr("Please input your API key in the settings")
+
+        return True, ""
+
+    @override
+    def helpUrl(self) -> str:
+        return self.plugin.helpUrl(
+            f"algorithms/{self.groupId()}/{self.name()}.html"
+        ).toString()
+
+    def casaGeoClient(self) -> "CasaGeoClient":
+        from casageo.tools import CasaGeoClient
+
+        return CasaGeoClient(
+            self.plugin.settingApikey.value(),
+            preferred_language=self.plugin.settingLanguage.value() or None,
+            preferred_unit_system=self.plugin.settingUnitSystem.value() or None,
+            preferred_political_view=self.plugin.settingPoliticalView.value() or None,
+        )
+
+    def requiredPythonModules(self) -> list[str]:
+        return ["casageo.tools"]

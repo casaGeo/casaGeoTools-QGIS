@@ -19,8 +19,7 @@ __all__ = [
     "CasaGeoToolsPOISearchAlgorithm",
 ]
 
-import importlib
-from typing import TYPE_CHECKING, Any, override
+from typing import Any, override
 
 from qgis.core import (
     Qgis,
@@ -34,18 +33,12 @@ from qgis.core import (
 )
 from qgis.PyQt.QtCore import QMetaType
 
+from . import CasaGeoToolsAbstractProcessingAlgorithm
 from ..utils import TrMethod
 
-if TYPE_CHECKING:
-    from ..plugin import CasaGeoToolsPlugin
 
-
-class CasaGeoToolsAbstractGeocodingAlgorithm(QgsProcessingAlgorithm):
+class CasaGeoToolsAbstractGeocodingAlgorithm(CasaGeoToolsAbstractProcessingAlgorithm):
     __tr = TrMethod()
-
-    def __init__(self, plugin: "CasaGeoToolsPlugin"):
-        super().__init__()
-        self.plugin = plugin
 
     @override
     def group(self) -> str:
@@ -56,29 +49,15 @@ class CasaGeoToolsAbstractGeocodingAlgorithm(QgsProcessingAlgorithm):
         return "coder"
 
     @override
-    def canExecute(self) -> tuple[bool, str]:
-        for module in ["casageo.tools", "casageo.coder", "geopandas"]:
-            try:
-                importlib.import_module(module)
-            except ModuleNotFoundError:
-                return False, f"The {module} module is not installed"
-            except ImportError as err:
-                return False, f"The {module} module could not be imported: {err}"
-
-        return True, ""
-
-    @override
-    def helpUrl(self) -> str:
-        return self.plugin.helpUrl(
-            f"algorithms/{self.groupId()}/{self.name()}.html"
-        ).toString()
+    def requiredPythonModules(self) -> list[str]:
+        return ["casageo.tools", "casageo.coder", "geopandas"]
 
 
 class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm):
+    __tr = TrMethod()
+
     INPUT = "INPUT"
     OUTPUT = "OUTPUT"
-
-    __tr = TrMethod()
 
     @override
     def displayName(self) -> str:
@@ -126,6 +105,8 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm):
     class.
     """
 
+    __tr = TrMethod()
+
     # Constants used to refer to parameters and outputs. They will be
     # used when calling the algorithm from another algorithm, or when
     # calling from the QGIS console.
@@ -133,11 +114,9 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm):
     INPUT = "INPUT"
     OUTPUT = "OUTPUT"
 
-    __tr = TrMethod()
-
     @override
     def displayName(self) -> str:
-        return self.__tr("POI search", "Algorithm")
+        return self.__tr("POI Search", "Algorithm")
 
     @override
     def name(self) -> str:
