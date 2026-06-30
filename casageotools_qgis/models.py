@@ -65,6 +65,8 @@ class CasaGeoToolsUnitSystemModel(QAbstractListModel):
                 return self.__systems[index.row()]["name"]
             case Qt.ItemDataRole.EditRole:
                 return self.__systems[index.row()]["id"]
+            case Qt.ItemDataRole.UserRole:
+                return self.__systems[index.row()]["id"]
         return None
 
     @staticmethod

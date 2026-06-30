@@ -108,6 +108,32 @@ class CasaGeoToolsPlugin:
             maxLength=64,
         )
 
+    @cached_property
+    def setting_language(self) -> QgsSettingsEntryString:
+        return QgsSettingsEntryString(
+            "language",
+            PLUGIN_IDENTIFIER,
+            description=self.__tr("Preferred output language"),
+            maxLength=64,
+        )
+
+    @cached_property
+    def setting_unit_system(self) -> QgsSettingsEntryString:
+        return QgsSettingsEntryString(
+            "unitSystem",
+            PLUGIN_IDENTIFIER,
+            description=self.__tr("Preferred unit system"),
+        )
+
+    @cached_property
+    def setting_political_view(self) -> QgsSettingsEntryString:
+        return QgsSettingsEntryString(
+            "politicalView",
+            PLUGIN_IDENTIFIER,
+            description=self.__tr("Preferred political view"),
+            maxLength=64,
+        )
+
     def __init__(self, iface: QgisInterface) -> None:
         self.iface = iface
         self.translator: QTranslator = QTranslator()
@@ -129,6 +155,9 @@ class CasaGeoToolsPlugin:
         # and then manually registering it afterward (even though it
         # should register itself automatically).
         self.settings.registerChildSetting(self.setting_apikey, None)
+        self.settings.registerChildSetting(self.setting_language, None)
+        self.settings.registerChildSetting(self.setting_unit_system, None)
+        self.settings.registerChildSetting(self.setting_political_view, None)
 
     def initProcessing(self) -> None:
         """Initialize only the processing components of this plugin."""
