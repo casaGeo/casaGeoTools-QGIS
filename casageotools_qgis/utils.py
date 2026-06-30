@@ -14,13 +14,6 @@
 #
 #  SPDX-License-Identifier: Apache-2.0
 
-from functools import cached_property
-from typing import Self, TYPE_CHECKING, Any, override
-
-
-if TYPE_CHECKING:
-    from qgis.PyQt.QtCore import QObject, QMetaObject
-
 
 def ensure[T](value: T | None, /) -> T:
     assert value is not None
