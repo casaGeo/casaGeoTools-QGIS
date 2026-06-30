@@ -2,75 +2,105 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="de_DE">
 <context>
-    <name>CasaGeoToolsAddressSearchAlgorithm</name>
+    <name>CasaGeoToolsAbstractGeocodingAlgorithm</name>
     <message>
-        <location filename="../coder.py" line="80"/>
-        <source>Geocode addresses</source>
+        <location filename="../processing/coder.py" line="52"/>
+        <source>Coder</source>
+        <comment>Group</comment>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
-    <name>CasaGeoToolsGeocodingAlgorithm</name>
+    <name>CasaGeoToolsAbstractSpatialAlgorithm</name>
     <message>
-        <location filename="../coder.py" line="44"/>
-        <source>Geocoding algorithms</source>
+        <location filename="../processing/spatial.py" line="59"/>
+        <source>Spatial</source>
+        <comment>Group</comment>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>CasaGeoToolsAddressSearchAlgorithm</name>
+    <message>
+        <location filename="../processing/coder.py" line="85"/>
+        <source>Address search</source>
+        <comment>Algorithm</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/coder.py" line="93"/>
+        <source>Geocodes addresses.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>CasaGeoToolsIsolinesAlgorithm</name>
     <message>
-        <location filename="../spatial.py" line="93"/>
-        <source>Calculate isolines</source>
+        <location filename="../processing/spatial.py" line="100"/>
+        <source>Isolines</source>
+        <comment>Algorithm</comment>
+        <translation type="unfinished">Isochronen</translation>
+    </message>
+    <message>
+        <location filename="../processing/spatial.py" line="108"/>
+        <source>Calculates isolines around locations.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../spatial.py" line="116"/>
+        <location filename="../processing/spatial.py" line="112"/>
+        <source>
+        Calculates isolines around locations.
+        The input points will be converted into EPSG:4326 and the resulting isolines are EPSG:4326 polygons. There may be multiple output polygons for a single input point. 
+        </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/spatial.py" line="134"/>
         <source>Input layer</source>
         <translation type="unfinished">Eingabe-Layer</translation>
     </message>
     <message>
-        <location filename="../spatial.py" line="123"/>
+        <location filename="../processing/spatial.py" line="141"/>
         <source>Output layer</source>
         <translation type="unfinished">Ausgabe-Layer</translation>
     </message>
     <message>
-        <location filename="../spatial.py" line="130"/>
+        <location filename="../processing/spatial.py" line="148"/>
         <source>Ranges (separated by semicolons</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../spatial.py" line="136"/>
+        <location filename="../processing/spatial.py" line="154"/>
         <source>Ranges unit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../spatial.py" line="145"/>
+        <location filename="../processing/spatial.py" line="163"/>
         <source>Transport mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../spatial.py" line="154"/>
+        <location filename="../processing/spatial.py" line="172"/>
         <source>Routing mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../spatial.py" line="163"/>
+        <location filename="../processing/spatial.py" line="181"/>
         <source>Direction</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../spatial.py" line="265"/>
+        <location filename="../processing/spatial.py" line="283"/>
         <source>Converting input geometries</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../spatial.py" line="288"/>
+        <location filename="../processing/spatial.py" line="306"/>
         <source>Calculating isolines</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../spatial.py" line="293"/>
+        <location filename="../processing/spatial.py" line="311"/>
         <source>Converting results</source>
         <translation type="unfinished"></translation>
     </message>
@@ -171,17 +201,18 @@
 <context>
     <name>CasaGeoToolsPOISearchAlgorithm</name>
     <message>
-        <location filename="../coder.py" line="140"/>
-        <source>Search for POIs</source>
+        <location filename="../processing/coder.py" line="140"/>
+        <source>POI search</source>
+        <comment>Algorithm</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../coder.py" line="175"/>
+        <location filename="../processing/coder.py" line="175"/>
         <source>Input layer</source>
         <translation type="unfinished">Eingabe-Layer</translation>
     </message>
     <message>
-        <location filename="../coder.py" line="183"/>
+        <location filename="../processing/coder.py" line="183"/>
         <source>Output layer</source>
         <translation type="unfinished">Ausgabe-Layer</translation>
     </message>
@@ -189,116 +220,136 @@
 <context>
     <name>CasaGeoToolsPlugin</name>
     <message>
-        <location filename="../plugin.py" line="75"/>
+        <location filename="../plugin.py" line="89"/>
         <source>casaGeoTools</source>
-        <translation>casaGeoTools</translation>
+        <translation type="unfinished">casaGeoTools</translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="81"/>
+        <location filename="../plugin.py" line="96"/>
         <source>casaGeoTools Documentation</source>
         <translation>casaGeoTools-Dokumentation</translation>
+    </message>
+    <message>
+        <location filename="../plugin.py" line="109"/>
+        <source>Your casaGeo API Key</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugin.py" line="118"/>
+        <source>Preferred output language</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugin.py" line="127"/>
+        <source>Preferred unit system</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugin.py" line="135"/>
+        <source>Preferred political view</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>CasaGeoToolsPoliticalViewModel</name>
     <message>
-        <location filename="../maindialog.py" line="79"/>
+        <location filename="../models.py" line="86"/>
         <source>Argentina</source>
         <comment>Political View</comment>
         <translation>Argentinien</translation>
     </message>
     <message>
-        <location filename="../maindialog.py" line="80"/>
+        <location filename="../models.py" line="87"/>
         <source>Egypt</source>
         <comment>Political View</comment>
         <translation>Ägypten</translation>
     </message>
     <message>
-        <location filename="../maindialog.py" line="81"/>
+        <location filename="../models.py" line="88"/>
         <source>Kenya</source>
         <comment>Political View</comment>
         <translation>Kenia</translation>
     </message>
     <message>
-        <location filename="../maindialog.py" line="82"/>
+        <location filename="../models.py" line="89"/>
         <source>India</source>
         <comment>Political View</comment>
         <translation>Indien</translation>
     </message>
     <message>
-        <location filename="../maindialog.py" line="83"/>
+        <location filename="../models.py" line="90"/>
         <source>Morocco</source>
         <comment>Political View</comment>
         <translation>Marokko</translation>
     </message>
     <message>
-        <location filename="../maindialog.py" line="84"/>
+        <location filename="../models.py" line="91"/>
         <source>Pakistan</source>
         <comment>Political View</comment>
         <translation>Pakistan</translation>
     </message>
     <message>
-        <location filename="../maindialog.py" line="85"/>
+        <location filename="../models.py" line="92"/>
         <source>Russia</source>
         <comment>Political View</comment>
         <translation>Russland</translation>
     </message>
     <message>
-        <location filename="../maindialog.py" line="86"/>
+        <location filename="../models.py" line="93"/>
         <source>Sudan</source>
         <comment>Political View</comment>
         <translation>Sudan</translation>
     </message>
     <message>
-        <location filename="../maindialog.py" line="87"/>
+        <location filename="../models.py" line="94"/>
         <source>Serbia</source>
         <comment>Political View</comment>
         <translation>Serbien</translation>
     </message>
     <message>
-        <location filename="../maindialog.py" line="88"/>
+        <location filename="../models.py" line="95"/>
         <source>Suriname</source>
         <comment>Political View</comment>
         <translation>Suriname</translation>
     </message>
     <message>
-        <location filename="../maindialog.py" line="89"/>
+        <location filename="../models.py" line="96"/>
         <source>Syria</source>
         <comment>Political View</comment>
         <translation>Syrien</translation>
     </message>
     <message>
-        <location filename="../maindialog.py" line="90"/>
+        <location filename="../models.py" line="97"/>
         <source>Turkey</source>
         <comment>Political View</comment>
         <translation>Türkei</translation>
     </message>
     <message>
-        <location filename="../maindialog.py" line="91"/>
+        <location filename="../models.py" line="98"/>
         <source>Tanzania</source>
         <comment>Political View</comment>
         <translation>Tansania</translation>
     </message>
     <message>
-        <location filename="../maindialog.py" line="92"/>
+        <location filename="../models.py" line="99"/>
         <source>Uruguay</source>
         <comment>Political View</comment>
         <translation>Uruguay</translation>
     </message>
     <message>
-        <location filename="../maindialog.py" line="93"/>
+        <location filename="../models.py" line="100"/>
         <source>Vietnam</source>
         <comment>Political View</comment>
         <translation>Vietnam</translation>
     </message>
     <message>
-        <location filename="../maindialog.py" line="112"/>
+        <location filename="../models.py" line="119"/>
         <source>Political View</source>
         <comment>Column Header</comment>
         <translation>Politische Sicht</translation>
     </message>
     <message>
-        <location filename="../maindialog.py" line="76"/>
+        <location filename="../models.py" line="83"/>
         <source>Default</source>
         <comment>Political View</comment>
         <translation>Standard</translation>
@@ -307,35 +358,70 @@
 <context>
     <name>CasaGeoToolsProcessingProvider</name>
     <message>
-        <location filename="../plugin.py" line="150"/>
+        <location filename="../processing/__init__.py" line="41"/>
         <source>casaGeoTools</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
-    <name>CasaGeoToolsSpatialAlgorithm</name>
+    <name>CasaGeoToolsSettingsDialog</name>
     <message>
-        <location filename="../spatial.py" line="49"/>
-        <source>Spatial algorithms</source>
+        <location filename="../ui/SettingsDialog.ui" line="14"/>
+        <source>casaGeoTools Settings</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/SettingsDialog.ui" line="20"/>
+        <source>Credentials</source>
+        <translation type="unfinished">Zugangsdaten</translation>
+    </message>
+    <message>
+        <location filename="../ui/SettingsDialog.ui" line="26"/>
+        <source>casaGeo API Key</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/SettingsDialog.ui" line="42"/>
+        <source>Global Preferences</source>
+        <translation type="unfinished">Standardwerte</translation>
+    </message>
+    <message>
+        <location filename="../ui/SettingsDialog.ui" line="48"/>
+        <source>Unit System</source>
+        <translation type="unfinished">Einheitensystem</translation>
+    </message>
+    <message>
+        <location filename="../ui/SettingsDialog.ui" line="58"/>
+        <source>Language</source>
+        <translation type="unfinished">Ausgabesprache</translation>
+    </message>
+    <message>
+        <location filename="../ui/SettingsDialog.ui" line="68"/>
+        <source>en-US, de-DE, …</source>
+        <translation type="unfinished">de-DE, en-US, …</translation>
+    </message>
+    <message>
+        <location filename="../ui/SettingsDialog.ui" line="78"/>
+        <source>Political View</source>
+        <translation type="unfinished">Politische Sicht</translation>
     </message>
 </context>
 <context>
     <name>CasaGeoToolsUnitSystemModel</name>
     <message>
-        <location filename="../maindialog.py" line="33"/>
+        <location filename="../models.py" line="36"/>
         <source>Metric</source>
         <comment>Unit System</comment>
         <translation>International (SI)</translation>
     </message>
     <message>
-        <location filename="../maindialog.py" line="34"/>
+        <location filename="../models.py" line="37"/>
         <source>Imperial</source>
         <comment>Unit System</comment>
         <translation>Angloamerikanisch</translation>
     </message>
     <message>
-        <location filename="../maindialog.py" line="53"/>
+        <location filename="../models.py" line="56"/>
         <source>Unit System</source>
         <comment>Column Header</comment>
         <translation>Einheitensystem</translation>

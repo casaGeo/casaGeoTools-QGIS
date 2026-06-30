@@ -8,6 +8,7 @@ SOURCES = \
     casageotools_qgis/maindialog.py \
     casageotools_qgis/models.py \
     casageotools_qgis/plugin.py \
+    casageotools_qgis/processing/__init__.py \
     casageotools_qgis/processing/coder.py \
     casageotools_qgis/processing/spatial.py \
     casageotools_qgis/resources.py \
