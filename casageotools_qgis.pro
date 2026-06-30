@@ -1,11 +1,8 @@
 FORMS = \
-    casageotools_qgis/ui/LicenseKeyEntryDialog.ui \
-    casageotools_qgis/ui/MainDialog.ui \
     casageotools_qgis/ui/OptionsPage.ui
 
 SOURCES = \
     casageotools_qgis/__init__.py \
-    casageotools_qgis/maindialog.py \
     casageotools_qgis/models.py \
     casageotools_qgis/plugin.py \
     casageotools_qgis/options.py \

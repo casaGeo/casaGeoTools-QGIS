@@ -28,7 +28,6 @@ from qgis.gui import QgisInterface
 from qgis.PyQt.QtCore import (
     QCoreApplication,
     QLocale,
-    Qt,
     QTranslator,
     QUrl,
 )
@@ -47,7 +46,6 @@ from .resources import (
 from .utils import TrMethod, ensure
 
 if TYPE_CHECKING:
-    from .maindialog import CasaGeoToolsMainDialog
     from .options import CasaGeoToolsOptionsWidgetFactory
     from .processing import CasaGeoToolsProcessingProvider
 
@@ -89,12 +87,6 @@ class CasaGeoToolsPlugin:
     @cached_property
     def icon(self) -> QIcon:
         return QIcon(os.path.join(PLUGIN_ASSETS_DIRECTORY, "casageotools.png"))
-
-    @cached_property
-    def actionMain(self) -> QAction:
-        action = QAction(self.icon, self.__tr("casaGeoTools", "Main action"))
-        action.triggered.connect(self.showMainDialog)
-        return action
 
     @cached_property
     def actionSettings(self) -> QAction:
@@ -164,7 +156,7 @@ class CasaGeoToolsPlugin:
         self.is_processing_initialized = False
         self.is_fully_initialized = False
 
-        self._main_dialog: CasaGeoToolsMainDialog | None = None
+        # self._main_dialog: CasaGeoToolsMainDialog | None = None
 
         if self.translator.load(
             QLocale(), PLUGIN_IDENTIFIER, ".", PLUGIN_I18N_DIRECTORY
@@ -260,20 +252,20 @@ class CasaGeoToolsPlugin:
     def helpUrl(self, path: str = "index.html") -> QUrl:
         return QUrl.fromLocalFile(self.helpFile(path))
 
-    def showMainDialog(self) -> None:
-        """Show the main dialog."""
-        from .maindialog import CasaGeoToolsMainDialog
-
-        if self._main_dialog is None:
-            dialog = CasaGeoToolsMainDialog(self.iface.mainWindow())
-            dialog.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
-            dialog.destroyed.connect(lambda: setattr(self, "_main_dialog", None))
-            self._main_dialog = dialog
-
-        # self._main_dialog.open()
-        self._main_dialog.show()
-        self._main_dialog.activateWindow()
-        # self._main_dialog.raise_()
+    # def showMainDialog(self) -> None:
+    #     """Show the main dialog."""
+    #     from .maindialog import CasaGeoToolsMainDialog
+    #
+    #     if self._main_dialog is None:
+    #         dialog = CasaGeoToolsMainDialog(self.iface.mainWindow())
+    #         dialog.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
+    #         dialog.destroyed.connect(lambda: setattr(self, "_main_dialog", None))
+    #         self._main_dialog = dialog
+    #
+    #     # self._main_dialog.open()
+    #     self._main_dialog.show()
+    #     self._main_dialog.activateWindow()
+    #     # self._main_dialog.raise_()
 
     def showSettingsDialog(self) -> None:
         """Show the plugin settings dialog."""
