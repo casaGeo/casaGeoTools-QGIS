@@ -72,14 +72,14 @@ class CasaGeoToolsAbstractSpatialAlgorithm(QgsProcessingAlgorithm):
             except ImportError as err:
                 return False, f"The {module} module could not be imported: {err}"
 
-        if not self.plugin.setting_apikey.value():
+        if not self.plugin.settingApikey.value():
             return False, "Please input your API key in the settings"
 
         return True, ""
 
     @override
     def helpUrl(self) -> str:
-        return self.plugin.help_url(
+        return self.plugin.helpUrl(
             f"algorithms/{self.groupId()}/{self.name()}.html"
         ).toString()
 
@@ -241,7 +241,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
         import casageo.tools
         from geopandas import GeoDataFrame
 
-        client = casageo.tools.CasaGeoClient(self.plugin.setting_apikey.value())
+        client = casageo.tools.CasaGeoClient(self.plugin.settingApikey.value())
 
         epsg4326 = QgsCoordinateReferenceSystem.fromEpsgId(4326)
         assert epsg4326.isValid()

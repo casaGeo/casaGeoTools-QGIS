@@ -49,26 +49,24 @@ class CasaGeoToolsSettingsDialog(QDialog):
 
     @pyqtSlot()
     def loadSettings(self) -> None:
-        self._ui.apikeyLineEdit.setText(self._plugin.setting_apikey.value())
-        self._ui.languagePrefLineEdit.setText(self._plugin.setting_language.value())
+        self._ui.apikeyLineEdit.setText(self._plugin.settingApikey.value())
+        self._ui.languagePrefLineEdit.setText(self._plugin.settingLanguage.value())
         self._ui.unitsPrefComboBox.setCurrentIndex(
-            self._ui.unitsPrefComboBox.findData(
-                self._plugin.setting_unit_system.value()
-            )
+            self._ui.unitsPrefComboBox.findData(self._plugin.settingUnitSystem.value())
         )
         self._ui.politicalPrefComboBox.setCurrentIndex(
             self._ui.politicalPrefComboBox.findData(
-                self._plugin.setting_political_view.value()
+                self._plugin.settingPoliticalView.value()
             )
         )
 
     @pyqtSlot()
     def saveSettings(self) -> None:
-        self._plugin.setting_apikey.setValue(self._ui.apikeyLineEdit.text())
-        self._plugin.setting_language.setValue(self._ui.languagePrefLineEdit.text())
-        self._plugin.setting_unit_system.setValue(
+        self._plugin.settingApikey.setValue(self._ui.apikeyLineEdit.text())
+        self._plugin.settingLanguage.setValue(self._ui.languagePrefLineEdit.text())
+        self._plugin.settingUnitSystem.setValue(
             self._ui.unitsPrefComboBox.currentData()
         )
-        self._plugin.setting_political_view.setValue(
+        self._plugin.settingPoliticalView.setValue(
             self._ui.politicalPrefComboBox.currentData()
         )

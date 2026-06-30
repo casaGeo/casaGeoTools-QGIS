@@ -85,16 +85,21 @@ class CasaGeoToolsPlugin:
         return QIcon(os.path.join(PLUGIN_ASSETS_DIRECTORY, "casageotools.png"))
 
     @cached_property
-    def action_main(self) -> QAction:
+    def actionMain(self) -> QAction:
         action = QAction(self.icon, self.__tr("casaGeoTools"))
-        action.triggered.connect(self.show_settings_dialog)
-        # action.triggered.connect(self.dialog_main.show)
+        action.triggered.connect(self.showMainDialog)
         return action
 
     @cached_property
-    def action_help(self) -> QAction:
+    def actionSettings(self) -> QAction:
+        action = QAction(self.icon, self.__tr("casaGeoTools Settings"))
+        action.triggered.connect(self.showSettingsDialog)
+        return action
+
+    @cached_property
+    def actionHelp(self) -> QAction:
         action = QAction(self.icon, self.__tr("casaGeoTools Documentation"))
-        action.triggered.connect(self.show_help)
+        action.triggered.connect(self.showHelp)
         return action
 
     @cached_property
@@ -102,7 +107,7 @@ class CasaGeoToolsPlugin:
         return ensure(QgsSettingsTree.createPluginTreeNode(PLUGIN_IDENTIFIER))
 
     @cached_property
-    def setting_apikey(self) -> QgsSettingsEntryString:
+    def settingApikey(self) -> QgsSettingsEntryString:
         return QgsSettingsEntryString(
             "apikey",
             PLUGIN_IDENTIFIER,
@@ -111,7 +116,7 @@ class CasaGeoToolsPlugin:
         )
 
     @cached_property
-    def setting_language(self) -> QgsSettingsEntryString:
+    def settingLanguage(self) -> QgsSettingsEntryString:
         return QgsSettingsEntryString(
             "language",
             PLUGIN_IDENTIFIER,
@@ -120,7 +125,7 @@ class CasaGeoToolsPlugin:
         )
 
     @cached_property
-    def setting_unit_system(self) -> QgsSettingsEntryString:
+    def settingUnitSystem(self) -> QgsSettingsEntryString:
         return QgsSettingsEntryString(
             "unitSystem",
             PLUGIN_IDENTIFIER,
@@ -128,7 +133,7 @@ class CasaGeoToolsPlugin:
         )
 
     @cached_property
-    def setting_political_view(self) -> QgsSettingsEntryString:
+    def settingPoliticalView(self) -> QgsSettingsEntryString:
         return QgsSettingsEntryString(
             "politicalView",
             PLUGIN_IDENTIFIER,
@@ -138,7 +143,7 @@ class CasaGeoToolsPlugin:
 
     def __init__(self, iface: QgisInterface) -> None:
         self.iface = iface
-        self.translator: QTranslator = QTranslator()
+        self.translator = QTranslator()
         self.processing_provider: CasaGeoToolsProcessingProvider | None = None
         self.is_processing_initialized = False
         self.is_fully_initialized = False
@@ -156,10 +161,10 @@ class CasaGeoToolsPlugin:
         # work is creating the child setting with the PLUGIN_IDENTIFIER
         # and then manually registering it afterward (even though it
         # should register itself automatically).
-        self.settings.registerChildSetting(self.setting_apikey, None)
-        self.settings.registerChildSetting(self.setting_language, None)
-        self.settings.registerChildSetting(self.setting_unit_system, None)
-        self.settings.registerChildSetting(self.setting_political_view, None)
+        self.settings.registerChildSetting(self.settingApikey, None)
+        self.settings.registerChildSetting(self.settingLanguage, None)
+        self.settings.registerChildSetting(self.settingUnitSystem, None)
+        self.settings.registerChildSetting(self.settingPoliticalView, None)
 
     def initProcessing(self) -> None:
         """
@@ -185,24 +190,24 @@ class CasaGeoToolsPlugin:
         """
         self.initProcessing()
 
-        self.iface.addToolBarIcon(self.action_main)
-        self.iface.addPluginToMenu("&casaGeoTools", self.action_main)
-        self.iface.addPluginToVectorMenu("&casaGeoTools", self.action_main)
+        self.iface.addToolBarIcon(self.actionSettings)
+        self.iface.addPluginToMenu("&casaGeoTools", self.actionSettings)
+        self.iface.addPluginToVectorMenu("&casaGeoTools", self.actionSettings)
 
         if pluginHelpMenu := self.iface.pluginHelpMenu():
-            pluginHelpMenu.addAction(self.action_help)
+            pluginHelpMenu.addAction(self.actionHelp)
 
         self.is_fully_initialized = True
 
     def unloadGui(self) -> None:
         """Unload the graphical components of this plugin."""
 
-        self.iface.removeToolBarIcon(self.action_main)
-        self.iface.removePluginMenu("&casaGeoTools", self.action_main)
-        self.iface.removePluginVectorMenu("&casaGeoTools", self.action_main)
+        self.iface.removeToolBarIcon(self.actionSettings)
+        self.iface.removePluginMenu("&casaGeoTools", self.actionSettings)
+        self.iface.removePluginVectorMenu("&casaGeoTools", self.actionSettings)
 
         if pluginHelpMenu := self.iface.pluginHelpMenu():
-            pluginHelpMenu.removeAction(self.action_help)
+            pluginHelpMenu.removeAction(self.actionHelp)
 
     def unloadProcessing(self) -> None:
         """Unload the processing components of this plugin."""
@@ -227,13 +232,13 @@ class CasaGeoToolsPlugin:
         QgsSettingsTree.unregisterPluginTreeNode(PLUGIN_IDENTIFIER)
         QCoreApplication.removeTranslator(self.translator)
 
-    def help_file(self, path: str = "index.html") -> str:
+    def helpFile(self, path: str = "index.html") -> str:
         return os.path.join(PLUGIN_HELP_DIRECTORY, path)
 
-    def help_url(self, path: str = "index.html") -> QUrl:
-        return QUrl.fromLocalFile(self.help_file(path))
+    def helpUrl(self, path: str = "index.html") -> QUrl:
+        return QUrl.fromLocalFile(self.helpFile(path))
 
-    def show_main_dialog(self) -> None:
+    def showMainDialog(self) -> None:
         """Show the main dialog."""
         from .maindialog import CasaGeoToolsMainDialog
 
@@ -245,7 +250,7 @@ class CasaGeoToolsPlugin:
 
         self._main_dialog.open()
 
-    def show_settings_dialog(self) -> None:
+    def showSettingsDialog(self) -> None:
         """Show the plugin settings dialog."""
         from .settingsdialog import CasaGeoToolsSettingsDialog
 
@@ -260,9 +265,9 @@ class CasaGeoToolsPlugin:
         self._settings_dialog.activateWindow()
         # self._settings_dialog.raise_()
 
-    def show_help(self) -> None:
+    def showHelp(self) -> None:
         """Show the plugin documentation."""
         # We would like to use qgis.utils.showPluginHelp(), but that
         # function is currently broken because it passes a path with
         # file:// prefix to QUrl.fromLocalFile().
-        QDesktopServices.openUrl(self.help_url())
+        QDesktopServices.openUrl(self.helpUrl())

@@ -69,7 +69,7 @@ class CasaGeoToolsAbstractGeocodingAlgorithm(QgsProcessingAlgorithm):
 
     @override
     def helpUrl(self) -> str:
-        return self.plugin.help_url(
+        return self.plugin.helpUrl(
             f"algorithms/{self.groupId()}/{self.name()}.html"
         ).toString()
 
