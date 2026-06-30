@@ -19,7 +19,7 @@ __all__ = [
 ]
 
 import importlib
-from typing import TYPE_CHECKING, Any, LiteralString, override
+from typing import TYPE_CHECKING, Any, override
 
 from qgis.core import (
     Qgis,
@@ -39,13 +39,17 @@ from qgis.core import (
     QgsProcessingParameterString,
     QgsProject,
 )
-from qgis.PyQt.QtCore import QCoreApplication, QMetaType
+from qgis.PyQt.QtCore import QMetaType
+
+from ..utils import TrMethod
 
 if TYPE_CHECKING:
     from ..plugin import CasaGeoToolsPlugin
 
 
 class CasaGeoToolsAbstractSpatialAlgorithm(QgsProcessingAlgorithm):
+    __tr = TrMethod()
+
     def __init__(self, plugin: "CasaGeoToolsPlugin"):
         super().__init__()
         self.plugin = plugin
@@ -79,17 +83,6 @@ class CasaGeoToolsAbstractSpatialAlgorithm(QgsProcessingAlgorithm):
             f"algorithms/{self.groupId()}/{self.name()}.html"
         ).toString()
 
-    @staticmethod
-    def __tr(
-        sourceText: LiteralString,
-        disambiguation: LiteralString | None = None,
-        /,
-        n: int = -1,
-    ) -> str:
-        return QCoreApplication.translate(
-            __class__.__name__, sourceText, disambiguation, n
-        )
-
 
 class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
     INPUT = "INPUT"
@@ -99,6 +92,8 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
     TRANSPORT_MODE = "TRANSPORT_MODE"
     ROUTING_MODE = "ROUTING_MODE"
     DIRECTION = "DIRECTION"
+
+    __tr = TrMethod()
 
     @override
     def displayName(self) -> str:
@@ -328,14 +323,3 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
             sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
 
         return {self.OUTPUT: dest_id}
-
-    @staticmethod
-    def __tr(
-        sourceText: LiteralString,
-        disambiguation: LiteralString | None = None,
-        /,
-        n: int = -1,
-    ) -> str:
-        return QCoreApplication.translate(
-            __class__.__name__, sourceText, disambiguation, n
-        )

@@ -16,7 +16,7 @@
 
 import os
 from functools import cached_property
-from typing import TYPE_CHECKING, LiteralString
+from typing import TYPE_CHECKING
 
 from qgis.core import (
     QgsApplication,
@@ -44,7 +44,7 @@ from .resources import (
     PLUGIN_I18N_DIRECTORY,
     PLUGIN_IDENTIFIER,
 )
-from .utils import ensure
+from .utils import TrMethod, ensure
 
 if TYPE_CHECKING:
     from .maindialog import CasaGeoToolsMainDialog
@@ -78,6 +78,8 @@ if TYPE_CHECKING:
 
 
 class CasaGeoToolsPlugin:
+    __tr = TrMethod()
+
     @cached_property
     def icon(self) -> QIcon:
         return QIcon(os.path.join(PLUGIN_ASSETS_DIRECTORY, "casageotools.png"))
@@ -160,7 +162,12 @@ class CasaGeoToolsPlugin:
         self.settings.registerChildSetting(self.setting_political_view, None)
 
     def initProcessing(self) -> None:
-        """Initialize only the processing components of this plugin."""
+        """
+        Initialize only the processing components of this plugin.
+
+        QGIS calls this function instead of :meth:`initGui` when the
+        plugin is loaded in processing-only mode.
+        """
         from .processing import CasaGeoToolsProcessingProvider
 
         self.processing_provider = CasaGeoToolsProcessingProvider(self)
@@ -170,7 +177,12 @@ class CasaGeoToolsPlugin:
         self.is_processing_initialized = True
 
     def initGui(self) -> None:
-        """Initialize the graphical and processing components of this plugin."""
+        """
+        Initialize all components of this plugin.
+
+        This is the main entry point of the plugin, which initializes
+        all graphical and processing components.
+        """
         self.initProcessing()
 
         self.iface.addToolBarIcon(self.action_main)
@@ -199,7 +211,12 @@ class CasaGeoToolsPlugin:
             processingRegistry.removeProvider(self.processing_provider)
 
     def unload(self) -> None:
-        """Called when the plugin is unloaded."""
+        """
+        Unload all loaded components of this plugin.
+
+        QGIS calls this function when the plugin is unloaded, whether it
+        was loaded in graphical or processing-only mode.
+        """
 
         if self.is_fully_initialized:
             self.unloadGui()
@@ -249,19 +266,3 @@ class CasaGeoToolsPlugin:
         # function is currently broken because it passes a path with
         # file:// prefix to QUrl.fromLocalFile().
         QDesktopServices.openUrl(self.help_url())
-
-    # def initProcessing(self):
-    #     """Init Processing provider for QGIS >= 3.8."""
-    #     self.provider = CasaGeoToolsProcessingProvider()
-    #     QgsApplication.processingRegistry().addProvider(self.provider)
-
-    @staticmethod
-    def __tr(
-        sourceText: LiteralString,
-        disambiguation: LiteralString | None = None,
-        /,
-        n: int = -1,
-    ) -> str:
-        return QCoreApplication.translate(
-            __class__.__name__, sourceText, disambiguation, n
-        )

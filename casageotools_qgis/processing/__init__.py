@@ -14,18 +14,20 @@
 #
 #  SPDX-License-Identifier: Apache-2.0
 
-from typing import LiteralString, TYPE_CHECKING, override
+from typing import TYPE_CHECKING, override
 
-from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import QgsProcessingProvider
 
 from ..resources import PLUGIN_IDENTIFIER
+from ..utils import TrMethod
 
 if TYPE_CHECKING:
     from ..plugin import CasaGeoToolsPlugin
 
 
 class CasaGeoToolsProcessingProvider(QgsProcessingProvider):
+    __tr = TrMethod()
+
     def __init__(self, plugin: "CasaGeoToolsPlugin"):
         super().__init__()
         self.plugin = plugin
@@ -66,14 +68,3 @@ class CasaGeoToolsProcessingProvider(QgsProcessingProvider):
     # @override
     # def versionInfo(self):
     #     return resources.plugin_version()
-
-    @staticmethod
-    def __tr(
-        sourceText: LiteralString,
-        disambiguation: LiteralString | None = None,
-        /,
-        n: int = -1,
-    ) -> str:
-        return QCoreApplication.translate(
-            __class__.__name__, sourceText, disambiguation, n
-        )

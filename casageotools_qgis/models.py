@@ -14,19 +14,22 @@
 #
 #  SPDX-License-Identifier: Apache-2.0
 
-from typing import LiteralString, override
+from typing import override
 
 from qgis.PyQt.QtCore import (
     QAbstractListModel,
     QCollator,
-    QCoreApplication,
     QModelIndex,
     QObject,
     Qt,
 )
 
+from .utils import TrMethod
+
 
 class CasaGeoToolsUnitSystemModel(QAbstractListModel):
+    __tr = TrMethod()
+
     def __init__(self, parent: QObject | None = None) -> None:
         super().__init__(parent)
         self.__systems = [
@@ -69,19 +72,10 @@ class CasaGeoToolsUnitSystemModel(QAbstractListModel):
                 return self.__systems[index.row()]["id"]
         return None
 
-    @staticmethod
-    def __tr(
-        sourceText: LiteralString,
-        disambiguation: LiteralString | None = None,
-        /,
-        n: int = -1,
-    ) -> str:
-        return QCoreApplication.translate(
-            __class__.__name__, sourceText, disambiguation, n
-        )
-
 
 class CasaGeoToolsPoliticalViewModel(QAbstractListModel):
+    __tr = TrMethod()
+
     def __init__(self, parent: QObject | None = None) -> None:
         super().__init__(parent)
         self._default_view = {
@@ -150,15 +144,4 @@ class CasaGeoToolsPoliticalViewModel(QAbstractListModel):
         self._views.sort(
             key=lambda item: collator.sortKey(item["name"]),
             reverse=(order == Qt.SortOrder.DescendingOrder),
-        )
-
-    @staticmethod
-    def __tr(
-        sourceText: LiteralString,
-        disambiguation: LiteralString | None = None,
-        /,
-        n: int = -1,
-    ) -> str:
-        return QCoreApplication.translate(
-            __class__.__name__, sourceText, disambiguation, n
         )

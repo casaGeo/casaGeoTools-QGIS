@@ -20,7 +20,7 @@ __all__ = [
 ]
 
 import importlib
-from typing import TYPE_CHECKING, Any, LiteralString, override
+from typing import TYPE_CHECKING, Any, override
 
 from qgis.core import (
     Qgis,
@@ -32,21 +32,17 @@ from qgis.core import (
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterFeatureSource,
 )
-from qgis.PyQt.QtCore import QCoreApplication, QMetaType
+from qgis.PyQt.QtCore import QMetaType
+
+from ..utils import TrMethod
 
 if TYPE_CHECKING:
     from ..plugin import CasaGeoToolsPlugin
 
-# def DECLARE_TR_FUNCTIONS[T: type](cls: T) -> T:
-#     setattr(
-#         cls,
-#         f"_{cls.__name__}__tr",
-#         staticmethod(partial(QCoreApplication.translate, cls.__name__)),
-#     )
-#     return cls
-
 
 class CasaGeoToolsAbstractGeocodingAlgorithm(QgsProcessingAlgorithm):
+    __tr = TrMethod()
+
     def __init__(self, plugin: "CasaGeoToolsPlugin"):
         super().__init__()
         self.plugin = plugin
@@ -77,21 +73,12 @@ class CasaGeoToolsAbstractGeocodingAlgorithm(QgsProcessingAlgorithm):
             f"algorithms/{self.groupId()}/{self.name()}.html"
         ).toString()
 
-    @staticmethod
-    def __tr(
-        sourceText: LiteralString,
-        disambiguation: LiteralString | None = None,
-        /,
-        n: int = -1,
-    ) -> str:
-        return QCoreApplication.translate(
-            __class__.__name__, sourceText, disambiguation, n
-        )
-
 
 class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm):
     INPUT = "INPUT"
     OUTPUT = "OUTPUT"
+
+    __tr = TrMethod()
 
     @override
     def displayName(self) -> str:
@@ -124,17 +111,6 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm)
     ) -> dict[str, Any]:
         raise NotImplementedError
 
-    @staticmethod
-    def __tr(
-        sourceText: LiteralString,
-        disambiguation: LiteralString | None = None,
-        /,
-        n: int = -1,
-    ) -> str:
-        return QCoreApplication.translate(
-            __class__.__name__, sourceText, disambiguation, n
-        )
-
 
 class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm):
     """
@@ -156,6 +132,8 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm):
 
     INPUT = "INPUT"
     OUTPUT = "OUTPUT"
+
+    __tr = TrMethod()
 
     @override
     def displayName(self) -> str:
@@ -288,14 +266,3 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm):
         # # or output names.
 
         return {self.OUTPUT: dest_id}
-
-    @staticmethod
-    def __tr(
-        sourceText: LiteralString,
-        disambiguation: LiteralString | None = None,
-        /,
-        n: int = -1,
-    ) -> str:
-        return QCoreApplication.translate(
-            __class__.__name__, sourceText, disambiguation, n
-        )

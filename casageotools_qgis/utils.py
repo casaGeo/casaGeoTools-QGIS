@@ -14,6 +14,33 @@
 #
 #  SPDX-License-Identifier: Apache-2.0
 
+from typing import LiteralString
+
+from qgis.PyQt.QtCore import QCoreApplication
+
+
+class TrMethod:
+    def __set_name__(self, owner: type, name: str) -> None:
+        self.context = owner.__name__
+
+    def __call__(
+        self,
+        sourceText: LiteralString,
+        disambiguation: LiteralString | None = None,
+        /,
+        n: int = -1,
+    ) -> str:
+        return QCoreApplication.translate(self.context, sourceText, disambiguation, n)
+
+
+# def DECLARE_TR_FUNCTIONS[T: type](cls: T) -> T:
+#     setattr(
+#         cls,
+#         f"_{cls.__name__}__tr",
+#         staticmethod(partial(QCoreApplication.translate, cls.__name__)),
+#     )
+#     return cls
+
 
 def ensure[T](value: T | None, /) -> T:
     assert value is not None
