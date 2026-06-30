@@ -48,8 +48,8 @@ from .utils import TrMethod, ensure
 
 if TYPE_CHECKING:
     from .maindialog import CasaGeoToolsMainDialog
+    from .options import CasaGeoToolsOptionsWidgetFactory
     from .processing import CasaGeoToolsProcessingProvider
-    from .settingsdialog import CasaGeoToolsSettingsDialog
 
 
 # class CasaGeoToolsPluginTranslationComponent:
@@ -80,25 +80,40 @@ if TYPE_CHECKING:
 class CasaGeoToolsPlugin:
     __tr = TrMethod()
 
+    identifier = PLUGIN_IDENTIFIER
+
+    @property
+    def name(self) -> str:
+        return self.__tr("casaGeoTools", "Plugin name")
+
     @cached_property
     def icon(self) -> QIcon:
         return QIcon(os.path.join(PLUGIN_ASSETS_DIRECTORY, "casageotools.png"))
 
     @cached_property
     def actionMain(self) -> QAction:
-        action = QAction(self.icon, self.__tr("casaGeoTools"))
+        action = QAction(self.icon, self.__tr("casaGeoTools", "Main action"))
         action.triggered.connect(self.showMainDialog)
         return action
 
     @cached_property
     def actionSettings(self) -> QAction:
-        action = QAction(self.icon, self.__tr("casaGeoTools Settings"))
+        action = QAction(
+            self.icon, self.__tr("casaGeoTools Settings", "Settings action")
+        )
         action.triggered.connect(self.showSettingsDialog)
         return action
 
     @cached_property
     def actionHelp(self) -> QAction:
-        action = QAction(self.icon, self.__tr("casaGeoTools Documentation"))
+        action = QAction(
+            self.icon, self.__tr("casaGeoTools Documentation", "Help action")
+        )
+        action.setStatusTip(
+            self.__tr(
+                "Open casaGeoTools plugin documentation in the browser", "Help action"
+            )
+        )
         action.triggered.connect(self.showHelp)
         return action
 
@@ -145,11 +160,11 @@ class CasaGeoToolsPlugin:
         self.iface = iface
         self.translator = QTranslator()
         self.processing_provider: CasaGeoToolsProcessingProvider | None = None
+        self.options_widget_factory: CasaGeoToolsOptionsWidgetFactory | None = None
         self.is_processing_initialized = False
         self.is_fully_initialized = False
 
         self._main_dialog: CasaGeoToolsMainDialog | None = None
-        self._settings_dialog: CasaGeoToolsSettingsDialog | None = None
 
         if self.translator.load(
             QLocale(), PLUGIN_IDENTIFIER, ".", PLUGIN_I18N_DIRECTORY
@@ -188,6 +203,8 @@ class CasaGeoToolsPlugin:
         This is the main entry point of the plugin, which initializes
         all graphical and processing components.
         """
+        from .options import CasaGeoToolsOptionsWidgetFactory
+
         self.initProcessing()
 
         self.iface.addToolBarIcon(self.actionSettings)
@@ -196,6 +213,9 @@ class CasaGeoToolsPlugin:
 
         if pluginHelpMenu := self.iface.pluginHelpMenu():
             pluginHelpMenu.addAction(self.actionHelp)
+
+        self.options_widget_factory = CasaGeoToolsOptionsWidgetFactory(self)
+        self.iface.registerOptionsWidgetFactory(self.options_widget_factory)
 
         self.is_fully_initialized = True
 
@@ -208,6 +228,8 @@ class CasaGeoToolsPlugin:
 
         if pluginHelpMenu := self.iface.pluginHelpMenu():
             pluginHelpMenu.removeAction(self.actionHelp)
+
+        self.iface.unregisterOptionsWidgetFactory(self.options_widget_factory)
 
     def unloadProcessing(self) -> None:
         """Unload the processing components of this plugin."""
@@ -243,27 +265,19 @@ class CasaGeoToolsPlugin:
         from .maindialog import CasaGeoToolsMainDialog
 
         if self._main_dialog is None:
-            dialog = CasaGeoToolsMainDialog()
+            dialog = CasaGeoToolsMainDialog(self.iface.mainWindow())
             dialog.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
             dialog.destroyed.connect(lambda: setattr(self, "_main_dialog", None))
             self._main_dialog = dialog
 
-        self._main_dialog.open()
+        # self._main_dialog.open()
+        self._main_dialog.show()
+        self._main_dialog.activateWindow()
+        # self._main_dialog.raise_()
 
     def showSettingsDialog(self) -> None:
         """Show the plugin settings dialog."""
-        from .settingsdialog import CasaGeoToolsSettingsDialog
-
-        if self._settings_dialog is None:
-            dialog = CasaGeoToolsSettingsDialog(self, self.iface.mainWindow())
-            dialog.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
-            dialog.destroyed.connect(lambda: setattr(self, "_settings_dialog", None))
-            self._settings_dialog = dialog
-
-        # self._settings_dialog.open()
-        self._settings_dialog.show()
-        self._settings_dialog.activateWindow()
-        # self._settings_dialog.raise_()
+        self.iface.showOptionsDialog(self.iface.mainWindow(), self.identifier)
 
     def showHelp(self) -> None:
         """Show the plugin documentation."""

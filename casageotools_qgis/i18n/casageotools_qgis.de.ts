@@ -160,7 +160,7 @@
     <message>
         <location filename="../ui/MainDialog.ui" line="89"/>
         <source>casaGeo API Key</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">casaGeo API-Schlüssel</translation>
     </message>
     <message>
         <location filename="../ui/MainDialog.ui" line="119"/>
@@ -199,6 +199,49 @@
     </message>
 </context>
 <context>
+    <name>CasaGeoToolsOptionsPage</name>
+    <message>
+        <location filename="../ui/OptionsPage.ui" line="14"/>
+        <source>Form</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/OptionsPage.ui" line="20"/>
+        <source>Credentials</source>
+        <translation>Zugangsdaten</translation>
+    </message>
+    <message>
+        <location filename="../ui/OptionsPage.ui" line="26"/>
+        <source>casaGeo API Key</source>
+        <translation>casaGeo API-Schlüssel</translation>
+    </message>
+    <message>
+        <location filename="../ui/OptionsPage.ui" line="42"/>
+        <source>Global Preferences</source>
+        <translation>Standardwerte</translation>
+    </message>
+    <message>
+        <location filename="../ui/OptionsPage.ui" line="48"/>
+        <source>Unit System</source>
+        <translation>Einheitensystem</translation>
+    </message>
+    <message>
+        <location filename="../ui/OptionsPage.ui" line="58"/>
+        <source>Language</source>
+        <translation>Ausgabesprache</translation>
+    </message>
+    <message>
+        <location filename="../ui/OptionsPage.ui" line="68"/>
+        <source>en-US, de-DE, …</source>
+        <translation>de-DE, en-US, …</translation>
+    </message>
+    <message>
+        <location filename="../ui/OptionsPage.ui" line="78"/>
+        <source>Political View</source>
+        <translation>Politische Sicht</translation>
+    </message>
+</context>
+<context>
     <name>CasaGeoToolsPOISearchAlgorithm</name>
     <message>
         <location filename="../processing/coder.py" line="140"/>
@@ -220,32 +263,52 @@
 <context>
     <name>CasaGeoToolsPlugin</name>
     <message>
-        <location filename="../plugin.py" line="89"/>
+        <location filename="../plugin.py" line="88"/>
         <source>casaGeoTools</source>
+        <comment>Plugin name</comment>
         <translation type="unfinished">casaGeoTools</translation>
     </message>
     <message>
         <location filename="../plugin.py" line="96"/>
-        <source>casaGeoTools Documentation</source>
-        <translation>casaGeoTools-Dokumentation</translation>
+        <source>casaGeoTools</source>
+        <comment>Main action</comment>
+        <translation type="unfinished">casaGeoTools</translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="109"/>
+        <location filename="../plugin.py" line="103"/>
+        <source>casaGeoTools Settings</source>
+        <comment>Settings action</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugin.py" line="111"/>
+        <source>casaGeoTools Documentation</source>
+        <comment>Help action</comment>
+        <translation type="unfinished">casaGeoTools-Dokumentation</translation>
+    </message>
+    <message>
+        <location filename="../plugin.py" line="115"/>
+        <source>Open casaGeoTools plugin documentation in the browser</source>
+        <comment>Help action</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../plugin.py" line="130"/>
         <source>Your casaGeo API Key</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="118"/>
+        <location filename="../plugin.py" line="139"/>
         <source>Preferred output language</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="127"/>
+        <location filename="../plugin.py" line="148"/>
         <source>Preferred unit system</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="135"/>
+        <location filename="../plugin.py" line="156"/>
         <source>Preferred political view</source>
         <translation type="unfinished"></translation>
     </message>
@@ -356,57 +419,6 @@
     </message>
 </context>
 <context>
-    <name>CasaGeoToolsProcessingProvider</name>
-    <message>
-        <location filename="../processing/__init__.py" line="41"/>
-        <source>casaGeoTools</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>CasaGeoToolsSettingsDialog</name>
-    <message>
-        <location filename="../ui/SettingsDialog.ui" line="14"/>
-        <source>casaGeoTools Settings</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/SettingsDialog.ui" line="20"/>
-        <source>Credentials</source>
-        <translation type="unfinished">Zugangsdaten</translation>
-    </message>
-    <message>
-        <location filename="../ui/SettingsDialog.ui" line="26"/>
-        <source>casaGeo API Key</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/SettingsDialog.ui" line="42"/>
-        <source>Global Preferences</source>
-        <translation type="unfinished">Standardwerte</translation>
-    </message>
-    <message>
-        <location filename="../ui/SettingsDialog.ui" line="48"/>
-        <source>Unit System</source>
-        <translation type="unfinished">Einheitensystem</translation>
-    </message>
-    <message>
-        <location filename="../ui/SettingsDialog.ui" line="58"/>
-        <source>Language</source>
-        <translation type="unfinished">Ausgabesprache</translation>
-    </message>
-    <message>
-        <location filename="../ui/SettingsDialog.ui" line="68"/>
-        <source>en-US, de-DE, …</source>
-        <translation type="unfinished">de-DE, en-US, …</translation>
-    </message>
-    <message>
-        <location filename="../ui/SettingsDialog.ui" line="78"/>
-        <source>Political View</source>
-        <translation type="unfinished">Politische Sicht</translation>
-    </message>
-</context>
-<context>
     <name>CasaGeoToolsUnitSystemModel</name>
     <message>
         <location filename="../models.py" line="36"/>
@@ -437,7 +449,7 @@
     <message>
         <location filename="../ui/LicenseKeyEntryDialog.ui" line="22"/>
         <source>casaGeo API Key</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">casaGeo API-Schlüssel</translation>
     </message>
 </context>
 </TS>

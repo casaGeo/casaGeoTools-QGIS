@@ -38,7 +38,7 @@ class CasaGeoToolsProcessingProvider(QgsProcessingProvider):
 
     @override
     def name(self):
-        return self.__tr("casaGeoTools")
+        return self.plugin.name
 
     @override
     def icon(self):

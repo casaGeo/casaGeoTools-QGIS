@@ -14,40 +14,51 @@
 #
 #  SPDX-License-Identifier: Apache-2.0
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
-from qgis.PyQt.QtCore import Qt, pyqtSlot
-from qgis.PyQt.QtWidgets import QDialog, QWidget
+from qgis.gui import (
+    QgsOptionsDialogHighlightLabel,
+    QgsOptionsPageWidget,
+    QgsOptionsWidgetFactory,
+)
+from qgis.PyQt.QtWidgets import QWidget
 
 from .models import CasaGeoToolsPoliticalViewModel, CasaGeoToolsUnitSystemModel
-from .ui.SettingsDialog import Ui_CasaGeoToolsSettingsDialog
+from .ui.OptionsPage import Ui_CasaGeoToolsOptionsPage
+from .utils import TrMethod
 
 if TYPE_CHECKING:
     from .plugin import CasaGeoToolsPlugin
 
 
-class CasaGeoToolsSettingsDialog(QDialog):
+class CasaGeoToolsOptionsPage(QgsOptionsPageWidget):
     def __init__(
         self,
         plugin: "CasaGeoToolsPlugin",
         parent: QWidget | None = None,
-        flags: Qt.WindowFlags = Qt.WindowFlags(),
-    ) -> None:
-        super().__init__(parent, flags)
+    ):
+        super().__init__(parent)
         self._plugin = plugin
-        self._ui = Ui_CasaGeoToolsSettingsDialog()
+        self._ui = Ui_CasaGeoToolsOptionsPage()
         self._unit_system_model = CasaGeoToolsUnitSystemModel()
         self._political_views_model = CasaGeoToolsPoliticalViewModel()
 
-        self.setWindowIcon(self._plugin.icon)
         self._ui.setupUi(self)
         self._ui.unitsPrefComboBox.setModel(self._unit_system_model)
         self._ui.politicalPrefComboBox.setModel(self._political_views_model)
 
-        self.loadSettings()
-        self.accepted.connect(self.saveSettings)
+        self._highlighters = [
+            QgsOptionsDialogHighlightLabel(self._ui.apikeyLabel),
+            QgsOptionsDialogHighlightLabel(self._ui.languagePrefLabel),
+            QgsOptionsDialogHighlightLabel(self._ui.unitsPrefLabel),
+            QgsOptionsDialogHighlightLabel(self._ui.politicalPrefLabel),
+        ]
 
-    @pyqtSlot()
+        for highlighter in self._highlighters:
+            self.registerHighlightWidget(highlighter)
+
+        self.loadSettings()
+
     def loadSettings(self) -> None:
         self._ui.apikeyLineEdit.setText(self._plugin.settingApikey.value())
         self._ui.languagePrefLineEdit.setText(self._plugin.settingLanguage.value())
@@ -60,8 +71,8 @@ class CasaGeoToolsSettingsDialog(QDialog):
             )
         )
 
-    @pyqtSlot()
-    def saveSettings(self) -> None:
+    @override
+    def apply(self) -> None:
         self._plugin.settingApikey.setValue(self._ui.apikeyLineEdit.text())
         self._plugin.settingLanguage.setValue(self._ui.languagePrefLineEdit.text())
         self._plugin.settingUnitSystem.setValue(
@@ -70,3 +81,19 @@ class CasaGeoToolsSettingsDialog(QDialog):
         self._plugin.settingPoliticalView.setValue(
             self._ui.politicalPrefComboBox.currentData()
         )
+
+    # We would like to implement helpKey(), but that system doesn’t
+    # appear to be working for QGIS 4.0 yet, which makes it hard to
+    # figure out how to use it correctly.
+
+
+class CasaGeoToolsOptionsWidgetFactory(QgsOptionsWidgetFactory):
+    __tr = TrMethod()
+
+    def __init__(self, plugin: "CasaGeoToolsPlugin"):
+        super().__init__(plugin.name, plugin.icon, plugin.identifier)
+        self._plugin = plugin
+
+    @override
+    def createWidget(self, parent: QWidget | None = None) -> CasaGeoToolsOptionsPage:
+        return CasaGeoToolsOptionsPage(self._plugin, parent)
