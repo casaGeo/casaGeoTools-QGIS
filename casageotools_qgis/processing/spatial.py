@@ -39,7 +39,7 @@ from qgis.core import (
 )
 from qgis.PyQt.QtCore import QMetaType
 
-from ..utils import TrMethod, geometry_as_shapely, geometry_from_shapely
+from ..utils import TrMethod, features_of, geometry_as_shapely, geometry_from_shapely
 from . import CasaGeoToolsAbstractProcessingAlgorithm
 
 if TYPE_CHECKING:
@@ -215,7 +215,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
         )
 
         inputs = []
-        for feature in source.getFeatures():  # pyright: ignore[reportGeneralTypeIssues]
+        for feature in features_of(source):
             position = feature.geometry()
             if position.isEmpty():
                 if feedback is not None:

@@ -15,12 +15,13 @@
 #  SPDX-License-Identifier: Apache-2.0
 
 
-from typing import TYPE_CHECKING, LiteralString
+from typing import TYPE_CHECKING, LiteralString, cast
+from collections.abc import Iterator
 
 from qgis.PyQt.QtCore import QCoreApplication
 
 if TYPE_CHECKING:
-    from qgis.core import QgsGeometry
+    from qgis.core import QgsGeometry, QgsFeature, QgsProcessingFeatureSource
     from shapely.geometry.base import BaseGeometry as ShapelyBaseGeometry
 
 
@@ -52,12 +53,18 @@ def ensure[T](value: T | None, /) -> T:
     return value
 
 
+def features_of(source: "QgsProcessingFeatureSource") -> "Iterator[QgsFeature]":
+    return cast("Iterator[QgsFeature]", cast(object, source.getFeatures()))
+
+
 def geometry_as_shapely(geometry: "QgsGeometry", /) -> "ShapelyBaseGeometry":
     # See https://qgis.org/pyqgis/master/core/QgsGeometry.html#qgis.core.QgsGeometry.as_shapely
     return geometry.as_shapely()  # pyright: ignore[reportAttributeAccessIssue]
 
 
 def geometry_from_shapely(geometry: "ShapelyBaseGeometry", /) -> "QgsGeometry":
+    from qgis.core import QgsGeometry
+
     # See https://qgis.org/pyqgis/master/core/QgsGeometry.html#qgis.core.QgsGeometry.from_shapely
     return QgsGeometry.from_shapely(geometry)  # pyright: ignore[reportAttributeAccessIssue]
 

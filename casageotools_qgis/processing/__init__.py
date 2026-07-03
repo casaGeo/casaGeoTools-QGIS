@@ -52,12 +52,12 @@ class CasaGeoToolsProcessingProvider(QgsProcessingProvider):
         Loads all algorithms belonging to this provider.
         """
         from .coder import (
-            # CasaGeoToolsAddressSearchAlgorithm,
+            CasaGeoToolsAddressSearchAlgorithm,
             CasaGeoToolsPOISearchAlgorithm,
         )
         from .spatial import CasaGeoToolsIsolinesAlgorithm
 
-        # self.addAlgorithm(CasaGeoToolsAddressSearchAlgorithm(self.plugin))
+        self.addAlgorithm(CasaGeoToolsAddressSearchAlgorithm(self.plugin))
         self.addAlgorithm(CasaGeoToolsPOISearchAlgorithm(self.plugin))
         self.addAlgorithm(CasaGeoToolsIsolinesAlgorithm(self.plugin))
 
