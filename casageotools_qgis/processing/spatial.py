@@ -99,8 +99,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
     @override
     def initAlgorithm(self, configuration: dict[str, Any] | None = None) -> None:
         try:
-            from casageo.tools._consts import (
-                # FIXME: These constants should be exposed by casageo.spatial.
+            from casageo.spatial import (
                 DIRECTION_TYPES,
                 RANGE_UNITS,
                 ROUTING_MODES,
@@ -250,8 +249,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
     ) -> "GeoDataFrame":
         """Calculate isolines using the casaGeoTools library."""
         import casageo.spatial
-        from casageo.tools._consts import (
-            # FIXME: These constants should be exposed by casageo.spatial.
+        from casageo.spatial import (
             DIRECTION_TYPES,
             ROUTING_MODES,
             TRANSPORT_MODES,
