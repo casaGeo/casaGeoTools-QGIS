@@ -171,8 +171,8 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm)
             QgsField("distance", QMetaType.Type.Double),
             QgsField("relevance", QMetaType.Type.Double),
             QgsField("timestamp", QMetaType.Type.QDateTime),
-            QgsField("error_code", QMetaType.Type.QString),
-            QgsField("error_message", QMetaType.Type.QString),
+            # QgsField("error_code", QMetaType.Type.QString),
+            # QgsField("error_message", QMetaType.Type.QString),
         ])
 
         sink, dest_id = self.parameterAsSink(
@@ -185,29 +185,34 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm)
         )
         assert sink is not None
 
-        last_id_subid = (None, None)
+        last_id_and_address = (None, None)
         result: Any  # Make Pyright shut up about the named tuples.
         for result in results.itertuples():
             # This weirdness is necessary because the library returns
             # multiple results when the location has multiple navigation
             # points.
-            if (result.id, result.subid) == last_id_subid:
+            if (result.id, result.address) == last_id_and_address:
                 continue
-            last_id_subid = (result.id, result.subid)
+            last_id_and_address = (result.id, result.address)
+
+            if result.error_code is not None:
+                if feedback is not None:
+                    feedback.reportError(
+                        self.__tr("Error ({code}): {message}").format(
+                            code=result.error_code, message=result.error_message
+                        )
+                    )
+                continue
 
             feature = QgsFeature(fields)
             feature.setGeometry(geometry_from_shapely(result.position))
-            feature.setAttributes([
-                result.id,
-                result.subid,
-                result.address,
-                result.resulttype,
-                result.distance,
-                result.relevance,
-                result.timestamp.isoformat(),
-                result.error_code,
-                result.error_message,
-            ])
+            feature["id"] = result.id
+            feature["subid"] = result.subid
+            feature["address"] = result.address
+            feature["resulttype"] = result.resulttype
+            feature["distance"] = result.distance
+            feature["relevance"] = result.relevance
+            feature["timestamp"] = result.timestamp.isoformat()
             sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
 
         return {self.OUTPUT: dest_id}
