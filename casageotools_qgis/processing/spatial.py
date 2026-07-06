@@ -175,27 +175,23 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback | None,
     ) -> dict[str, Any]:
+        if feedback is None:
+            feedback = QgsProcessingFeedback(logFeedback=False)
 
-        if feedback is not None:
-            feedback.setProgressText(self.__tr("Converting input geometries"))
-
+        feedback.setProgressText(self.__tr("Converting input geometries"))
         queries = self._convertInputGeometries(parameters, context, feedback)
 
-        if feedback is not None:
-            feedback.setProgressText(self.__tr("Calculating isolines"))
-
+        feedback.setProgressText(self.__tr("Calculating isolines"))
         results = self._calculateIsolines(parameters, context, feedback, queries)
 
-        if feedback is not None:
-            feedback.setProgressText(self.__tr("Converting results"))
-
+        feedback.setProgressText(self.__tr("Converting results"))
         return self._writeOutputGeometries(parameters, context, feedback, results)
 
     def _convertInputGeometries(
         self,
         parameters: dict[str, Any],
         context: QgsProcessingContext,
-        feedback: QgsProcessingFeedback | None,
+        feedback: QgsProcessingFeedback,
     ) -> "GeoDataFrame":
         """Convert input geometries into an EPSG:4326 GeoDataFrame."""
         from geopandas import GeoDataFrame
@@ -217,22 +213,20 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
         for feature in features_of(source):
             position = feature.geometry()
             if position.isEmpty():
-                if feedback is not None:
-                    feedback.pushInfo(
-                        self.__tr(
-                            "Skipping feature {featid} due to empty geometry"
-                        ).format(featid=feature.id())
-                    )
+                feedback.pushInfo(
+                    self.__tr(
+                        "Skipping feature {featid} due to empty geometry",
+                    ).format(featid=feature.id())
+                )
                 continue
 
             position.transform(into_epsg4326)
             if position.isEmpty():
-                if feedback is not None:
-                    feedback.pushInfo(
-                        self.__tr(
-                            "Skipping feature {featid} due to reprojection failure"
-                        ).format(featid=feature.id())
-                    )
+                feedback.pushInfo(
+                    self.__tr(
+                        "Skipping feature {featid} due to reprojection failure",
+                    ).format(featid=feature.id())
+                )
                 continue
 
             inputs.append({"position": geometry_as_shapely(position)})
@@ -243,7 +237,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
         self,
         parameters: dict[str, Any],
         context: QgsProcessingContext,
-        feedback: QgsProcessingFeedback | None,
+        feedback: QgsProcessingFeedback,
         queries: "GeoDataFrame",
     ) -> "GeoDataFrame":
         """Calculate isolines using the casaGeoTools library."""
@@ -276,7 +270,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
         self,
         parameters: dict[str, Any],
         context: QgsProcessingContext,
-        feedback: QgsProcessingFeedback | None,
+        feedback: QgsProcessingFeedback,
         results: "GeoDataFrame",
     ) -> dict[str, str]:
         """Convert results to features and write them to the feature sink."""

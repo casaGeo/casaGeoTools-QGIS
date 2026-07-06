@@ -111,26 +111,23 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm)
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback | None,
     ) -> dict[str, Any]:
-        if feedback is not None:
-            feedback.setProgressText(self.__tr("Converting input geometries"))
+        if feedback is None:
+            feedback = QgsProcessingFeedback(logFeedback=False)
 
+        feedback.setProgressText(self.__tr("Converting input geometries"))
         queries = self._convertInputGeometries(parameters, context, feedback)
 
-        if feedback is not None:
-            feedback.setProgressText(self.__tr("Geocoding addresses"))
-
+        feedback.setProgressText(self.__tr("Geocoding addresses"))
         results = self._geocodeAddresses(parameters, context, feedback, queries)
 
-        if feedback is not None:
-            feedback.setProgressText(self.__tr("Converting results"))
-
+        feedback.setProgressText(self.__tr("Converting results"))
         return self._writeOutputGeometries(parameters, context, feedback, results)
 
     def _convertInputGeometries(
         self,
         parameters: dict[str, Any],
         context: QgsProcessingContext,
-        feedback: QgsProcessingFeedback | None,
+        feedback: QgsProcessingFeedback,
     ) -> "DataFrame":
         from pandas import DataFrame
 
@@ -147,7 +144,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm)
         self,
         parameters: dict[str, Any],
         context: QgsProcessingContext,
-        feedback: QgsProcessingFeedback | None,
+        feedback: QgsProcessingFeedback,
         queries: "DataFrame",
     ) -> "GeoDataFrame":
         import casageo.coder
@@ -161,7 +158,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm)
         self,
         parameters: dict[str, Any],
         context: QgsProcessingContext,
-        feedback: QgsProcessingFeedback | None,
+        feedback: QgsProcessingFeedback,
         results: "GeoDataFrame",
     ) -> dict[str, str]:
 
@@ -198,12 +195,11 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm)
             last_id_and_address = (result.id, result.address)
 
             if result.error_code is not None:
-                if feedback is not None:
-                    feedback.reportError(
-                        self.__tr("Error ({code}): {message}").format(
-                            code=result.error_code, message=result.error_message
-                        )
+                feedback.reportError(
+                    self.__tr("Error ({code}): {message}").format(
+                        code=result.error_code, message=result.error_message
                     )
+                )
                 continue
 
             feature = QgsFeature(fields)
@@ -266,19 +262,16 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm):
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback | None,
     ) -> dict[str, Any]:
-        if feedback is not None:
-            feedback.setProgressText(self.__tr("Converting input geometries"))
+        if feedback is None:
+            feedback = QgsProcessingFeedback(logFeedback=False)
 
+        feedback.setProgressText(self.__tr("Converting input geometries"))
         queries = self._convertInputGeometries(parameters, context, feedback)
 
-        if feedback is not None:
-            feedback.setProgressText(self.__tr("Geocoding addresses"))
-
+        feedback.setProgressText(self.__tr("Searching for POIs"))
         results = self._searchForPOIs(parameters, context, feedback, queries)
 
-        if feedback is not None:
-            feedback.setProgressText(self.__tr("Converting results"))
-
+        feedback.setProgressText(self.__tr("Converting results"))
         return self._writeOutputGeometries(parameters, context, feedback, results)
 
         # """
@@ -325,7 +318,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm):
         self,
         parameters: dict[str, Any],
         context: QgsProcessingContext,
-        feedback: QgsProcessingFeedback | None,
+        feedback: QgsProcessingFeedback,
     ) -> "GeoDataFrame":
         """Convert input geometries into an EPSG:4326 GeoDataFrame."""
         from geopandas import GeoDataFrame
@@ -347,22 +340,20 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm):
         for feature in features_of(source):
             position = feature.geometry()
             if position.isEmpty():
-                if feedback is not None:
-                    feedback.pushInfo(
-                        self.__tr(
-                            "Skipping feature {featid} due to empty geometry"
-                        ).format(featid=feature.id())
-                    )
+                feedback.pushInfo(
+                    self.__tr(
+                        "Skipping feature {featid} due to empty geometry",
+                    ).format(featid=feature.id())
+                )
                 continue
 
             position.transform(into_epsg4326)
             if position.isEmpty():
-                if feedback is not None:
-                    feedback.pushInfo(
-                        self.__tr(
-                            "Skipping feature {featid} due to reprojection failure"
-                        ).format(featid=feature.id())
-                    )
+                feedback.pushInfo(
+                    self.__tr(
+                        "Skipping feature {featid} due to reprojection failure",
+                    ).format(featid=feature.id())
+                )
                 continue
 
             inputs.append({"position": geometry_as_shapely(position)})
@@ -373,7 +364,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm):
         self,
         parameters: dict[str, Any],
         context: QgsProcessingContext,
-        feedback: QgsProcessingFeedback | None,
+        feedback: QgsProcessingFeedback,
         queries: "GeoDataFrame",
     ) -> "GeoDataFrame":
         import casageo.coder
@@ -387,7 +378,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm):
         self,
         parameters: dict[str, Any],
         context: QgsProcessingContext,
-        feedback: QgsProcessingFeedback | None,
+        feedback: QgsProcessingFeedback,
         results: "GeoDataFrame",
     ) -> dict[str, str]:
         """Convert results to features and write them to the feature sink."""
@@ -424,12 +415,11 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm):
             last_id_and_title = (result.id, result.title)
 
             if result.error_code is not None:
-                if feedback is not None:
-                    feedback.reportError(
-                        self.__tr("Error ({code}): {message}").format(
-                            code=result.error_code, message=result.error_message
-                        )
+                feedback.reportError(
+                    self.__tr("Error ({code}): {message}").format(
+                        code=result.error_code, message=result.error_message
                     )
+                )
                 continue
 
             feature = QgsFeature(fields)
