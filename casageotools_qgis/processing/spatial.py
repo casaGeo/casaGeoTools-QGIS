@@ -28,7 +28,7 @@ from qgis.core import (
     QgsFeatureSink,
     QgsField,
     QgsFields,
-    QgsProcessingAlgorithm,
+    QgsPointXY,
     QgsProcessingContext,
     QgsProcessingFeedback,
     QgsProcessingParameterEnum,
@@ -44,6 +44,7 @@ from . import CasaGeoToolsAbstractProcessingAlgorithm
 
 if TYPE_CHECKING:
     from geopandas import GeoDataFrame
+    from pandas import DataFrame
 
 
 class CasaGeoToolsAbstractSpatialAlgorithm(CasaGeoToolsAbstractProcessingAlgorithm):
@@ -313,6 +314,205 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
             feature["rangetype"] = result.rangetype
             feature["rangeunit"] = result.rangeunit
             feature["rangevalue"] = result.rangevalue
+            feature["timestamp"] = result.timestamp.isoformat()
+            sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
+
+        return {self.OUTPUT: dest_id}
+
+
+class CasaGeoToolsRoutingAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
+    __tr = TrMethod()
+
+    INPUT = "INPUT"
+    OUTPUT = "OUTPUT"
+
+    @override
+    def displayName(self) -> str:
+        return self.__tr("Routes", "Algorithm")
+
+    @override
+    def name(self) -> str:
+        return "routes"
+
+    @override
+    def shortDescription(self) -> str:
+        return self.__tr("Calculate routes between locations.")
+
+    @override
+    def createInstance(self) -> "CasaGeoToolsRoutingAlgorithm":
+        return CasaGeoToolsRoutingAlgorithm(self.plugin)
+
+    @override
+    def initAlgorithm(self, configuration: dict[str, Any] | None = None) -> None:
+        if configuration is None:
+            configuration = {}
+
+        self.addParameter(
+            QgsProcessingParameterFeatureSource(
+                self.INPUT,
+                self.__tr("Input layer"),
+                [Qgis.ProcessingSourceType.VectorLine],
+            )
+        )
+        self.addParameter(
+            QgsProcessingParameterFeatureSink(
+                self.OUTPUT,
+                self.__tr("Output layer"),
+                Qgis.ProcessingSourceType.VectorLine,
+            )
+        )
+
+    @override
+    def processAlgorithm(
+        self,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback | None,
+    ) -> dict[str, Any]:
+        if feedback is None:
+            feedback = QgsProcessingFeedback(logFeedback=False)
+
+        feedback.setProgressText(self.__tr("Converting input geometries"))
+        queries = self._convertInputGeometries(parameters, context, feedback)
+
+        feedback.setProgressText(self.__tr("Calculating routes"))
+        results = self._calculateRoutes(parameters, context, feedback, queries)
+
+        feedback.setProgressText(self.__tr("Converting results"))
+        return self._writeOutputGeometries(parameters, context, feedback, results)
+
+    def _convertInputGeometries(
+        self,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback,
+    ) -> "DataFrame":
+        """Convert input geometries into an EPSG:4326 GeoDataFrame."""
+        from geopandas import GeoDataFrame
+
+        source = self.parameterAsSource(
+            parameters,
+            self.INPUT,
+            context,
+        )
+        assert source is not None
+
+        into_epsg4326 = QgsCoordinateTransform(
+            source.sourceCrs(),
+            QgsCoordinateReferenceSystem.fromEpsgId(4326),
+            QgsProject.instance(),
+        )
+
+        show_intermediate_waypoint_warning = False
+
+        inputs = []
+        for feature in features_of(source):
+            itinerary = feature.geometry()
+            if itinerary.isEmpty():
+                feedback.pushInfo(
+                    self.__tr(
+                        "Skipping feature {featid} due to empty geometry",
+                    ).format(featid=feature.id())
+                )
+                continue
+
+            itinerary.transform(into_epsg4326)
+            if itinerary.isEmpty():
+                feedback.pushInfo(
+                    self.__tr(
+                        "Skipping feature {featid} due to reprojection failure",
+                    ).format(featid=feature.id())
+                )
+                continue
+
+            waypoints: list[QgsPointXY] = itinerary.asPolyline()
+            if len(waypoints) > 2:
+                feedback.pushInfo(
+                    self.__tr(
+                        "Feature {featid} has intermediate waypoints which will be ignored",
+                    ).format(featid=feature.id())
+                )
+                show_intermediate_waypoint_warning = True
+
+            origin = waypoints[0]
+            destination = waypoints[-1]
+
+            inputs.append({
+                "origin_longitude": origin.x(),
+                "origin_latitude": origin.y(),
+                "destination_longitude": destination.x(),
+                "destination_latitude": destination.y(),
+            })
+
+        if show_intermediate_waypoint_warning:
+            feedback.pushWarning(
+                self.__tr(
+                    "Some input geometries contain intermediate waypoints. Routing with intermediate waypoints is not implemented yet and these waypoints will be ignored."
+                )
+            )
+
+        return DataFrame(inputs)
+
+    def _calculateRoutes(
+        self,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback,
+        queries: "DataFrame",
+    ) -> "GeoDataFrame":
+        import casageo.spatial
+
+        client = self.casaGeoClient()
+        defaults = {}
+
+        return casageo.spatial.routes(client, queries, defaults)
+
+    def _writeOutputGeometries(
+        self,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback,
+        results: "GeoDataFrame",
+    ) -> dict[str, str]:
+        """Convert results to features and write them to the feature sink."""
+
+        fields = QgsFields([
+            QgsField("id", QMetaType.Type.Int),
+            QgsField("subid", QMetaType.Type.Int),
+            QgsField("length", QMetaType.Type.Double),
+            QgsField("duration", QMetaType.Type.Double),
+            QgsField("timestamp", QMetaType.Type.QDateTime),
+            # QgsField("error_code", QMetaType.Type.QString),
+            # QgsField("error_message", QMetaType.Type.QString),
+        ])
+
+        sink, dest_id = self.parameterAsSink(
+            parameters,
+            self.OUTPUT,
+            context,
+            fields,
+            # TODO: Make this a MultiLineStringZM with elevation and time datapoints.
+            Qgis.WkbType.MultiLineString,
+            QgsCoordinateReferenceSystem.fromEpsgId(4326),
+        )
+        assert sink is not None
+
+        result: Any  # Make Pyright shut up about the named tuples.
+        for result in results.itertuples():
+            if result.error_code is not None:
+                feedback.reportError(
+                    self.__tr("Error ({code}): {message}").format(
+                        code=result.error_code, message=result.error_message
+                    )
+                )
+                continue
+
+            feature = QgsFeature(fields)
+            feature.setGeometry(geometry_from_shapely(result.geometry))
+            feature["id"] = result.id
+            feature["subid"] = result.subid
+            feature["length"] = result.length
+            feature["duration"] = result.duration
             feature["timestamp"] = result.timestamp.isoformat()
             sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
 
