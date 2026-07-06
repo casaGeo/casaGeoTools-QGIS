@@ -199,9 +199,9 @@ class CasaGeoToolsPlugin:
 
         self.initProcessing()
 
-        self.iface.addToolBarIcon(self.actionSettings)
-        self.iface.addPluginToMenu("&casaGeoTools", self.actionSettings)
-        self.iface.addPluginToVectorMenu("&casaGeoTools", self.actionSettings)
+        # self.iface.addToolBarIcon(self.actionSettings)
+        # self.iface.addPluginToMenu("&casaGeoTools", self.actionSettings)
+        # self.iface.addPluginToVectorMenu("&casaGeoTools", self.actionSettings)
 
         if pluginHelpMenu := self.iface.pluginHelpMenu():
             pluginHelpMenu.addAction(self.actionHelp)
@@ -214,9 +214,9 @@ class CasaGeoToolsPlugin:
     def unloadGui(self) -> None:
         """Unload the graphical components of this plugin."""
 
-        self.iface.removeToolBarIcon(self.actionSettings)
-        self.iface.removePluginMenu("&casaGeoTools", self.actionSettings)
-        self.iface.removePluginVectorMenu("&casaGeoTools", self.actionSettings)
+        # self.iface.removeToolBarIcon(self.actionSettings)
+        # self.iface.removePluginMenu("&casaGeoTools", self.actionSettings)
+        # self.iface.removePluginVectorMenu("&casaGeoTools", self.actionSettings)
 
         if pluginHelpMenu := self.iface.pluginHelpMenu():
             pluginHelpMenu.removeAction(self.actionHelp)
