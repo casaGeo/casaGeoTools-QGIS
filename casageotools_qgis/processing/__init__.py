@@ -18,11 +18,11 @@ from typing import TYPE_CHECKING, override
 
 from qgis.core import QgsProcessingAlgorithm, QgsProcessingProvider
 
-from ..resources import PLUGIN_IDENTIFIER
 from ..utils import TrMethod
 
 if TYPE_CHECKING:
     from casageo.tools import CasaGeoClient
+    from qgis.PyQt.QtGui import QIcon
 
     from ..plugin import CasaGeoToolsPlugin
 
@@ -30,27 +30,24 @@ if TYPE_CHECKING:
 class CasaGeoToolsProcessingProvider(QgsProcessingProvider):
     __tr = TrMethod()
 
-    def __init__(self, plugin: "CasaGeoToolsPlugin"):
+    def __init__(self, plugin: "CasaGeoToolsPlugin") -> None:
         super().__init__()
         self.plugin = plugin
 
     @override
-    def id(self):
-        return PLUGIN_IDENTIFIER
+    def id(self) -> str:
+        return self.plugin.identifier
 
     @override
-    def name(self):
+    def name(self) -> str:
         return self.plugin.name
 
     @override
-    def icon(self):
+    def icon(self) -> "QIcon":
         return self.plugin.icon
 
     @override
-    def loadAlgorithms(self):
-        """
-        Loads all algorithms belonging to this provider.
-        """
+    def loadAlgorithms(self) -> None:
         from .coder import (
             CasaGeoToolsAddressSearchAlgorithm,
             CasaGeoToolsPOISearchAlgorithm,
