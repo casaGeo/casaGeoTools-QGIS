@@ -93,7 +93,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
         """)
 
     @override
-    def createInstance(self) -> QgsProcessingAlgorithm | None:
+    def createInstance(self) -> "CasaGeoToolsIsolinesAlgorithm":
         return CasaGeoToolsIsolinesAlgorithm(self.plugin)
 
     @override
@@ -105,7 +105,6 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
                 ROUTING_MODES,
                 TRANSPORT_MODES,
             )
-
         except ImportError:
             return
 
@@ -288,6 +287,9 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
             QgsField("rangetype", QMetaType.Type.QString),
             QgsField("rangeunit", QMetaType.Type.QString),
             QgsField("rangevalue", QMetaType.Type.Double),
+            QgsField("timestamp", QMetaType.Type.QDateTime),
+            # QgsField("error_code", QMetaType.Type.QString),
+            # QgsField("error_message", QMetaType.Type.QString),
         ])
 
         sink, dest_id = self.parameterAsSink(
@@ -302,15 +304,22 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
 
         result: Any  # Make Pyright shut up about the named tuples.
         for result in results.itertuples():
+            if result.error_code is not None:
+                feedback.reportError(
+                    self.__tr("Error ({code}): {message}").format(
+                        code=result.error_code, message=result.error_message
+                    )
+                )
+                continue
+
             feature = QgsFeature(fields)
             feature.setGeometry(geometry_from_shapely(result.geometry))
-            feature.setAttributes([
-                result.id,
-                result.subid,
-                result.rangetype,
-                result.rangeunit,
-                result.rangevalue,
-            ])
+            feature["id"] = result.id
+            feature["subid"] = result.subid
+            feature["rangetype"] = result.rangetype
+            feature["rangeunit"] = result.rangeunit
+            feature["rangevalue"] = result.rangevalue
+            feature["timestamp"] = result.timestamp.isoformat()
             sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
 
         return {self.OUTPUT: dest_id}
