@@ -19,29 +19,31 @@ __all__ = [
     "CasaGeoToolsPOISearchAlgorithm",
 ]
 
-from typing import Any, TYPE_CHECKING, override
+from typing import TYPE_CHECKING, Any, override
 
 from qgis.core import (
     Qgis,
     QgsCoordinateReferenceSystem,
+    QgsCoordinateTransform,
     QgsFeature,
+    QgsFeatureSink,
     QgsField,
     QgsFields,
     QgsProcessingAlgorithm,
     QgsProcessingContext,
     QgsProcessingFeedback,
     QgsProcessingParameterFeatureSink,
-    QgsFeatureSink,
     QgsProcessingParameterFeatureSource,
+    QgsProject,
 )
 from qgis.PyQt.QtCore import QMetaType
 
+from ..utils import TrMethod, features_of, geometry_as_shapely, geometry_from_shapely
 from . import CasaGeoToolsAbstractProcessingAlgorithm
-from ..utils import TrMethod, features_of, geometry_from_shapely
 
 if TYPE_CHECKING:
-    from pandas import DataFrame
     from geopandas import GeoDataFrame
+    from pandas import DataFrame
 
 
 class CasaGeoToolsAbstractGeocodingAlgorithm(CasaGeoToolsAbstractProcessingAlgorithm):
@@ -219,24 +221,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm)
 
 
 class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm):
-    """
-    This is an example algorithm that takes a vector layer and
-    creates a new identical one.
-
-    It is meant to be used as an example of how to create your own
-    algorithms and explain methods and variables used to do it. An
-    algorithm like this will be available in all elements, and there
-    is not need for additional work.
-
-    All Processing algorithms should extend the QgsProcessingAlgorithm
-    class.
-    """
-
     __tr = TrMethod()
-
-    # Constants used to refer to parameters and outputs. They will be
-    # used when calling the algorithm from another algorithm, or when
-    # calling from the QGIS console.
 
     INPUT = "INPUT"
     OUTPUT = "OUTPUT"
@@ -257,23 +242,6 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm):
     def initAlgorithm(self, configuration: dict[str, Any] | None = None) -> None:
         if configuration is None:
             configuration = {}
-
-        # # We add the input vector features source. It can have any kind of
-        # # geometry.
-        # self.addParameter(
-        #     QgsProcessingParameterFeatureSource(
-        #         self.INPUT,
-        #         self.tr("Input layer"),
-        #         [QgsProcessing.TypeVectorAnyGeometry],
-        #     )
-        # )
-        #
-        # # We add a feature sink in which to store our processed features (this
-        # # usually takes the form of a newly created vector layer when the
-        # # algorithm is run in QGIS).
-        # self.addParameter(
-        #     QgsProcessingParameterFeatureSink(self.OUTPUT, self.tr("Output layer"))
-        # )
 
         self.addParameter(
             QgsProcessingParameterFeatureSource(
@@ -298,38 +266,20 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm):
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback | None,
     ) -> dict[str, Any]:
-        source = self.parameterAsSource(parameters, self.INPUT, context)
-        assert source is not None
+        if feedback is not None:
+            feedback.setProgressText(self.__tr("Converting input geometries"))
 
-        sink_fields = QgsFields([
-            QgsField("id", QMetaType.Type.Int),
-            QgsField("subid", QMetaType.Type.Int),
-            QgsField("title", QMetaType.Type.QString),
-            QgsField("resulttype", QMetaType.Type.QString),
-            QgsField("distance", QMetaType.Type.Double),
-            QgsField("error_code", QMetaType.Type.QString),
-            QgsField("error_message", QMetaType.Type.QString),
-        ])
+        queries = self._convertInputGeometries(parameters, context, feedback)
 
-        sink, dest_id = self.parameterAsSink(
-            parameters,
-            self.OUTPUT,
-            context,
-            sink_fields,
-            source.wkbType(),
-            source.sourceCrs(),
-        )
-        assert sink is not None
+        if feedback is not None:
+            feedback.setProgressText(self.__tr("Geocoding addresses"))
 
-        """
-        client = CasaGeoClient("")
-        casageo.coder.poi(client, queries)
+        results = self._searchForPOIs(parameters, context, feedback, queries)
 
-        feature = QgsFeature(sink_fields)
-        feature.setAttributes([1, 0, "Test", "POI", 1.0, "0", "No error"])
-        feature.setGeometry(source.getFeature(0).geometry())
-        sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
-        """
+        if feedback is not None:
+            feedback.setProgressText(self.__tr("Converting results"))
+
+        return self._writeOutputGeometries(parameters, context, feedback, results)
 
         # """
         # Here is where the processing itself takes place.
@@ -370,5 +320,126 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm):
         # # statistics, etc. These should all be included in the returned
         # # dictionary, with keys matching the feature corresponding parameter
         # # or output names.
+
+    def _convertInputGeometries(
+        self,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback | None,
+    ) -> "GeoDataFrame":
+        """Convert input geometries into an EPSG:4326 GeoDataFrame."""
+        from geopandas import GeoDataFrame
+
+        source = self.parameterAsSource(
+            parameters,
+            self.INPUT,
+            context,
+        )
+        assert source is not None
+
+        into_epsg4326 = QgsCoordinateTransform(
+            source.sourceCrs(),
+            QgsCoordinateReferenceSystem.fromEpsgId(4326),
+            QgsProject.instance(),
+        )
+
+        inputs = []
+        for feature in features_of(source):
+            position = feature.geometry()
+            if position.isEmpty():
+                if feedback is not None:
+                    feedback.pushInfo(
+                        self.__tr(
+                            "Skipping feature {featid} due to empty geometry"
+                        ).format(featid=feature.id())
+                    )
+                continue
+
+            position.transform(into_epsg4326)
+            if position.isEmpty():
+                if feedback is not None:
+                    feedback.pushInfo(
+                        self.__tr(
+                            "Skipping feature {featid} due to reprojection failure"
+                        ).format(featid=feature.id())
+                    )
+                continue
+
+            inputs.append({"position": geometry_as_shapely(position)})
+
+        return GeoDataFrame(inputs, geometry="position", crs="EPSG:4326")
+
+    def _searchForPOIs(
+        self,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback | None,
+        queries: "GeoDataFrame",
+    ) -> "GeoDataFrame":
+        import casageo.coder
+
+        client = self.casaGeoClient()
+        defaults = {}
+
+        return casageo.coder.poi(client, queries, defaults)
+
+    def _writeOutputGeometries(
+        self,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback | None,
+        results: "GeoDataFrame",
+    ) -> dict[str, str]:
+        """Convert results to features and write them to the feature sink."""
+
+        fields = QgsFields([
+            QgsField("id", QMetaType.Type.Int),
+            QgsField("subid", QMetaType.Type.Int),
+            QgsField("title", QMetaType.Type.QString),
+            QgsField("resulttype", QMetaType.Type.QString),
+            QgsField("distance", QMetaType.Type.Double),
+            QgsField("timestamp", QMetaType.Type.QDateTime),
+            # QgsField("error_code", QMetaType.Type.QString),
+            # QgsField("error_message", QMetaType.Type.QString),
+        ])
+
+        sink, dest_id = self.parameterAsSink(
+            parameters,
+            self.OUTPUT,
+            context,
+            fields,
+            Qgis.WkbType.Point,
+            QgsCoordinateReferenceSystem.fromEpsgId(4326),
+        )
+        assert sink is not None
+
+        last_id_and_title = (None, None)
+        result: Any  # Make Pyright shut up about the named tuples.
+        for result in results.itertuples():
+            # This weirdness is necessary because the library returns
+            # multiple results when the location has multiple navigation
+            # points.
+            if (result.id, result.title) == last_id_and_title:
+                continue
+            last_id_and_title = (result.id, result.title)
+
+            if result.error_code is not None:
+                if feedback is not None:
+                    feedback.reportError(
+                        self.__tr("Error ({code}): {message}").format(
+                            code=result.error_code, message=result.error_message
+                        )
+                    )
+                continue
+
+            feature = QgsFeature(fields)
+            feature.setGeometry(geometry_from_shapely(result.position))
+            feature["id"] = result.id
+            feature["subid"] = result.subid
+            feature["title"] = result.title
+            feature["resulttype"] = result.resulttype
+            feature["distance"] = result.distance
+            feature["timestamp"] = result.timestamp.isoformat()
+            sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
 
         return {self.OUTPUT: dest_id}
