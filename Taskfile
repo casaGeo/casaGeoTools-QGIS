@@ -60,11 +60,21 @@ build() {
 }
 
 deploy() {
-	local plugindir datadir
+	local plugindir datadir qgis3profile qgis4profile
 	plugindir=$(realpath -- "$PLUGINDIR")
 	datadir=$(application-data-directory)
-	ln -sfvT -- "$plugindir" "$datadir/QGIS/QGIS3/profiles/$QGIS_PROFILE/python/plugins/$PLUGIN_ID" 2>/dev/null || true
-	ln -sfvT -- "$plugindir" "$datadir/QGIS/QGIS4/profiles/$QGIS_PROFILE/python/plugins/$PLUGIN_ID" 2>/dev/null || true
+
+	qgis3profile="$datadir/QGIS/QGIS3/profiles/$QGIS_PROFILE"
+	if [[ -d "$qgis3profile" ]]; then
+		mkdir -p -- "$qgis3profile/python/plugins"
+		ln -sfvT -- "$plugindir" "$qgis3profile/python/plugins/$PLUGIN_ID"
+	fi
+
+	qgis4profile="$datadir/QGIS/QGIS4/profiles/$QGIS_PROFILE"
+	if [[ -d "$qgis4profile" ]]; then
+		mkdir -p -- "$qgis4profile/python/plugins"
+		ln -sfvT -- "$plugindir" "$qgis4profile/python/plugins/$PLUGIN_ID"
+	fi
 }
 
 undeploy() {
