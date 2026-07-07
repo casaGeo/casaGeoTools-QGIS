@@ -82,7 +82,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm)
         return self.__tr("Geocodes addresses.")
 
     @override
-    def createInstance(self) -> QgsProcessingAlgorithm | None:
+    def createInstance(self) -> "CasaGeoToolsAddressSearchAlgorithm":
         return CasaGeoToolsAddressSearchAlgorithm(self.plugin)
 
     @override
@@ -233,7 +233,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm):
         return "poisearch"
 
     @override
-    def createInstance(self) -> QgsProcessingAlgorithm | None:
+    def createInstance(self) -> "CasaGeoToolsPOISearchAlgorithm":
         return CasaGeoToolsPOISearchAlgorithm(self.plugin)
 
     @override
