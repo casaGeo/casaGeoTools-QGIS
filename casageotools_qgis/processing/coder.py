@@ -34,6 +34,7 @@ from qgis.core import (
     QgsProcessingFeedback,
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterFeatureSource,
+    QgsProcessingParameterNumber,
     QgsProject,
 )
 from qgis.PyQt.QtCore import QMetaType
@@ -221,6 +222,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm):
 
     INPUT = "INPUT"
     OUTPUT = "OUTPUT"
+    LIMIT = "LIMIT"
 
     @override
     def displayName(self) -> str:
@@ -252,6 +254,18 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm):
                 self.OUTPUT,
                 self.__tr("Output layer"),
                 Qgis.ProcessingSourceType.VectorPoint,
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.LIMIT,
+                self.__tr("Limit"),
+                Qgis.ProcessingNumberParameterType.Integer,
+                # FIXME: these should be constants from casageo.coder
+                defaultValue=20,
+                minValue=1,
+                maxValue=100,
             )
         )
 
@@ -370,7 +384,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm):
         import casageo.coder
 
         client = self.casaGeoClient()
-        defaults = {}
+        defaults = {"limit": self.parameterAsInt(parameters, self.LIMIT, context)}
 
         return casageo.coder.poi(client, queries, defaults)
 
