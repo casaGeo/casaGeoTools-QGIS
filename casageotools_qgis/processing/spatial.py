@@ -31,6 +31,8 @@ from qgis.core import (
     QgsPointXY,
     QgsProcessingContext,
     QgsProcessingFeedback,
+    QgsProcessingParameterBoolean,
+    QgsProcessingParameterDateTime,
     QgsProcessingParameterEnum,
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterFeatureSource,
@@ -39,7 +41,13 @@ from qgis.core import (
 )
 from qgis.PyQt.QtCore import QMetaType
 
-from ..utils import TrMethod, features_of, geometry_as_shapely, geometry_from_shapely
+from ..utils import (
+    TrMethod,
+    features_of,
+    geometry_as_shapely,
+    geometry_from_shapely,
+    pydatetime,
+)
 from . import CasaGeoToolsAbstractProcessingAlgorithm
 
 if TYPE_CHECKING:
@@ -73,6 +81,11 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
     TRANSPORT_MODE = "TRANSPORT_MODE"
     ROUTING_MODE = "ROUTING_MODE"
     DIRECTION = "DIRECTION"
+    DEPARTURE_TIME = "DEPARTURE_TIME"
+    ARRIVAL_TIME = "ARRIVAL_TIME"
+    TRAFFIC = "TRAFFIC"
+    AVOID_FEATURES = "AVOID_FEATURES"
+    EXCLUDE_COUNTRIES = "EXCLUDE_COUNTRIES"
 
     @override
     def displayName(self) -> str:
@@ -106,11 +119,29 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
             RANGE_UNITS = casageo.spatial.RANGE_UNITS
             ROUTING_MODES = casageo.spatial.ROUTING_MODES
             TRANSPORT_MODES = casageo.spatial.TRANSPORT_MODES
+            DEFAULT_RANGE_UNIT = casageo.spatial.DEFAULT_RANGE_UNIT
+            DEFAULT_TRANSPORT_MODE = casageo.spatial.DEFAULT_TRANSPORT_MODE
+            DEFAULT_ROUTING_MODE = casageo.spatial.DEFAULT_ROUTING_MODE
+            DEFAULT_DIRECTION = casageo.spatial.DEFAULT_DIRECTION
+            DEFAULT_DEPARTURE_TIME = casageo.spatial.DEFAULT_DEPARTURE_TIME
+            DEFAULT_ARRIVAL_TIME = casageo.spatial.DEFAULT_ARRIVAL_TIME
+            DEFAULT_TRAFFIC = casageo.spatial.DEFAULT_TRAFFIC
+            DEFAULT_AVOID_FEATURES = casageo.spatial.DEFAULT_AVOID_FEATURES
+            DEFAULT_EXCLUDE_COUNTRIES = casageo.spatial.DEFAULT_EXCLUDE_COUNTRIES
         except (ImportError, AttributeError):
             DIRECTION_TYPES = [None]
             RANGE_UNITS = [None]
             ROUTING_MODES = [None]
             TRANSPORT_MODES = [None]
+            DEFAULT_RANGE_UNIT = None
+            DEFAULT_TRANSPORT_MODE = None
+            DEFAULT_ROUTING_MODE = None
+            DEFAULT_DIRECTION = None
+            DEFAULT_DEPARTURE_TIME = None
+            DEFAULT_ARRIVAL_TIME = None
+            DEFAULT_TRAFFIC = None
+            DEFAULT_AVOID_FEATURES = ()
+            DEFAULT_EXCLUDE_COUNTRIES = ()
 
         if configuration is None:
             configuration = {}
@@ -140,7 +171,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
                 self.RANGES_UNIT,
                 self.__tr("Ranges unit"),
                 options=RANGE_UNITS,
-                defaultValue=RANGE_UNITS[0],
+                defaultValue=DEFAULT_RANGE_UNIT,
                 usesStaticStrings=True,
             )
         )
@@ -149,7 +180,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
                 self.TRANSPORT_MODE,
                 self.__tr("Transport mode"),
                 options=TRANSPORT_MODES,
-                defaultValue=TRANSPORT_MODES[0],
+                defaultValue=DEFAULT_TRANSPORT_MODE,
                 usesStaticStrings=True,
             )
         )
@@ -158,7 +189,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
                 self.ROUTING_MODE,
                 self.__tr("Routing mode"),
                 options=ROUTING_MODES,
-                defaultValue=ROUTING_MODES[0],
+                defaultValue=DEFAULT_ROUTING_MODE,
                 usesStaticStrings=True,
             )
         )
@@ -167,8 +198,45 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
                 self.DIRECTION,
                 self.__tr("Direction"),
                 options=DIRECTION_TYPES,
-                defaultValue=DIRECTION_TYPES[0],
+                defaultValue=DEFAULT_DIRECTION,
                 usesStaticStrings=True,
+            )
+        )
+        self.addParameter(
+            QgsProcessingParameterDateTime(
+                self.DEPARTURE_TIME,
+                self.__tr("Departure time (if outgoing)"),
+                defaultValue=DEFAULT_DEPARTURE_TIME,
+                optional=True,
+            )
+        )
+        self.addParameter(
+            QgsProcessingParameterDateTime(
+                self.ARRIVAL_TIME,
+                self.__tr("Arrival time (if incoming)"),
+                defaultValue=DEFAULT_ARRIVAL_TIME,
+                optional=True,
+            )
+        )
+        self.addParameter(
+            QgsProcessingParameterBoolean(
+                self.TRAFFIC,
+                self.__tr("Use traffic data"),
+                defaultValue=DEFAULT_TRAFFIC,
+            )
+        )
+        self.addParameter(
+            QgsProcessingParameterString(
+                self.AVOID_FEATURES,
+                self.__tr("Avoid features (separated by commas)"),
+                defaultValue=",".join(DEFAULT_AVOID_FEATURES),
+            )
+        )
+        self.addParameter(
+            QgsProcessingParameterString(
+                self.EXCLUDE_COUNTRIES,
+                self.__tr("Exclude countries (separated by commas)"),
+                defaultValue=",".join(DEFAULT_EXCLUDE_COUNTRIES),
             )
         )
 
@@ -259,6 +327,17 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
         transport_index = self.parameterAsEnum(parameters, self.TRANSPORT_MODE, context)
         routing_index = self.parameterAsEnum(parameters, self.ROUTING_MODE, context)
         direction_index = self.parameterAsEnum(parameters, self.DIRECTION, context)
+        departure_time = self.parameterAsDateTime(
+            parameters, self.DEPARTURE_TIME, context
+        )
+        arrival_time = self.parameterAsDateTime(parameters, self.ARRIVAL_TIME, context)
+        traffic = self.parameterAsBool(parameters, self.TRAFFIC, context)
+        avoid_features = self.parameterAsString(
+            parameters, self.AVOID_FEATURES, context
+        )
+        exclude_countries = self.parameterAsString(
+            parameters, self.EXCLUDE_COUNTRIES, context
+        )
 
         defaults = {
             "ranges": [float(r) for r in ranges],
@@ -266,6 +345,11 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
             "transport_mode": TRANSPORT_MODES[transport_index],
             "routing_mode": ROUTING_MODES[routing_index],
             "direction": DIRECTION_TYPES[direction_index],
+            "departure_time": pydatetime(departure_time),
+            "arrival_time": pydatetime(arrival_time),
+            "traffic": traffic,
+            "avoid_features": avoid_features,
+            "exclude_countries": exclude_countries,
         }
 
         return casageo.spatial.isolines(client, queries, defaults)

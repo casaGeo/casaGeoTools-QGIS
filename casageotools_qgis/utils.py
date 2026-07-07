@@ -15,13 +15,16 @@
 #  SPDX-License-Identifier: Apache-2.0
 
 
-from typing import TYPE_CHECKING, LiteralString, cast
 from collections.abc import Iterator
+from typing import TYPE_CHECKING, LiteralString, cast
 
 from qgis.PyQt.QtCore import QCoreApplication
 
 if TYPE_CHECKING:
-    from qgis.core import QgsGeometry, QgsFeature, QgsProcessingFeatureSource
+    import datetime
+
+    from qgis.core import QgsFeature, QgsGeometry, QgsProcessingFeatureSource
+    from qgis.PyQt.QtCore import QDateTime
     from shapely.geometry.base import BaseGeometry as ShapelyBaseGeometry
 
 
@@ -67,6 +70,10 @@ def geometry_from_shapely(geometry: "ShapelyBaseGeometry", /) -> "QgsGeometry":
 
     # See https://qgis.org/pyqgis/master/core/QgsGeometry.html#qgis.core.QgsGeometry.from_shapely
     return QgsGeometry.from_shapely(geometry)  # pyright: ignore[reportAttributeAccessIssue]
+
+
+def pydatetime(dt: "QDateTime", /) -> "datetime.datetime | None":
+    return dt.toPyDateTime() if dt.isValid() else None
 
 
 # class Box[T: "QObject"]:
