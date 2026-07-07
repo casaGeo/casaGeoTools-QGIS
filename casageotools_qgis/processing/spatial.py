@@ -30,6 +30,7 @@ from qgis.core import (
     QgsFields,
     QgsPointXY,
     QgsProcessingContext,
+    QgsProcessingException,  # pyright: ignore[reportAttributeAccessIssue]
     QgsProcessingFeedback,
     QgsProcessingParameterBoolean,
     QgsProcessingParameterDateTime,
@@ -314,6 +315,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
     ) -> "GeoDataFrame":
         """Calculate isolines using the casaGeoTools library."""
         import casageo.spatial
+        import casageo.tools
         from casageo.spatial import (
             DIRECTION_TYPES,
             ROUTING_MODES,
@@ -352,7 +354,10 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
             "exclude_countries": exclude_countries,
         }
 
-        return casageo.spatial.isolines(client, queries, defaults)
+        try:
+            return casageo.spatial.isolines(client, queries, defaults)
+        except casageo.tools.CasaGeoError as err:
+            raise QgsProcessingException(str(err)) from err
 
     def _writeOutputGeometries(
         self,
@@ -548,11 +553,15 @@ class CasaGeoToolsRoutingAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
         queries: "DataFrame",
     ) -> "GeoDataFrame":
         import casageo.spatial
+        import casageo.tools
 
         client = self.casaGeoClient()
         defaults = {}
 
-        return casageo.spatial.routes(client, queries, defaults)
+        try:
+            return casageo.spatial.routes(client, queries, defaults)
+        except casageo.tools.CasaGeoError as err:
+            raise QgsProcessingException(str(err)) from err
 
     def _writeOutputGeometries(
         self,

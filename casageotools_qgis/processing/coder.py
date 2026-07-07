@@ -29,8 +29,8 @@ from qgis.core import (
     QgsFeatureSink,
     QgsField,
     QgsFields,
-    QgsProcessingAlgorithm,
     QgsProcessingContext,
+    QgsProcessingException,  # pyright: ignore[reportAttributeAccessIssue]
     QgsProcessingFeedback,
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterFeatureSource,
@@ -149,11 +149,15 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm)
         queries: "DataFrame",
     ) -> "GeoDataFrame":
         import casageo.coder
+        import casageo.tools
 
         client = self.casaGeoClient()
         defaults = {}
 
-        return casageo.coder.address(client, queries, defaults)
+        try:
+            return casageo.coder.address(client, queries, defaults)
+        except casageo.tools.CasaGeoError as err:
+            raise QgsProcessingException(str(err)) from err
 
     def _writeOutputGeometries(
         self,
@@ -382,11 +386,15 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm):
         queries: "GeoDataFrame",
     ) -> "GeoDataFrame":
         import casageo.coder
+        import casageo.tools
 
         client = self.casaGeoClient()
         defaults = {"limit": self.parameterAsInt(parameters, self.LIMIT, context)}
 
-        return casageo.coder.poi(client, queries, defaults)
+        try:
+            return casageo.coder.poi(client, queries, defaults)
+        except casageo.tools.CasaGeoError as err:
+            raise QgsProcessingException(str(err)) from err
 
     def _writeOutputGeometries(
         self,
