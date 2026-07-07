@@ -248,14 +248,20 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback | None,
     ) -> dict[str, Any]:
+        from geopandas import GeoDataFrame
+
         if feedback is None:
             feedback = QgsProcessingFeedback(logFeedback=False)
 
         feedback.setProgressText(self.__tr("Converting input geometries"))
         queries = self._convertInputGeometries(parameters, context, feedback)
 
-        feedback.setProgressText(self.__tr("Calculating isolines"))
-        results = self._calculateIsolines(parameters, context, feedback, queries)
+        if queries.empty:
+            feedback.pushInfo(self.__tr("No valid features in input layer"))
+            results = GeoDataFrame()
+        else:
+            feedback.setProgressText(self.__tr("Calculating isolines"))
+            results = self._calculateIsolines(parameters, context, feedback, queries)
 
         feedback.setProgressText(self.__tr("Converting results"))
         return self._writeOutputGeometries(parameters, context, feedback, results)
@@ -265,9 +271,8 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
         parameters: dict[str, Any],
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
-    ) -> "GeoDataFrame":
-        """Convert input geometries into an EPSG:4326 GeoDataFrame."""
-        from geopandas import GeoDataFrame
+    ) -> "DataFrame":
+        from pandas import DataFrame
 
         source = self.parameterAsSource(
             parameters,
@@ -282,10 +287,10 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
             QgsProject.instance(),
         )
 
-        inputs = []
+        data = []
         for feature in features_of(source):
-            position = feature.geometry()
-            if position.isEmpty():
+            geometry = feature.geometry()
+            if geometry.isEmpty():
                 feedback.pushInfo(
                     self.__tr(
                         "Skipping feature {featid} due to empty geometry",
@@ -293,8 +298,8 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
                 )
                 continue
 
-            position.transform(into_epsg4326)
-            if position.isEmpty():
+            geometry.transform(into_epsg4326)
+            if geometry.isEmpty():
                 feedback.pushInfo(
                     self.__tr(
                         "Skipping feature {featid} due to reprojection failure",
@@ -302,16 +307,20 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
                 )
                 continue
 
-            inputs.append({"position": geometry_as_shapely(position)})
+            position = geometry.asPoint()
+            data.append({
+                "position_longitude": position.x(),
+                "position_latitude": position.y(),
+            })
 
-        return GeoDataFrame(inputs, geometry="position", crs="EPSG:4326")
+        return DataFrame(data)
 
     def _calculateIsolines(
         self,
         parameters: dict[str, Any],
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
-        queries: "GeoDataFrame",
+        queries: "DataFrame",
     ) -> "GeoDataFrame":
         """Calculate isolines using the casaGeoTools library."""
         import casageo.spatial
@@ -461,14 +470,20 @@ class CasaGeoToolsRoutingAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback | None,
     ) -> dict[str, Any]:
+        from geopandas import GeoDataFrame
+
         if feedback is None:
             feedback = QgsProcessingFeedback(logFeedback=False)
 
         feedback.setProgressText(self.__tr("Converting input geometries"))
         queries = self._convertInputGeometries(parameters, context, feedback)
 
-        feedback.setProgressText(self.__tr("Calculating routes"))
-        results = self._calculateRoutes(parameters, context, feedback, queries)
+        if queries.empty:
+            feedback.pushInfo(self.__tr("No valid features in input layer"))
+            results = GeoDataFrame()
+        else:
+            feedback.setProgressText(self.__tr("Calculating routes"))
+            results = self._calculateRoutes(parameters, context, feedback, queries)
 
         feedback.setProgressText(self.__tr("Converting results"))
         return self._writeOutputGeometries(parameters, context, feedback, results)
@@ -479,8 +494,7 @@ class CasaGeoToolsRoutingAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
     ) -> "DataFrame":
-        """Convert input geometries into an EPSG:4326 GeoDataFrame."""
-        from geopandas import GeoDataFrame
+        from pandas import DataFrame
 
         source = self.parameterAsSource(
             parameters,
@@ -497,7 +511,7 @@ class CasaGeoToolsRoutingAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
 
         show_intermediate_waypoint_warning = False
 
-        inputs = []
+        data = []
         for feature in features_of(source):
             itinerary = feature.geometry()
             if itinerary.isEmpty():
@@ -529,7 +543,7 @@ class CasaGeoToolsRoutingAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
             origin = waypoints[0]
             destination = waypoints[-1]
 
-            inputs.append({
+            data.append({
                 "origin_longitude": origin.x(),
                 "origin_latitude": origin.y(),
                 "destination_longitude": destination.x(),
@@ -543,7 +557,7 @@ class CasaGeoToolsRoutingAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
                 )
             )
 
-        return DataFrame(inputs)
+        return DataFrame(data)
 
     def _calculateRoutes(
         self,

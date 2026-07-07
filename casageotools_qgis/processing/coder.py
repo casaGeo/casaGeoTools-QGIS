@@ -112,14 +112,20 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm)
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback | None,
     ) -> dict[str, Any]:
+        from geopandas import GeoDataFrame
+
         if feedback is None:
             feedback = QgsProcessingFeedback(logFeedback=False)
 
         feedback.setProgressText(self.__tr("Converting input geometries"))
         queries = self._convertInputGeometries(parameters, context, feedback)
 
-        feedback.setProgressText(self.__tr("Geocoding addresses"))
-        results = self._geocodeAddresses(parameters, context, feedback, queries)
+        if queries.empty:
+            feedback.pushInfo(self.__tr("No valid features in input layer"))
+            results = GeoDataFrame()
+        else:
+            feedback.setProgressText(self.__tr("Geocoding addresses"))
+            results = self._geocodeAddresses(parameters, context, feedback, queries)
 
         feedback.setProgressText(self.__tr("Converting results"))
         return self._writeOutputGeometries(parameters, context, feedback, results)
@@ -280,14 +286,20 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm):
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback | None,
     ) -> dict[str, Any]:
+        from geopandas import GeoDataFrame
+
         if feedback is None:
             feedback = QgsProcessingFeedback(logFeedback=False)
 
         feedback.setProgressText(self.__tr("Converting input geometries"))
         queries = self._convertInputGeometries(parameters, context, feedback)
 
-        feedback.setProgressText(self.__tr("Searching for POIs"))
-        results = self._searchForPOIs(parameters, context, feedback, queries)
+        if queries.empty:
+            feedback.pushInfo(self.__tr("No valid features in input layer"))
+            results = GeoDataFrame()
+        else:
+            feedback.setProgressText(self.__tr("Searching for POIs"))
+            results = self._searchForPOIs(parameters, context, feedback, queries)
 
         feedback.setProgressText(self.__tr("Converting results"))
         return self._writeOutputGeometries(parameters, context, feedback, results)
@@ -337,9 +349,8 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm):
         parameters: dict[str, Any],
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
-    ) -> "GeoDataFrame":
-        """Convert input geometries into an EPSG:4326 GeoDataFrame."""
-        from geopandas import GeoDataFrame
+    ) -> "DataFrame":
+        from pandas import DataFrame
 
         source = self.parameterAsSource(
             parameters,
@@ -354,10 +365,10 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm):
             QgsProject.instance(),
         )
 
-        inputs = []
+        data = []
         for feature in features_of(source):
-            position = feature.geometry()
-            if position.isEmpty():
+            geometry = feature.geometry()
+            if geometry.isEmpty():
                 feedback.pushInfo(
                     self.__tr(
                         "Skipping feature {featid} due to empty geometry",
@@ -365,8 +376,8 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm):
                 )
                 continue
 
-            position.transform(into_epsg4326)
-            if position.isEmpty():
+            geometry.transform(into_epsg4326)
+            if geometry.isEmpty():
                 feedback.pushInfo(
                     self.__tr(
                         "Skipping feature {featid} due to reprojection failure",
@@ -374,16 +385,20 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm):
                 )
                 continue
 
-            inputs.append({"position": geometry_as_shapely(position)})
+            position = geometry.asPoint()
+            data.append({
+                "position_longitude": position.x(),
+                "position_latitude": position.y(),
+            })
 
-        return GeoDataFrame(inputs, geometry="position", crs="EPSG:4326")
+        return DataFrame(data)
 
     def _searchForPOIs(
         self,
         parameters: dict[str, Any],
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
-        queries: "GeoDataFrame",
+        queries: "DataFrame",
     ) -> "GeoDataFrame":
         import casageo.coder
         import casageo.tools
