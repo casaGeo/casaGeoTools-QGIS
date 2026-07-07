@@ -100,14 +100,17 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
     @override
     def initAlgorithm(self, configuration: dict[str, Any] | None = None) -> None:
         try:
-            from casageo.spatial import (
-                DIRECTION_TYPES,
-                RANGE_UNITS,
-                ROUTING_MODES,
-                TRANSPORT_MODES,
-            )
-        except ImportError:
-            return
+            import casageo.spatial
+
+            DIRECTION_TYPES = casageo.spatial.DIRECTION_TYPES
+            RANGE_UNITS = casageo.spatial.RANGE_UNITS
+            ROUTING_MODES = casageo.spatial.ROUTING_MODES
+            TRANSPORT_MODES = casageo.spatial.TRANSPORT_MODES
+        except (ImportError, AttributeError):
+            DIRECTION_TYPES = [None]
+            RANGE_UNITS = [None]
+            ROUTING_MODES = [None]
+            TRANSPORT_MODES = [None]
 
         if configuration is None:
             configuration = {}
