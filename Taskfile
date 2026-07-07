@@ -183,6 +183,7 @@ application-data-directory() {
 plugin-metadata() {
 	# This file contains plugin metadata. It should be included when packaging.
 	# See https://docs.qgis.org/3.44/en/docs/pyqgis_developer_cookbook/plugins/plugins.html#metadata-txt
+	yq --version >/dev/null
 	cat <<-METADATA
 	[general]
 	name = $(yq -r '.tool.qgis.metadata.general.name // ""' pyproject.toml)
