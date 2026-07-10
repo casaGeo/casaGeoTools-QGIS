@@ -38,6 +38,8 @@ from qgis.core import (
     QgsProcessingParameterEnum,
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterFeatureSource,
+    QgsProcessingParameterNumber,
+    QgsProcessingParameterPoint,
     QgsProcessingParameterString,
     QgsProject,
 )
@@ -387,6 +389,258 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
             feature["rangetype"] = result.rangetype
             feature["rangeunit"] = result.rangeunit
             feature["rangevalue"] = result.rangevalue
+            feature["timestamp"] = result.timestamp.isoformat()
+            sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
+
+        return {self.OUTPUT: dest_id}
+
+
+class CasaGeoToolsRoutesSingleAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
+    __tr = TrMethod()
+
+    OUTPUT = "OUTPUT"
+    ORIGIN = "ORIGIN"
+    DESTINATION = "DESTINATION"
+    ALTERNATIVES = "ALTERNATIVES"
+    DEPARTURE_TIME = "DEPARTURE_TIME"
+    ARRIVAL_TIME = "ARRIVAL_TIME"
+
+    @override
+    def displayName(self) -> str:
+        return self.__tr("Routes (single)", "Algorithm")
+
+    @override
+    def name(self) -> str:
+        return "routes_single"
+
+    @override
+    def shortDescription(self) -> str:
+        return self.__tr("Calculate routes between two locations.")
+
+    @override
+    def createInstance(self) -> "CasaGeoToolsRoutesSingleAlgorithm":
+        return CasaGeoToolsRoutesSingleAlgorithm(self.plugin)
+
+    def _paramAlternatives(self):
+        from casageo.spatial import DEFAULT_ALTERNATIVES
+
+        # FIXME: Export these constants from casageo.spatial
+        MIN_ALTERNATIVES = 0
+        MAX_ALTERNATIVES = 6
+
+        return QgsProcessingParameterNumber(
+            self.ALTERNATIVES,
+            self.__tr("Number of alternative routes", "Parameter"),
+            Qgis.ProcessingNumberParameterType.Integer,
+            minValue=MIN_ALTERNATIVES,
+            maxValue=MAX_ALTERNATIVES,
+            defaultValue=DEFAULT_ALTERNATIVES,
+        )
+
+    def _paramDepartureTime(self):
+        return QgsProcessingParameterDateTime(
+            self.DEPARTURE_TIME,
+            self.__tr("Departure time", "Parameter"),
+            optional=True,
+        )
+
+    def _paramArrivalTime(self):
+        return QgsProcessingParameterDateTime(
+            self.ARRIVAL_TIME,
+            self.__tr("Arrival time", "Parameter"),
+            optional=True,
+        )
+
+    @override
+    def initAlgorithm(self, configuration: dict[str, Any] | None = None) -> None:
+        if configuration is None:
+            configuration = {}
+
+        self.addParameter(
+            QgsProcessingParameterFeatureSink(
+                self.OUTPUT,
+                self.__tr("Output layer", "Parameter"),
+                Qgis.ProcessingSourceType.VectorLine,
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterPoint(
+                self.ORIGIN,
+                self.__tr("Origin", "Parameter"),
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterPoint(
+                self.DESTINATION,
+                self.__tr("Destination", "Parameter"),
+            )
+        )
+
+        with contextlib.suppress(ImportError):
+            self.addParameter(self._paramAlternatives())
+            self.addParameter(self._paramTransportMode())
+            self.addParameter(self._paramRoutingMode())
+            self.addParameter(self._paramDepartureTime())
+            self.addParameter(self._paramArrivalTime())
+            self.addParameter(self._paramAvoidFeatures())
+            self.addParameter(self._paramExcludeCountries())
+
+    @override
+    def processAlgorithm(
+        self,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback | None,
+    ) -> dict[str, Any]:
+        if feedback is None:
+            feedback = QgsProcessingFeedback(logFeedback=False)
+
+        feedback.setProgressText(self.__tr("Converting input geometries"))
+        queries = self._convertInputGeometries(parameters, context, feedback)
+
+        feedback.setProgressText(self.__tr("Calculating routes"))
+        results = self._calculateRoutes(parameters, context, feedback, queries)
+
+        feedback.setProgressText(self.__tr("Converting results"))
+        return self._writeOutputGeometries(parameters, context, feedback, results)
+
+    def _convertInputGeometries(
+        self,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback,
+    ) -> "DataFrame":
+        from pandas import DataFrame
+
+        EPSG4326 = QgsCoordinateReferenceSystem.fromEpsgId(4326)
+
+        origin = QgsCoordinateTransform(
+            self.parameterAsPointCrs(parameters, self.ORIGIN, context),
+            EPSG4326,
+            context.project(),
+        ).transform(self.parameterAsPoint(parameters, self.ORIGIN, context))
+
+        if origin.isEmpty():
+            msg = self.__tr("Origin point is invalid in {crs}").format(
+                crs=EPSG4326.authid()
+            )
+            raise QgsProcessingException(msg)
+
+        destination = QgsCoordinateTransform(
+            self.parameterAsPointCrs(parameters, self.DESTINATION, context),
+            EPSG4326,
+            context.project(),
+        ).transform(self.parameterAsPoint(parameters, self.DESTINATION, context))
+
+        if destination.isEmpty():
+            msg = self.__tr("Destination point is invalid in {crs}").format(
+                crs=EPSG4326.authid()
+            )
+            raise QgsProcessingException(msg)
+
+        return DataFrame([
+            {
+                "origin_longitude": origin.x(),
+                "origin_latitude": origin.y(),
+                "destination_longitude": destination.x(),
+                "destination_latitude": destination.y(),
+            }
+        ])
+
+    def _calculateRoutes(
+        self,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback,
+        queries: "DataFrame",
+    ) -> "GeoDataFrame":
+        import casageo.spatial
+        import casageo.tools
+        from casageo.spatial import (
+            ROUTING_MODES,
+            TRANSPORT_MODES,
+        )
+
+        client = self.casaGeoClient()
+
+        alternatives = self.parameterAsInt(parameters, self.ALTERNATIVES, context)
+        transport_index = self.parameterAsEnum(parameters, self.TRANSPORT_MODE, context)
+        routing_index = self.parameterAsEnum(parameters, self.ROUTING_MODE, context)
+        departure_time = self.parameterAsDateTime(
+            parameters, self.DEPARTURE_TIME, context
+        )
+        arrival_time = self.parameterAsDateTime(parameters, self.ARRIVAL_TIME, context)
+        avoid_features = self.parameterAsString(
+            parameters, self.AVOID_FEATURES, context
+        )
+        exclude_countries = self.parameterAsString(
+            parameters, self.EXCLUDE_COUNTRIES, context
+        )
+
+        defaults = {
+            "alternatives": alternatives,
+            "transport_mode": TRANSPORT_MODES[transport_index],
+            "routing_mode": ROUTING_MODES[routing_index],
+            "departure_time": pydatetime(departure_time),
+            "arrival_time": pydatetime(arrival_time),
+            "traffic": departure_time.isValid() or arrival_time.isValid(),
+            "avoid_features": avoid_features,
+            "exclude_countries": exclude_countries,
+        }
+
+        try:
+            return casageo.spatial.routes(client, queries, defaults)
+        except casageo.tools.CasaGeoError as err:
+            raise QgsProcessingException(str(err)) from err
+
+    def _writeOutputGeometries(
+        self,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback,
+        results: "GeoDataFrame",
+    ) -> dict[str, str]:
+        """Convert results to features and write them to the feature sink."""
+
+        fields = QgsFields([
+            QgsField("id", QMetaType.Type.Int),
+            QgsField("subid", QMetaType.Type.Int),
+            QgsField("length", QMetaType.Type.Double),
+            QgsField("duration", QMetaType.Type.Double),
+            QgsField("timestamp", QMetaType.Type.QDateTime),
+            # QgsField("error_code", QMetaType.Type.QString),
+            # QgsField("error_message", QMetaType.Type.QString),
+        ])
+
+        sink, dest_id = self.parameterAsSink(
+            parameters,
+            self.OUTPUT,
+            context,
+            fields,
+            # TODO: Make this a MultiLineStringZM with elevation and time datapoints.
+            Qgis.WkbType.MultiLineString,
+            QgsCoordinateReferenceSystem.fromEpsgId(4326),
+        )
+        assert sink is not None
+
+        result: Any  # Make Pyright shut up about the named tuples.
+        for result in results.itertuples():
+            if result.error_code is not None:
+                feedback.reportError(
+                    self.__tr("Error ({code}): {message}").format(
+                        code=result.error_code, message=result.error_message
+                    )
+                )
+                continue
+
+            feature = QgsFeature(fields)
+            feature.setGeometry(geometry_from_shapely(result.geometry))
+            feature["id"] = result.id
+            feature["subid"] = result.subid
+            feature["length"] = result.length
+            feature["duration"] = result.duration
             feature["timestamp"] = result.timestamp.isoformat()
             sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
 
