@@ -39,7 +39,7 @@ from qgis.core import (
 )
 from qgis.PyQt.QtCore import QMetaType
 
-from ..utils import TrMethod, features_of, geometry_as_shapely, geometry_from_shapely
+from ..utils import TrMethod, features_of, geometry_from_shapely
 from . import CasaGeoToolsAbstractProcessingAlgorithm
 
 if TYPE_CHECKING:
