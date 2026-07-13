@@ -23,7 +23,12 @@ from qgis.PyQt.QtCore import QCoreApplication
 if TYPE_CHECKING:
     import datetime
 
-    from qgis.core import QgsFeature, QgsGeometry, QgsProcessingFeatureSource
+    from qgis.core import (
+        QgsFeature,
+        QgsGeometry,
+        QgsProcessingFeatureSource,
+        QgsFeatureRequest,
+    )
     from qgis.PyQt.QtCore import QDateTime
     from shapely.geometry.base import BaseGeometry as ShapelyBaseGeometry
 
@@ -56,8 +61,12 @@ def ensure[T](value: T | None, /) -> T:
     return value
 
 
-def features_of(source: "QgsProcessingFeatureSource") -> "Iterator[QgsFeature]":
-    return cast("Iterator[QgsFeature]", cast(object, source.getFeatures()))
+def features_of(
+    source: "QgsProcessingFeatureSource",
+    request: "QgsFeatureRequest | None" = None,
+) -> "Iterator[QgsFeature]":
+    it = source.getFeatures() if request is None else source.getFeatures(request)
+    return cast("Iterator[QgsFeature]", cast(object, it))
 
 
 def geometry_as_shapely(geometry: "QgsGeometry", /) -> "ShapelyBaseGeometry":
