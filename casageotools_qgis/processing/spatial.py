@@ -14,10 +14,6 @@
 #
 #  SPDX-License-Identifier: Apache-2.0
 
-__all__ = [
-    "CasaGeoToolsIsolinesAlgorithm",
-]
-
 import contextlib
 
 from typing import TYPE_CHECKING, Any, override
@@ -177,6 +173,10 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
 
     @override
     def initAlgorithm(self, configuration: dict[str, Any] | None = None) -> None:
+        super().initAlgorithm(configuration)
+        if not self.status_ok:
+            return
+
         if configuration is None:
             configuration = {}
 
@@ -445,6 +445,10 @@ class CasaGeoToolsRoutesSingleAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
 
     @override
     def initAlgorithm(self, configuration: dict[str, Any] | None = None) -> None:
+        super().initAlgorithm(configuration)
+        if not self.status_ok:
+            return
+
         if configuration is None:
             configuration = {}
 
@@ -663,6 +667,10 @@ class CasaGeoToolsRoutingAlgorithm(CasaGeoToolsAbstractSpatialAlgorithm):
 
     @override
     def initAlgorithm(self, configuration: dict[str, Any] | None = None) -> None:
+        super().initAlgorithm(configuration)
+        if not self.status_ok:
+            return
+
         if configuration is None:
             configuration = {}
 

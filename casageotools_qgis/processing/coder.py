@@ -14,11 +14,6 @@
 #
 #  SPDX-License-Identifier: Apache-2.0
 
-__all__ = [
-    "CasaGeoToolsAddressSearchAlgorithm",
-    "CasaGeoToolsPOISearchAlgorithm",
-]
-
 from typing import TYPE_CHECKING, Any, override
 
 from qgis.core import (
@@ -75,6 +70,10 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
     @override
     def initAlgorithm(self, configuration: dict[str, Any] | None = None) -> None:
+        super().initAlgorithm(configuration)
+        if not self.status_ok:
+            return
+
         if configuration is None:
             configuration = {}
 
@@ -240,6 +239,10 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
     @override
     def initAlgorithm(self, configuration: dict[str, Any] | None = None) -> None:
+        super().initAlgorithm(configuration)
+        if not self.status_ok:
+            return
+
         if configuration is None:
             configuration = {}
 

@@ -14,7 +14,7 @@
 #
 #  SPDX-License-Identifier: Apache-2.0
 
-from typing import TYPE_CHECKING, override
+from typing import TYPE_CHECKING, Any, override
 
 from qgis.core import QgsProcessingAlgorithm, QgsProcessingProvider
 
@@ -83,27 +83,12 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
     def __init__(self, plugin: "CasaGeoToolsPlugin") -> None:
         super().__init__()
         self.plugin = plugin
+        self.status_ok = True
+        self.status_message = ""
 
     @override
     def canExecute(self) -> tuple[bool, str]:
-        import importlib
-
-        for module in self.requiredPythonModules():
-            try:
-                importlib.import_module(module)
-            except ModuleNotFoundError:
-                return False, self.__tr(
-                    "The {module} module is not installed",
-                ).format(module=module)
-            except ImportError as err:
-                return False, self.__tr(
-                    "The {module} module could not be imported: {err}",
-                ).format(module=module, err=err)
-
-        if not self.plugin.settingApikey.value():
-            return False, self.__tr("Please input your API key in the settings")
-
-        return True, ""
+        return self.status_ok, self.status_message
 
     @override
     def group(self) -> str:
@@ -121,6 +106,35 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
             f"algorithms/{self.groupId()}/{self.name()}.html"
         ).toString()
 
+    @override
+    def initAlgorithm(self, configuration: dict[str, Any] | None = None) -> None:
+        from importlib import import_module
+
+        if configuration is None:
+            configuration = {}
+
+        try:
+            import_module("casageo.tools")
+            import_module("casageo.coder")
+            import_module("casageo.spatial")
+        except ModuleNotFoundError as err:
+            self.status_ok = False
+            self.status_message = self.__tr(
+                "The {module} module is not installed",
+            ).format(module=err.name)
+            return
+        except ImportError as err:
+            self.status_ok = False
+            self.status_message = self.__tr(
+                "The {module} module could not be imported: {err}",
+            ).format(module=err.name, err=err)
+            return
+
+        if not self.plugin.settingApikey.value():
+            self.status_ok = False
+            self.status_message = self.__tr("Please input your API key in the settings")
+            return
+
     def casaGeoClient(self) -> "CasaGeoClient":
         from casageo.tools import CasaGeoClient
 
@@ -130,6 +144,3 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
             preferred_unit_system=self.plugin.settingUnitSystem.value() or None,
             preferred_political_view=self.plugin.settingPoliticalView.value() or None,
         )
-
-    def requiredPythonModules(self) -> list[str]:
-        return ["casageo.tools", "casageo.coder", "casageo.spatial", "geopandas"]
