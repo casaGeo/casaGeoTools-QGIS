@@ -14,7 +14,7 @@
 #
 #  SPDX-License-Identifier: Apache-2.0
 
-from typing import TYPE_CHECKING, Any, override
+from typing import TYPE_CHECKING, Any, Self, override
 
 from qgis.core import QgsProcessingAlgorithm, QgsProcessingProvider
 
@@ -85,6 +85,10 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
         self.plugin = plugin
         self.status_ok = True
         self.status_message = ""
+
+    @override
+    def createInstance(self) -> Self:
+        return self.__class__(self.plugin)
 
     @override
     def canExecute(self) -> tuple[bool, str]:

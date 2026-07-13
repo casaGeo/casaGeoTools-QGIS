@@ -65,10 +65,6 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         return self.__tr("Geocodes addresses.")
 
     @override
-    def createInstance(self) -> "CasaGeoToolsAddressSearchAlgorithm":
-        return CasaGeoToolsAddressSearchAlgorithm(self.plugin)
-
-    @override
     def initAlgorithm(self, configuration: dict[str, Any] | None = None) -> None:
         super().initAlgorithm(configuration)
         if not self.status_ok:
@@ -232,10 +228,6 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     @override
     def name(self) -> str:
         return "poisearch"
-
-    @override
-    def createInstance(self) -> "CasaGeoToolsPOISearchAlgorithm":
-        return CasaGeoToolsPOISearchAlgorithm(self.plugin)
 
     @override
     def initAlgorithm(self, configuration: dict[str, Any] | None = None) -> None:

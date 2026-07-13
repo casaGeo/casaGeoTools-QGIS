@@ -92,10 +92,6 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         """)
 
     @override
-    def createInstance(self) -> "CasaGeoToolsIsolinesAlgorithm":
-        return CasaGeoToolsIsolinesAlgorithm(self.plugin)
-
-    @override
     def initAlgorithm(self, configuration: dict[str, Any] | None = None) -> None:
         super().initAlgorithm(configuration)
         if not self.status_ok:
@@ -415,10 +411,6 @@ class CasaGeoToolsRoutesSingleAlgorithm(CasaGeoToolsProcessingAlgorithm):
         return self.__tr("Calculate routes between two locations.")
 
     @override
-    def createInstance(self) -> "CasaGeoToolsRoutesSingleAlgorithm":
-        return CasaGeoToolsRoutesSingleAlgorithm(self.plugin)
-
-    @override
     def initAlgorithm(self, configuration: dict[str, Any] | None = None) -> None:
         super().initAlgorithm(configuration)
         if not self.status_ok:
@@ -711,10 +703,6 @@ class CasaGeoToolsRoutingAlgorithm(CasaGeoToolsProcessingAlgorithm):
     @override
     def shortDescription(self) -> str:
         return self.__tr("Calculate routes between locations.")
-
-    @override
-    def createInstance(self) -> "CasaGeoToolsRoutingAlgorithm":
-        return CasaGeoToolsRoutingAlgorithm(self.plugin)
 
     @override
     def initAlgorithm(self, configuration: dict[str, Any] | None = None) -> None:

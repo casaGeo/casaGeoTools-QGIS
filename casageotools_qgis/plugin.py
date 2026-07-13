@@ -249,8 +249,10 @@ class CasaGeoToolsPlugin:
     def helpFile(self, path: str = "index.html") -> str:
         return os.path.join(PLUGIN_HELP_DIRECTORY, path)
 
-    def helpUrl(self, path: str = "index.html") -> QUrl:
-        return QUrl.fromLocalFile(self.helpFile(path))
+    def helpUrl(self, path: str = "index.html", fragment: str | None = None) -> QUrl:
+        url = QUrl.fromLocalFile(self.helpFile(path))
+        url.setFragment(fragment)
+        return url
 
     # def showMainDialog(self) -> None:
     #     """Show the main dialog."""
