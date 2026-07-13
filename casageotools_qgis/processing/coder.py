@@ -40,34 +40,22 @@ from qgis.core import (
 from qgis.PyQt.QtCore import QMetaType
 
 from ..utils import TrMethod, features_of, geometry_from_shapely
-from . import CasaGeoToolsAbstractProcessingAlgorithm
+from . import CasaGeoToolsProcessingAlgorithm
 
 if TYPE_CHECKING:
     from geopandas import GeoDataFrame
     from pandas import DataFrame
 
 
-class CasaGeoToolsAbstractGeocodingAlgorithm(CasaGeoToolsAbstractProcessingAlgorithm):
-    __tr = TrMethod()
-
-    @override
-    def group(self) -> str:
-        return self.__tr("Coder", "Group")
-
-    @override
-    def groupId(self) -> str:
-        return "coder"
-
-    @override
-    def requiredPythonModules(self) -> list[str]:
-        return ["casageo.tools", "casageo.coder", "geopandas"]
-
-
-class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm):
+class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     __tr = TrMethod()
 
     INPUT = "INPUT"
     OUTPUT = "OUTPUT"
+
+    @override
+    def groupId(self) -> str:
+        return self.GROUP_ID_CODER
 
     @override
     def displayName(self) -> str:
@@ -227,12 +215,16 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm)
         return {self.OUTPUT: dest_id}
 
 
-class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsAbstractGeocodingAlgorithm):
+class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     __tr = TrMethod()
 
     INPUT = "INPUT"
     OUTPUT = "OUTPUT"
     LIMIT = "LIMIT"
+
+    @override
+    def groupId(self) -> str:
+        return self.GROUP_ID_CODER
 
     @override
     def displayName(self) -> str:

@@ -73,8 +73,11 @@ class CasaGeoToolsProcessingProvider(QgsProcessingProvider):
     #     return resources.plugin_version()
 
 
-class CasaGeoToolsAbstractProcessingAlgorithm(QgsProcessingAlgorithm):
+class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
     __tr = TrMethod()
+
+    GROUP_ID_CODER = "coder"
+    GROUP_ID_SPATIAL = "spatial"
 
     @override
     def __init__(self, plugin: "CasaGeoToolsPlugin") -> None:
@@ -103,6 +106,16 @@ class CasaGeoToolsAbstractProcessingAlgorithm(QgsProcessingAlgorithm):
         return True, ""
 
     @override
+    def group(self) -> str:
+        match self.groupId():
+            case self.GROUP_ID_CODER:
+                return self.__tr("Coder", "Group")
+            case self.GROUP_ID_SPATIAL:
+                return self.__tr("Spatial", "Group")
+            case gid:
+                return gid
+
+    @override
     def helpUrl(self) -> str:
         return self.plugin.helpUrl(
             f"algorithms/{self.groupId()}/{self.name()}.html"
@@ -119,4 +132,4 @@ class CasaGeoToolsAbstractProcessingAlgorithm(QgsProcessingAlgorithm):
         )
 
     def requiredPythonModules(self) -> list[str]:
-        return ["casageo.tools"]
+        return ["casageo.tools", "casageo.coder", "casageo.spatial", "geopandas"]

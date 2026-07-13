@@ -51,14 +51,14 @@ from ..utils import (
     geometry_from_shapely,
     pydatetime,
 )
-from . import CasaGeoToolsAbstractProcessingAlgorithm
+from . import CasaGeoToolsProcessingAlgorithm
 
 if TYPE_CHECKING:
     from geopandas import GeoDataFrame
     from pandas import DataFrame
 
 
-class CasaGeoToolsAbstractSpatialAlgorithm(CasaGeoToolsAbstractProcessingAlgorithm):
+class CasaGeoToolsAbstractSpatialAlgorithm(CasaGeoToolsProcessingAlgorithm):
     __tr = TrMethod()
 
     TRANSPORT_MODE = "TRANSPORT_MODE"
@@ -67,16 +67,8 @@ class CasaGeoToolsAbstractSpatialAlgorithm(CasaGeoToolsAbstractProcessingAlgorit
     EXCLUDE_COUNTRIES = "EXCLUDE_COUNTRIES"
 
     @override
-    def group(self) -> str:
-        return self.__tr("Spatial", "Group")
-
-    @override
     def groupId(self) -> str:
-        return "spatial"
-
-    @override
-    def requiredPythonModules(self) -> list[str]:
-        return ["casageo.tools", "casageo.spatial", "geopandas"]
+        return self.GROUP_ID_SPATIAL
 
     def _paramTransportMode(self) -> QgsProcessingParameterEnum:
         from casageo.spatial import DEFAULT_TRANSPORT_MODE, TRANSPORT_MODES
