@@ -22,16 +22,17 @@ from qgis.core import (
     Qgis,
     QgsCoordinateReferenceSystem,
     QgsCoordinateTransform,
+    QgsExpression,
     QgsFeature,
     QgsFeatureSink,
     QgsField,
     QgsFields,
-    QgsPointXY,
     QgsProcessingContext,
     QgsProcessingException,  # pyright: ignore[reportAttributeAccessIssue]
     QgsProcessingFeedback,
     QgsProcessingParameterDateTime,
     QgsProcessingParameterEnum,
+    QgsProcessingParameterExpression,
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterNumber,
@@ -380,7 +381,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         return {self.OUTPUT: dest_id}
 
 
-class CasaGeoToolsRoutesSingleAlgorithm(CasaGeoToolsProcessingAlgorithm):
+class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
     __tr = TrMethod()
 
     OUTPUT = "OUTPUT"
@@ -400,11 +401,11 @@ class CasaGeoToolsRoutesSingleAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
     @override
     def displayName(self) -> str:
-        return self.__tr("Routes (single)", "Algorithm")
+        return self.__tr("Routes", "Algorithm")
 
     @override
     def name(self) -> str:
-        return "routes_single"
+        return "routes"
 
     @override
     def shortDescription(self) -> str:
@@ -682,11 +683,12 @@ class CasaGeoToolsRoutesSingleAlgorithm(CasaGeoToolsProcessingAlgorithm):
         return {self.OUTPUT: dest_id}
 
 
-class CasaGeoToolsRoutingAlgorithm(CasaGeoToolsProcessingAlgorithm):
+class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
     __tr = TrMethod()
 
     INPUT = "INPUT"
     OUTPUT = "OUTPUT"
+    SEQUENCE_EXPRESSION = "SEQUENCE_EXPRESSION"
 
     @override
     def groupId(self) -> str:
@@ -694,15 +696,15 @@ class CasaGeoToolsRoutingAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
     @override
     def displayName(self) -> str:
-        return self.__tr("Routes", "Algorithm")
+        return self.__tr("Routes Via", "Algorithm")
 
     @override
     def name(self) -> str:
-        return "routes"
+        return "routesvia"
 
     @override
     def shortDescription(self) -> str:
-        return self.__tr("Calculate routes between locations.")
+        return self.__tr("Calculate routes passing through a list of points.")
 
     @override
     def initAlgorithm(self, configuration: dict[str, Any] | None = None) -> None:
@@ -717,14 +719,23 @@ class CasaGeoToolsRoutingAlgorithm(CasaGeoToolsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
                 self.__tr("Input layer"),
-                [Qgis.ProcessingSourceType.VectorLine],
+                [Qgis.ProcessingSourceType.VectorPoint],
             )
         )
+
         self.addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT,
                 self.__tr("Output layer"),
                 Qgis.ProcessingSourceType.VectorLine,
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterExpression(
+                self.SEQUENCE_EXPRESSION,
+                self.__tr("Sequence expression"),
+                parentLayerParameterName=self.INPUT,
             )
         )
 
@@ -768,18 +779,31 @@ class CasaGeoToolsRoutingAlgorithm(CasaGeoToolsProcessingAlgorithm):
         )
         assert source is not None
 
+        expr = QgsExpression(
+            self.parameterAsExpression(
+                parameters,
+                self.SEQUENCE_EXPRESSION,
+                context,
+            )
+        )
+
+        if expr.hasParserError():
+            raise QgsProcessingException(
+                self.__tr("Invalid sequence expression: {error}").format(
+                    error=expr.parserErrorString(),
+                )
+            )
+
         into_epsg4326 = QgsCoordinateTransform(
             source.sourceCrs(),
             QgsCoordinateReferenceSystem.fromEpsgId(4326),
             QgsProject.instance(),
         )
 
-        show_intermediate_waypoint_warning = False
-
         data = []
         for feature in features_of(source):
-            itinerary = feature.geometry()
-            if itinerary.isEmpty():
+            geometry = feature.geometry()
+            if geometry.isEmpty():
                 feedback.pushInfo(
                     self.__tr(
                         "Skipping feature {featid} due to empty geometry",
@@ -787,8 +811,8 @@ class CasaGeoToolsRoutingAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 )
                 continue
 
-            itinerary.transform(into_epsg4326)
-            if itinerary.isEmpty():
+            geometry.transform(into_epsg4326)
+            if geometry.isEmpty():
                 feedback.pushInfo(
                     self.__tr(
                         "Skipping feature {featid} due to reprojection failure",
@@ -796,33 +820,27 @@ class CasaGeoToolsRoutingAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 )
                 continue
 
-            waypoints: list[QgsPointXY] = itinerary.asPolyline()
-            if len(waypoints) > 2:
-                feedback.pushInfo(
-                    self.__tr(
-                        "Feature {featid} has intermediate waypoints which will be ignored",
-                    ).format(featid=feature.id())
-                )
-                show_intermediate_waypoint_warning = True
+            position = geometry.asPoint()
+            sequence_id = -1  # FIXME
 
-            origin = waypoints[0]
-            destination = waypoints[-1]
+            # ctx = QgsExpressionContext()
+            # ctx.setFeature(feature)
+            # expr.evaluate()
 
             data.append({
-                "origin_longitude": origin.x(),
-                "origin_latitude": origin.y(),
-                "destination_longitude": destination.x(),
-                "destination_latitude": destination.y(),
+                "position_longitude": position.x(),
+                "position_latitude": position.y(),
+                "sequence_id": sequence_id,
             })
 
-        if show_intermediate_waypoint_warning:
+        if len(data) > 2:
             feedback.pushWarning(
                 self.__tr(
-                    "Some input geometries contain intermediate waypoints. Routing with intermediate waypoints is not implemented yet and these waypoints will be ignored."
+                    "The input layer contains intermediate waypoints. Routing with intermediate waypoints is not implemented yet and these waypoints will be ignored."
                 )
             )
 
-        return DataFrame(data)
+        return DataFrame(data).sort_values("sequence_id", ignore_index=True)
 
     def _calculateRoutes(
         self,
