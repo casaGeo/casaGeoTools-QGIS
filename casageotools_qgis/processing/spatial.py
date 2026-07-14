@@ -452,11 +452,11 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             self.addParameter(self._paramExcludeCountries())
 
     def _paramAlternatives(self):
-        from casageo.spatial import DEFAULT_ALTERNATIVES
-
-        # FIXME: Export these constants from casageo.spatial
-        MIN_ALTERNATIVES = 0
-        MAX_ALTERNATIVES = 6
+        from casageo.spatial import (
+            DEFAULT_ALTERNATIVES,
+            MAX_ALTERNATIVES,
+            MIN_ALTERNATIVES,
+        )
 
         return QgsProcessingParameterNumber(
             self.ALTERNATIVES,
@@ -479,7 +479,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         )
 
     def _paramRoutingMode(self) -> QgsProcessingParameterEnum:
-        from casageo.spatial import ROUTING_MODES, DEFAULT_ROUTING_MODE
+        from casageo.spatial import DEFAULT_ROUTING_MODE, ROUTING_MODES
 
         return QgsProcessingParameterEnum(
             self.ROUTING_MODE,
