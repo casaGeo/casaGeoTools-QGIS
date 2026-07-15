@@ -18,14 +18,12 @@ from typing import TYPE_CHECKING, Any, Self, override
 
 from qgis.core import (
     QgsProcessingAlgorithm,
-    QgsProcessingFeedback,
     QgsProcessingProvider,
 )
 
 from ..utils import TrMethod
 
 if TYPE_CHECKING:
-    from casageo.tools import CasaGeoClient
     from qgis.PyQt.QtGui import QIcon
 
     from ..plugin import CasaGeoToolsPlugin
@@ -142,16 +140,3 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
             self.status_ok = False
             self.status_message = self.__tr("Please input your API key in the settings")
             return
-
-    def casaGeoClient(
-        self, feedback: QgsProcessingFeedback | None = None
-    ) -> "CasaGeoClient":
-        from ..cgutils import CasaGeoToolsQgisEnabledCasaGeoClient
-
-        return CasaGeoToolsQgisEnabledCasaGeoClient(
-            self.plugin.settingApikey.value(),
-            preferred_language=self.plugin.settingLanguage.value() or None,
-            preferred_unit_system=self.plugin.settingUnitSystem.value() or None,
-            preferred_political_view=self.plugin.settingPoliticalView.value() or None,
-            qgis_feedback=feedback,
-        )

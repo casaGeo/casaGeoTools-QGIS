@@ -18,9 +18,9 @@ import json as jsonlib
 from typing import Any
 
 from casageo.tools import CasaGeoClient, CasaGeoError
+from qgis.core import QgsNetworkAccessManager
 from qgis.PyQt.QtCore import QUrl
 from qgis.PyQt.QtNetwork import QNetworkReply, QNetworkRequest
-from qgis.core import QgsNetworkAccessManager
 
 
 class CasaGeoToolsQgisEnabledCasaGeoClient(CasaGeoClient):

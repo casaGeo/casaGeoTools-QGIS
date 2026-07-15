@@ -25,9 +25,9 @@ if TYPE_CHECKING:
 
     from qgis.core import (
         QgsFeature,
+        QgsFeatureRequest,
         QgsGeometry,
         QgsProcessingFeatureSource,
-        QgsFeatureRequest,
     )
     from qgis.PyQt.QtCore import QDateTime
     from shapely.geometry.base import BaseGeometry as ShapelyBaseGeometry

@@ -140,7 +140,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         import casageo.coder
         import casageo.tools
 
-        client = self.casaGeoClient()
+        client = self.plugin.casaGeoClient()
         defaults = {}
 
         try:
@@ -390,7 +390,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         import casageo.coder
         import casageo.tools
 
-        client = self.casaGeoClient()
+        client = self.plugin.casaGeoClient()
         defaults = {"limit": self.parameterAsInt(parameters, self.LIMIT, context)}
 
         try:

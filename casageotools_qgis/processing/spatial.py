@@ -15,7 +15,6 @@
 #  SPDX-License-Identifier: Apache-2.0
 
 import contextlib
-
 from typing import TYPE_CHECKING, Any, override
 
 from qgis.core import (
@@ -135,7 +134,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         )
 
     def _paramRangesUnit(self) -> QgsProcessingParameterEnum:
-        from casageo.spatial import RANGE_UNITS, DEFAULT_RANGE_UNIT
+        from casageo.spatial import DEFAULT_RANGE_UNIT, RANGE_UNITS
 
         return QgsProcessingParameterEnum(
             self.RANGES_UNIT,
@@ -157,7 +156,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         )
 
     def _paramRoutingMode(self) -> QgsProcessingParameterEnum:
-        from casageo.spatial import ROUTING_MODES, DEFAULT_ROUTING_MODE
+        from casageo.spatial import DEFAULT_ROUTING_MODE, ROUTING_MODES
 
         return QgsProcessingParameterEnum(
             self.ROUTING_MODE,
@@ -168,7 +167,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         )
 
     def _paramDirection(self) -> QgsProcessingParameterEnum:
-        from casageo.spatial import DIRECTION_TYPES, DEFAULT_DIRECTION
+        from casageo.spatial import DEFAULT_DIRECTION, DIRECTION_TYPES
 
         return QgsProcessingParameterEnum(
             self.DIRECTION,
@@ -295,7 +294,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             TRANSPORT_MODES,
         )
 
-        client = self.casaGeoClient()
+        client = self.plugin.casaGeoClient()
 
         ranges = self.parameterAsString(parameters, self.RANGES, context).split(";")
         ranges_unit = self.parameterAsString(parameters, self.RANGES_UNIT, context)
@@ -599,7 +598,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             TRANSPORT_MODES,
         )
 
-        client = self.casaGeoClient()
+        client = self.plugin.casaGeoClient()
 
         alternatives = self.parameterAsInt(parameters, self.ALTERNATIVES, context)
         transport_index = self.parameterAsEnum(parameters, self.TRANSPORT_MODE, context)
@@ -852,7 +851,7 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
         import casageo.spatial
         import casageo.tools
 
-        client = self.casaGeoClient()
+        client = self.plugin.casaGeoClient()
         defaults = {}
 
         try:

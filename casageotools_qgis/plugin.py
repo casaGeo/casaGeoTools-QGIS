@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING
 
 from qgis.core import (
     QgsApplication,
+    QgsFeedback,
     QgsSettingsEntryString,
     QgsSettingsTree,
     QgsSettingsTreeNode,
@@ -46,6 +47,8 @@ from .resources import (
 from .utils import TrMethod, ensure
 
 if TYPE_CHECKING:
+    from casageo.tools import CasaGeoClient
+
     from .options import CasaGeoToolsOptionsWidgetFactory
     from .processing import CasaGeoToolsProcessingProvider
 
@@ -245,6 +248,17 @@ class CasaGeoToolsPlugin:
 
         QgsSettingsTree.unregisterPluginTreeNode(PLUGIN_IDENTIFIER)
         QCoreApplication.removeTranslator(self.translator)
+
+    def casaGeoClient(self, feedback: QgsFeedback | None = None) -> "CasaGeoClient":
+        from .cgutils import CasaGeoToolsQgisEnabledCasaGeoClient
+
+        return CasaGeoToolsQgisEnabledCasaGeoClient(
+            self.settingApikey.value(),
+            preferred_language=self.settingLanguage.value() or None,
+            preferred_unit_system=self.settingUnitSystem.value() or None,
+            preferred_political_view=self.settingPoliticalView.value() or None,
+            qgis_feedback=feedback,
+        )
 
     def helpFile(self, path: str = "index.html") -> str:
         return os.path.join(PLUGIN_HELP_DIRECTORY, path)
