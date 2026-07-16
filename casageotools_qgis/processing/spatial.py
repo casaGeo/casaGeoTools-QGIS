@@ -58,7 +58,6 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
     __tr = TrMethod()
 
     INPUT = "INPUT"
-    OUTPUT = "OUTPUT"
     RANGES = "RANGES"
     RANGES_UNIT = "RANGES_UNIT"
     TRANSPORT_MODE = "TRANSPORT_MODE"
@@ -67,6 +66,8 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
     DATETIME = "DATETIME"
     AVOID_FEATURES = "AVOID_FEATURES"
     EXCLUDE_COUNTRIES = "EXCLUDE_COUNTRIES"
+
+    OUTPUT_ISOLINES = "OUTPUT_ISOLINES"
 
     @override
     def groupId(self) -> str:
@@ -108,14 +109,6 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             )
         )
 
-        self.addParameter(
-            QgsProcessingParameterFeatureSink(
-                self.OUTPUT,
-                self.__tr("Output layer"),
-                Qgis.ProcessingSourceType.VectorPolygon,
-            )
-        )
-
         with contextlib.suppress(ImportError):
             self.addParameter(self._paramRanges())
             self.addParameter(self._paramRangesUnit())
@@ -125,6 +118,8 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             self.addParameter(self._paramDateTime())
             self.addParameter(self._paramAvoidFeatures())
             self.addParameter(self._paramExcludeCountries())
+
+        self.addParameter(self._paramOutputIsolines())
 
     def _paramRanges(self) -> QgsProcessingParameterString:
         # This could be converted into a QgsProcessingParameterMatrix.
@@ -204,6 +199,13 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             defaultValue=",".join(DEFAULT_EXCLUDE_COUNTRIES),
         )
 
+    def _paramOutputIsolines(self) -> QgsProcessingParameterFeatureSink:
+        return QgsProcessingParameterFeatureSink(
+            self.OUTPUT_ISOLINES,
+            self.__tr("Calculated isolines"),
+            Qgis.ProcessingSourceType.VectorPolygon,
+        )
+
     @override
     def sinkProperties(
         self,
@@ -213,7 +215,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         sourceProperties: dict[str | None, QgsProcessingAlgorithm.VectorProperties],
     ) -> QgsProcessingAlgorithm.VectorProperties:
         match sink:
-            case self.OUTPUT:
+            case self.OUTPUT_ISOLINES:
                 props = QgsProcessingAlgorithm.VectorProperties()
                 props.availability = Qgis.ProcessingPropertyAvailability.Available
                 props.crs = QgsCoordinateReferenceSystem.fromEpsgId(4326)
@@ -383,7 +385,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
     ) -> dict[str, str]:
         """Convert results to features and write them to the feature sink."""
 
-        sink_name = self.OUTPUT
+        sink_name = self.OUTPUT_ISOLINES
         sink_props = self.sinkProperties(sink_name, parameters, context, {})
         sink, dest_id = self.parameterAsSink(
             parameters,
@@ -394,7 +396,9 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             sink_props.crs,
         )
         if sink is None:
-            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
+            raise QgsProcessingException(
+                self.invalidSinkError(parameters, self.OUTPUT_ISOLINES)
+            )
 
         result: Any  # Make Pyright shut up about the named tuples.
         for result in results.itertuples():
@@ -416,13 +420,12 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature["timestamp"] = result.timestamp.isoformat()
             sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
 
-        return {self.OUTPUT: dest_id}
+        return {self.OUTPUT_ISOLINES: dest_id}
 
 
 class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
     __tr = TrMethod()
 
-    OUTPUT = "OUTPUT"
     ORIGIN = "ORIGIN"
     DESTINATION = "DESTINATION"
     ALTERNATIVES = "ALTERNATIVES"
@@ -432,6 +435,8 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
     ARRIVAL_TIME = "ARRIVAL_TIME"
     AVOID_FEATURES = "AVOID_FEATURES"
     EXCLUDE_COUNTRIES = "EXCLUDE_COUNTRIES"
+
+    OUTPUT_ROUTES = "OUTPUT_ROUTES"
 
     @override
     def groupId(self) -> str:
@@ -459,14 +464,6 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             configuration = {}
 
         self.addParameter(
-            QgsProcessingParameterFeatureSink(
-                self.OUTPUT,
-                self.__tr("Output layer", "Parameter"),
-                Qgis.ProcessingSourceType.VectorLine,
-            )
-        )
-
-        self.addParameter(
             QgsProcessingParameterPoint(
                 self.ORIGIN,
                 self.__tr("Origin", "Parameter"),
@@ -488,6 +485,8 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             self.addParameter(self._paramArrivalTime())
             self.addParameter(self._paramAvoidFeatures())
             self.addParameter(self._paramExcludeCountries())
+
+        self.addParameter(self._paramOutputRoutes())
 
     def _paramAlternatives(self):
         from casageo.spatial import (
@@ -561,6 +560,13 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             defaultValue=",".join(DEFAULT_EXCLUDE_COUNTRIES),
         )
 
+    def _paramOutputRoutes(self) -> QgsProcessingParameterFeatureSink:
+        return QgsProcessingParameterFeatureSink(
+            self.OUTPUT_ROUTES,
+            self.__tr("Calculated routes", "Parameter"),
+            Qgis.ProcessingSourceType.VectorLine,
+        )
+
     @override
     def sinkProperties(
         self,
@@ -570,7 +576,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         sourceProperties: dict[str | None, QgsProcessingAlgorithm.VectorProperties],
     ) -> QgsProcessingAlgorithm.VectorProperties:
         match sink:
-            case self.OUTPUT:
+            case self.OUTPUT_ROUTES:
                 props = QgsProcessingAlgorithm.VectorProperties()
                 props.availability = Qgis.ProcessingPropertyAvailability.Available
                 props.crs = QgsCoordinateReferenceSystem.fromEpsgId(4326)
@@ -723,7 +729,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
     ) -> dict[str, str]:
         """Convert results to features and write them to the feature sink."""
 
-        sink_name = self.OUTPUT
+        sink_name = self.OUTPUT_ROUTES
         sink_props = self.sinkProperties(sink_name, parameters, context, {})
         sink, dest_id = self.parameterAsSink(
             parameters,
@@ -734,7 +740,9 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             sink_props.crs,
         )
         if sink is None:
-            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
+            raise QgsProcessingException(
+                self.invalidSinkError(parameters, self.OUTPUT_ROUTES)
+            )
 
         result: Any  # Make Pyright shut up about the named tuples.
         for result in results.itertuples():
@@ -755,15 +763,16 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature["timestamp"] = result.timestamp.isoformat()
             sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
 
-        return {self.OUTPUT: dest_id}
+        return {self.OUTPUT_ROUTES: dest_id}
 
 
 class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
     __tr = TrMethod()
 
     INPUT = "INPUT"
-    OUTPUT = "OUTPUT"
     SEQUENCE_EXPRESSION = "SEQUENCE_EXPRESSION"
+
+    OUTPUT_ROUTES = "OUTPUT_ROUTES"
 
     @override
     def groupId(self) -> str:
@@ -799,18 +808,18 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
         )
 
         self.addParameter(
-            QgsProcessingParameterFeatureSink(
-                self.OUTPUT,
-                self.__tr("Output layer"),
-                Qgis.ProcessingSourceType.VectorLine,
-            )
-        )
-
-        self.addParameter(
             QgsProcessingParameterExpression(
                 self.SEQUENCE_EXPRESSION,
                 self.__tr("Sequence expression"),
                 parentLayerParameterName=self.INPUT,
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterFeatureSink(
+                self.OUTPUT_ROUTES,
+                self.__tr("Calculated routes"),
+                Qgis.ProcessingSourceType.VectorLine,
             )
         )
 
@@ -959,7 +968,7 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         sink, dest_id = self.parameterAsSink(
             parameters,
-            self.OUTPUT,
+            self.OUTPUT_ROUTES,
             context,
             fields,
             # TODO: Make this a MultiLineStringZM with elevation and time datapoints.
@@ -967,7 +976,9 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
             QgsCoordinateReferenceSystem.fromEpsgId(4326),
         )
         if sink is None:
-            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
+            raise QgsProcessingException(
+                self.invalidSinkError(parameters, self.OUTPUT_ROUTES)
+            )
 
         result: Any  # Make Pyright shut up about the named tuples.
         for result in results.itertuples():
@@ -988,4 +999,4 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature["timestamp"] = result.timestamp.isoformat()
             sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
 
-        return {self.OUTPUT: dest_id}
+        return {self.OUTPUT_ROUTES: dest_id}

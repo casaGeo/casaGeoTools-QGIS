@@ -47,7 +47,8 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     __tr = TrMethod()
 
     INPUT = "INPUT"
-    OUTPUT = "OUTPUT"
+
+    OUTPUT_LOCATIONS = "OUTPUT_LOCATIONS"
 
     @override
     def groupId(self) -> str:
@@ -81,10 +82,11 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 [Qgis.ProcessingSourceType.Vector],
             )
         )
+
         self.addParameter(
             QgsProcessingParameterFeatureSink(
-                self.OUTPUT,
-                self.__tr("Output layer"),
+                self.OUTPUT_LOCATIONS,
+                self.__tr("Geocoded locations"),
                 Qgis.ProcessingSourceType.VectorPoint,
             )
         )
@@ -98,7 +100,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         sourceProperties: dict[str | None, QgsProcessingAlgorithm.VectorProperties],
     ) -> QgsProcessingAlgorithm.VectorProperties:
         match sink:
-            case self.OUTPUT:
+            case self.OUTPUT_LOCATIONS:
                 props = QgsProcessingAlgorithm.VectorProperties()
                 props.availability = Qgis.ProcessingPropertyAvailability.Available
                 props.crs = QgsCoordinateReferenceSystem.fromEpsgId(4326)
@@ -206,7 +208,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     ) -> dict[str, str]:
         """Convert results to features and write them to the feature sink."""
 
-        sink_name = self.OUTPUT
+        sink_name = self.OUTPUT_LOCATIONS
         sink_props = self.sinkProperties(sink_name, parameters, context, {})
         sink, dest_id = self.parameterAsSink(
             parameters,
@@ -217,7 +219,9 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             sink_props.crs,
         )
         if sink is None:
-            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
+            raise QgsProcessingException(
+                self.invalidSinkError(parameters, self.OUTPUT_LOCATIONS)
+            )
 
         last_id_and_address = (None, None)
         result: Any  # Make Pyright shut up about the named tuples.
@@ -248,15 +252,16 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature["timestamp"] = result.timestamp.isoformat()
             sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
 
-        return {self.OUTPUT: dest_id}
+        return {self.OUTPUT_LOCATIONS: dest_id}
 
 
 class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     __tr = TrMethod()
 
     INPUT = "INPUT"
-    OUTPUT = "OUTPUT"
     LIMIT = "LIMIT"
+
+    OUTPUT_LOCATIONS = "OUTPUT_LOCATIONS"
 
     @override
     def groupId(self) -> str:
@@ -287,16 +292,16 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             )
         )
 
+        with contextlib.suppress(ImportError):
+            self.addParameter(self._paramLimit())
+
         self.addParameter(
             QgsProcessingParameterFeatureSink(
-                self.OUTPUT,
-                self.__tr("Output layer"),
+                self.OUTPUT_LOCATIONS,
+                self.__tr("POI locations"),
                 Qgis.ProcessingSourceType.VectorPoint,
             )
         )
-
-        with contextlib.suppress(ImportError):
-            self.addParameter(self._paramLimit())
 
     def _paramLimit(self) -> QgsProcessingParameterNumber:
         from casageo.coder import DEFAULT_LIMIT, MAX_LIMIT, MIN_LIMIT
@@ -319,7 +324,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         sourceProperties: dict[str | None, QgsProcessingAlgorithm.VectorProperties],
     ) -> QgsProcessingAlgorithm.VectorProperties:
         match sink:
-            case self.OUTPUT:
+            case self.OUTPUT_LOCATIONS:
                 props = QgsProcessingAlgorithm.VectorProperties()
                 props.availability = Qgis.ProcessingPropertyAvailability.Available
                 props.crs = QgsCoordinateReferenceSystem.fromEpsgId(4326)
@@ -498,7 +503,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     ) -> dict[str, str]:
         """Convert results to features and write them to the feature sink."""
 
-        sink_name = self.OUTPUT
+        sink_name = self.OUTPUT_LOCATIONS
         sink_props = self.sinkProperties(sink_name, parameters, context, {})
         sink, dest_id = self.parameterAsSink(
             parameters,
@@ -509,7 +514,9 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             sink_props.crs,
         )
         if sink is None:
-            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
+            raise QgsProcessingException(
+                self.invalidSinkError(parameters, self.OUTPUT_LOCATIONS)
+            )
 
         last_id_and_title = (None, None)
         result: Any  # Make Pyright shut up about the named tuples.
@@ -539,4 +546,4 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature["timestamp"] = result.timestamp.isoformat()
             sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
 
-        return {self.OUTPUT: dest_id}
+        return {self.OUTPUT_LOCATIONS: dest_id}
