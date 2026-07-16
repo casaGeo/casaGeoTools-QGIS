@@ -14,6 +14,7 @@
 #
 #  SPDX-License-Identifier: Apache-2.0
 
+import contextlib
 from typing import TYPE_CHECKING, Any, override
 
 from qgis.core import (
@@ -294,16 +295,19 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             )
         )
 
-        self.addParameter(
-            QgsProcessingParameterNumber(
-                self.LIMIT,
-                self.__tr("Limit"),
-                Qgis.ProcessingNumberParameterType.Integer,
-                # FIXME: these should be constants from casageo.coder
-                defaultValue=20,
-                minValue=1,
-                maxValue=100,
-            )
+        with contextlib.suppress(ImportError):
+            self.addParameter(self._paramLimit())
+
+    def _paramLimit(self) -> QgsProcessingParameterNumber:
+        from casageo.coder import DEFAULT_LIMIT, MAX_LIMIT, MIN_LIMIT
+
+        return QgsProcessingParameterNumber(
+            self.LIMIT,
+            self.__tr("Limit"),
+            Qgis.ProcessingNumberParameterType.Integer,
+            defaultValue=DEFAULT_LIMIT,
+            minValue=MIN_LIMIT,
+            maxValue=MAX_LIMIT,
         )
 
     @override
