@@ -17,7 +17,7 @@
 import json as jsonlib
 from typing import Any
 
-from casageo.tools import CasaGeoClient, CasaGeoError
+from casageo.tools import APIValueError, CasaGeoClient, CasaGeoError
 from qgis.core import QgsNetworkAccessManager
 from qgis.PyQt.QtCore import QUrl
 from qgis.PyQt.QtNetwork import QNetworkReply, QNetworkRequest
@@ -68,4 +68,8 @@ class CasaGeoToolsQgisEnabledCasaGeoClient(CasaGeoClient):
             case NetworkError.OperationCanceledError:
                 return None
 
-        raise CasaGeoError(f"Request failed: {reply.errorString()}")
+            case NetworkError.ProtocolInvalidOperationError:
+                raise APIValueError(str(reply.content(), "utf-8"))
+
+        msg = f"Request failed (code {reply.error()}): {reply.errorString()}"
+        raise CasaGeoError(msg)
