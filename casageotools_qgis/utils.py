@@ -32,6 +32,8 @@ if TYPE_CHECKING:
     from qgis.PyQt.QtCore import QDateTime
     from shapely.geometry.base import BaseGeometry as ShapelyBaseGeometry
 
+    from .plugin import CasaGeoToolsPlugin
+
 
 class TrMethod:
     def __set_name__(self, owner: type, name: str) -> None:
@@ -54,6 +56,104 @@ class TrMethod:
 #         staticmethod(partial(QCoreApplication.translate, cls.__name__)),
 #     )
 #     return cls
+
+
+class CasaGeoToolsCoderTranslator:
+    __tr = TrMethod()
+
+    address_names_mode_map: dict[str, str]
+    postal_code_mode_map: dict[str, str]
+
+    def __init__(self, plugin: "CasaGeoToolsPlugin") -> None:
+        self.plugin = plugin
+        self.retranslate()
+
+    def retranslate(self):
+        self.address_names_mode_map = {
+            "default": self.__tr("Default", "Address names mode"),
+            "matched": self.__tr("Matched", "Address names mode"),
+            "normalized": self.__tr("Normalized", "Address names mode"),
+        }
+        self.postal_code_mode_map = {
+            "default": self.__tr("Default", "Postal code mode"),
+            "cityLookup": self.__tr("City lookup", "Postal code mode"),
+            "districtLookup": self.__tr("District lookup", "Postal code mode"),
+        }
+
+    def translateAddressNamesMode(self, mode: str) -> str:
+        return self.address_names_mode_map.get(mode, mode)
+
+    def translatePostalCodeMode(self, mode: str) -> str:
+        return self.postal_code_mode_map.get(mode, mode)
+
+
+class CasaGeoToolsSpatialTranslator:
+    __tr = TrMethod()
+
+    range_type_map: dict[str, str]
+    range_unit_map: dict[str, str]
+    transport_mode_map: dict[str, str]
+    routing_mode_map: dict[str, str]
+    direction_type_map: dict[str, str]
+    avoidable_feature_map: dict[str, str]
+
+    def __init__(self, plugin: "CasaGeoToolsPlugin") -> None:
+        self.plugin = plugin
+        self.retranslate()
+
+    def retranslate(self):
+        self.range_type_map = {
+            "time": self.__tr("Time", "Range type"),
+            "distance": self.__tr("Distance", "Range type"),
+        }
+        self.range_unit_map = {
+            "minutes": self.__tr("Minutes", "Range unit"),
+            "meters": self.__tr("Meters", "Range unit"),
+        }
+        self.transport_mode_map = {
+            "car": self.__tr("Car", "Transport mode"),
+            "pedestrian": self.__tr("Pedestrian", "Transport mode"),
+            "bicycle": self.__tr("Bicycle", "Transport mode"),
+            "truck": self.__tr("Truck", "Transport mode"),
+        }
+        self.routing_mode_map = {
+            "fast": self.__tr("Fast", "Routing mode"),
+            "short": self.__tr("Short", "Routing mode"),
+        }
+        self.direction_type_map = {
+            "outgoing": self.__tr("Outgoing", "Direction type"),
+            "incoming": self.__tr("Incoming", "Direction type"),
+        }
+        self.avoidable_feature_map = {
+            "carShuttleTrain": self.__tr("Car shuttle trains", "Avoidable feature"),
+            "controlledAccessHighway": self.__tr(
+                "Controlled access highways", "Avoidable feature"
+            ),
+            "dirtRoad": self.__tr("Dirt roads", "Avoidable feature"),
+            "ferry": self.__tr("Ferries", "Avoidable feature"),
+            "seasonalClosure": self.__tr("Seasonal closures", "Avoidable feature"),
+            "tollRoad": self.__tr("Toll roads", "Avoidable feature"),
+            "tunnel": self.__tr("Tunnels", "Avoidable feature"),
+            "uTurns": self.__tr("U-turns", "Avoidable feature"),
+        }
+
+    def translateRangeType(self, range_type: str) -> str:
+        return self.range_type_map.get(range_type, range_type)
+
+    def translateRangeUnit(self, range_unit: str) -> str:
+        return self.range_unit_map.get(range_unit, range_unit)
+
+    def translateTransportMode(self, transport_mode: str) -> str:
+        return self.transport_mode_map.get(transport_mode, transport_mode)
+
+    def translateRoutingMode(self, routing_mode: str) -> str:
+        return self.routing_mode_map.get(routing_mode, routing_mode)
+
+    def translateDirectionType(self, direction_type: str) -> str:
+        return self.direction_type_map.get(direction_type, direction_type)
+
+    def translateAvoidableFeature(self, avoidable_feature: str) -> str:
+        return self.avoidable_feature_map.get(avoidable_feature, avoidable_feature)
 
 
 def ensure[T](value: T | None, /) -> T:

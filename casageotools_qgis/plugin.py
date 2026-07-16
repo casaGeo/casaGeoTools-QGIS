@@ -44,7 +44,12 @@ from .resources import (
     PLUGIN_I18N_DIRECTORY,
     PLUGIN_IDENTIFIER,
 )
-from .utils import TrMethod, ensure
+from .utils import (
+    CasaGeoToolsCoderTranslator,
+    CasaGeoToolsSpatialTranslator,
+    TrMethod,
+    ensure,
+)
 
 if TYPE_CHECKING:
     from casageo.tools import CasaGeoClient
@@ -90,6 +95,14 @@ class CasaGeoToolsPlugin:
     @cached_property
     def icon(self) -> QIcon:
         return QIcon(os.path.join(PLUGIN_ASSETS_DIRECTORY, "casageotools.png"))
+
+    @cached_property
+    def coderTranslator(self) -> CasaGeoToolsCoderTranslator:
+        return CasaGeoToolsCoderTranslator(self)
+
+    @cached_property
+    def spatialTranslator(self) -> CasaGeoToolsSpatialTranslator:
+        return CasaGeoToolsSpatialTranslator(self)
 
     @cached_property
     def actionSettings(self) -> QAction:

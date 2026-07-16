@@ -131,45 +131,45 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
     def _paramRangesUnit(self) -> QgsProcessingParameterEnum:
         from casageo.spatial import DEFAULT_RANGE_UNIT, RANGE_UNITS
 
+        displayname = self.plugin.spatialTranslator.translateRangeUnit
         return QgsProcessingParameterEnum(
             self.RANGES_UNIT,
             self.__tr("Ranges unit"),
-            options=RANGE_UNITS,
-            defaultValue=DEFAULT_RANGE_UNIT,
-            usesStaticStrings=True,
+            options=map(displayname, RANGE_UNITS),
+            defaultValue=displayname(DEFAULT_RANGE_UNIT),
         )
 
     def _paramTransportMode(self) -> QgsProcessingParameterEnum:
         from casageo.spatial import DEFAULT_TRANSPORT_MODE, TRANSPORT_MODES
 
+        displayname = self.plugin.spatialTranslator.translateTransportMode
         return QgsProcessingParameterEnum(
             self.TRANSPORT_MODE,
             self.__tr("Transport mode"),
-            options=TRANSPORT_MODES,
-            defaultValue=DEFAULT_TRANSPORT_MODE,
-            usesStaticStrings=True,
+            options=map(displayname, TRANSPORT_MODES),
+            defaultValue=displayname(DEFAULT_TRANSPORT_MODE),
         )
 
     def _paramRoutingMode(self) -> QgsProcessingParameterEnum:
         from casageo.spatial import DEFAULT_ROUTING_MODE, ROUTING_MODES
 
+        displayname = self.plugin.spatialTranslator.translateRoutingMode
         return QgsProcessingParameterEnum(
             self.ROUTING_MODE,
             self.__tr("Routing mode"),
-            options=ROUTING_MODES,
-            defaultValue=DEFAULT_ROUTING_MODE,
-            usesStaticStrings=True,
+            options=map(displayname, ROUTING_MODES),
+            defaultValue=displayname(DEFAULT_ROUTING_MODE),
         )
 
     def _paramDirection(self) -> QgsProcessingParameterEnum:
         from casageo.spatial import DEFAULT_DIRECTION, DIRECTION_TYPES
 
+        displayname = self.plugin.spatialTranslator.translateDirectionType
         return QgsProcessingParameterEnum(
             self.DIRECTION,
             self.__tr("Direction"),
-            options=DIRECTION_TYPES,
-            defaultValue=DEFAULT_DIRECTION,
-            usesStaticStrings=True,
+            options=map(displayname, DIRECTION_TYPES),
+            defaultValue=displayname(DEFAULT_DIRECTION),
         )
 
     def _paramDateTime(self) -> QgsProcessingParameterDateTime:
@@ -179,14 +179,17 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             optional=True,
         )
 
-    def _paramAvoidFeatures(self) -> QgsProcessingParameterString:
-        from casageo.spatial import DEFAULT_AVOID_FEATURES
+    def _paramAvoidFeatures(self) -> QgsProcessingParameterEnum:
+        from casageo.spatial import AVOIDABLE_FEATURES, DEFAULT_AVOID_FEATURES
 
-        return QgsProcessingParameterString(
+        displayname = self.plugin.spatialTranslator.translateAvoidableFeature
+        return QgsProcessingParameterEnum(
             self.AVOID_FEATURES,
-            self.__tr("Avoid features (separated by commas)"),
+            self.__tr("Avoid features"),
+            options=map(displayname, AVOIDABLE_FEATURES),
+            allowMultiple=True,
+            defaultValue=list(map(displayname, DEFAULT_AVOID_FEATURES)),
             optional=True,
-            defaultValue=",".join(DEFAULT_AVOID_FEATURES),
         )
 
     def _paramExcludeCountries(self) -> QgsProcessingParameterString:
@@ -341,7 +344,9 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         import casageo.spatial
         import casageo.tools
         from casageo.spatial import (
+            AVOIDABLE_FEATURES,
             DIRECTION_TYPES,
+            RANGE_UNITS,
             ROUTING_MODES,
             TRANSPORT_MODES,
         )
@@ -349,12 +354,12 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         client = self.plugin.casaGeoClient(feedback)
 
         ranges = self.parameterAsString(parameters, self.RANGES, context).split(";")
-        ranges_unit = self.parameterAsString(parameters, self.RANGES_UNIT, context)
+        ranges_unit_index = self.parameterAsEnum(parameters, self.RANGES_UNIT, context)
         transport_index = self.parameterAsEnum(parameters, self.TRANSPORT_MODE, context)
         routing_index = self.parameterAsEnum(parameters, self.ROUTING_MODE, context)
         direction_index = self.parameterAsEnum(parameters, self.DIRECTION, context)
         date_and_time = self.parameterAsDateTime(parameters, self.DATETIME, context)
-        avoid_features = self.parameterAsString(
+        avoid_features_indices = self.parameterAsEnums(
             parameters, self.AVOID_FEATURES, context
         )
         exclude_countries = self.parameterAsString(
@@ -363,14 +368,14 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         defaults = {
             "ranges": [float(r) for r in ranges],
-            "ranges_unit": ranges_unit,
+            "ranges_unit": RANGE_UNITS[ranges_unit_index],
             "transport_mode": TRANSPORT_MODES[transport_index],
             "routing_mode": ROUTING_MODES[routing_index],
             "direction": DIRECTION_TYPES[direction_index],
             "departure_time": pydatetime(date_and_time),
             "arrival_time": pydatetime(date_and_time),
             "traffic": date_and_time.isValid(),
-            "avoid_features": avoid_features,
+            "avoid_features": [AVOIDABLE_FEATURES[i] for i in avoid_features_indices],
             "exclude_countries": exclude_countries,
         }
 
@@ -513,23 +518,23 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
     def _paramTransportMode(self) -> QgsProcessingParameterEnum:
         from casageo.spatial import DEFAULT_TRANSPORT_MODE, TRANSPORT_MODES
 
+        displayname = self.plugin.spatialTranslator.translateTransportMode
         return QgsProcessingParameterEnum(
             self.TRANSPORT_MODE,
             self.__tr("Transport mode"),
-            options=TRANSPORT_MODES,
-            defaultValue=DEFAULT_TRANSPORT_MODE,
-            usesStaticStrings=True,
+            options=map(displayname, TRANSPORT_MODES),
+            defaultValue=displayname(DEFAULT_TRANSPORT_MODE),
         )
 
     def _paramRoutingMode(self) -> QgsProcessingParameterEnum:
         from casageo.spatial import DEFAULT_ROUTING_MODE, ROUTING_MODES
 
+        displayname = self.plugin.spatialTranslator.translateRoutingMode
         return QgsProcessingParameterEnum(
             self.ROUTING_MODE,
             self.__tr("Routing mode"),
-            options=ROUTING_MODES,
-            defaultValue=DEFAULT_ROUTING_MODE,
-            usesStaticStrings=True,
+            options=map(displayname, ROUTING_MODES),
+            defaultValue=displayname(DEFAULT_ROUTING_MODE),
         )
 
     def _paramDepartureTime(self):
@@ -546,14 +551,17 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             optional=True,
         )
 
-    def _paramAvoidFeatures(self) -> QgsProcessingParameterString:
-        from casageo.spatial import DEFAULT_AVOID_FEATURES
+    def _paramAvoidFeatures(self) -> QgsProcessingParameterEnum:
+        from casageo.spatial import AVOIDABLE_FEATURES, DEFAULT_AVOID_FEATURES
 
-        return QgsProcessingParameterString(
+        displayname = self.plugin.spatialTranslator.translateAvoidableFeature
+        return QgsProcessingParameterEnum(
             self.AVOID_FEATURES,
-            self.__tr("Avoid features (separated by commas)"),
+            self.__tr("Avoid features"),
+            options=map(displayname, AVOIDABLE_FEATURES),
+            allowMultiple=True,
+            defaultValue=list(map(displayname, DEFAULT_AVOID_FEATURES)),
             optional=True,
-            defaultValue=",".join(DEFAULT_AVOID_FEATURES),
         )
 
     def _paramExcludeCountries(self) -> QgsProcessingParameterString:
@@ -690,6 +698,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         import casageo.spatial
         import casageo.tools
         from casageo.spatial import (
+            AVOIDABLE_FEATURES,
             ROUTING_MODES,
             TRANSPORT_MODES,
         )
@@ -703,7 +712,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             parameters, self.DEPARTURE_TIME, context
         )
         arrival_time = self.parameterAsDateTime(parameters, self.ARRIVAL_TIME, context)
-        avoid_features = self.parameterAsString(
+        avoid_features_indices = self.parameterAsEnums(
             parameters, self.AVOID_FEATURES, context
         )
         exclude_countries = self.parameterAsString(
@@ -717,7 +726,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             "departure_time": pydatetime(departure_time),
             "arrival_time": pydatetime(arrival_time),
             "traffic": departure_time.isValid() or arrival_time.isValid(),
-            "avoid_features": avoid_features,
+            "avoid_features": [AVOIDABLE_FEATURES[i] for i in avoid_features_indices],
             "exclude_countries": exclude_countries,
         }
 
