@@ -179,7 +179,13 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 self.invalidSourceError(parameters, self.INPUT)
             )
 
-        return DataFrame([feature.attributeMap() for feature in features_of(source)])
+        data = []
+        for feature in features_of(source):
+            if feedback.isCanceled():
+                break
+            data.append(feature.attributeMap())
+
+        return DataFrame(data)
 
     def _geocodeAddresses(
         self,
@@ -191,7 +197,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         import casageo.coder
         import casageo.tools
 
-        client = self.plugin.casaGeoClient()
+        client = self.plugin.casaGeoClient(feedback)
         defaults = {}
 
         try:
@@ -226,6 +232,9 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         last_id_and_address = (None, None)
         result: Any  # Make Pyright shut up about the named tuples.
         for result in results.itertuples():
+            if feedback.isCanceled():
+                break
+
             # This weirdness is necessary because the library returns
             # multiple results when the location has multiple navigation
             # points.
@@ -450,6 +459,9 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         data = []
         for feature in features_of(source):
+            if feedback.isCanceled():
+                break
+
             geometry = feature.geometry()
             if geometry.isEmpty():
                 feedback.pushInfo(
@@ -486,7 +498,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         import casageo.coder
         import casageo.tools
 
-        client = self.plugin.casaGeoClient()
+        client = self.plugin.casaGeoClient(feedback)
         defaults = {"limit": self.parameterAsInt(parameters, self.LIMIT, context)}
 
         try:
@@ -521,6 +533,9 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         last_id_and_title = (None, None)
         result: Any  # Make Pyright shut up about the named tuples.
         for result in results.itertuples():
+            if feedback.isCanceled():
+                break
+
             # This weirdness is necessary because the library returns
             # multiple results when the location has multiple navigation
             # points.

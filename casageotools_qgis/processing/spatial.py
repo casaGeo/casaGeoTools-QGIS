@@ -301,6 +301,9 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         data = []
         for feature in features_of(source):
+            if feedback.isCanceled():
+                break
+
             geometry = feature.geometry()
             if geometry.isEmpty():
                 feedback.pushInfo(
@@ -343,7 +346,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             TRANSPORT_MODES,
         )
 
-        client = self.plugin.casaGeoClient()
+        client = self.plugin.casaGeoClient(feedback)
 
         ranges = self.parameterAsString(parameters, self.RANGES, context).split(";")
         ranges_unit = self.parameterAsString(parameters, self.RANGES_UNIT, context)
@@ -402,6 +405,9 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         result: Any  # Make Pyright shut up about the named tuples.
         for result in results.itertuples():
+            if feedback.isCanceled():
+                break
+
             if result.error_code is not None:
                 feedback.reportError(
                     self.__tr("Error ({code}): {message}").format(
@@ -688,7 +694,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             TRANSPORT_MODES,
         )
 
-        client = self.plugin.casaGeoClient()
+        client = self.plugin.casaGeoClient(feedback)
 
         alternatives = self.parameterAsInt(parameters, self.ALTERNATIVES, context)
         transport_index = self.parameterAsEnum(parameters, self.TRANSPORT_MODE, context)
@@ -746,6 +752,9 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         result: Any  # Make Pyright shut up about the named tuples.
         for result in results.itertuples():
+            if feedback.isCanceled():
+                break
+
             if result.error_code is not None:
                 feedback.reportError(
                     self.__tr("Error ({code}): {message}").format(
@@ -889,6 +898,9 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         data = []
         for feature in features_of(source):
+            if feedback.isCanceled():
+                break
+
             geometry = feature.geometry()
             if geometry.isEmpty():
                 feedback.pushInfo(
@@ -939,7 +951,7 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
         import casageo.spatial
         import casageo.tools
 
-        client = self.plugin.casaGeoClient()
+        client = self.plugin.casaGeoClient(feedback)
         defaults = {}
 
         try:
@@ -982,6 +994,9 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         result: Any  # Make Pyright shut up about the named tuples.
         for result in results.itertuples():
+            if feedback.isCanceled():
+                break
+
             if result.error_code is not None:
                 feedback.reportError(
                     self.__tr("Error ({code}): {message}").format(

@@ -31,6 +31,8 @@ class CasaGeoToolsQgisEnabledCasaGeoClient(CasaGeoClient):
         self.__server_url = QUrl(self.server)
 
     def request(self, method: str, url: str, *, json: Any | None = None) -> Any:
+        NetworkError = QNetworkReply.NetworkError
+
         request = QNetworkRequest(self.__server_url.resolved(QUrl(url)))
         request.setRawHeader(b"Authorization", self.__auth_header)
 
@@ -59,7 +61,11 @@ class CasaGeoToolsQgisEnabledCasaGeoClient(CasaGeoClient):
             case _:
                 raise ValueError(f"Unsupported method: {method}")
 
-        if reply.error() != QNetworkReply.NetworkError.NoError:
-            raise CasaGeoError(f"Request failed: {reply.errorString()}")
+        match reply.error():
+            case NetworkError.NoError:
+                return jsonlib.loads(str(reply.content(), "utf-8"))
 
-        return jsonlib.loads(str(reply.content(), "utf-8"))
+            case NetworkError.OperationCanceledError:
+                return None
+
+        raise CasaGeoError(f"Request failed: {reply.errorString()}")
