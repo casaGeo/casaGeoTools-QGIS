@@ -229,18 +229,10 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 self.invalidSinkError(parameters, self.OUTPUT_LOCATIONS)
             )
 
-        last_id_and_address = (None, None)
         result: Any  # Make Pyright shut up about the named tuples.
         for result in results.itertuples():
             if feedback.isCanceled():
                 break
-
-            # This weirdness is necessary because the library returns
-            # multiple results when the location has multiple navigation
-            # points.
-            if (result.id, result.address) == last_id_and_address:
-                continue
-            last_id_and_address = (result.id, result.address)
 
             if result.error_code is not None:
                 feedback.reportError(
@@ -530,18 +522,10 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 self.invalidSinkError(parameters, self.OUTPUT_LOCATIONS)
             )
 
-        last_id_and_title = (None, None)
         result: Any  # Make Pyright shut up about the named tuples.
         for result in results.itertuples():
             if feedback.isCanceled():
                 break
-
-            # This weirdness is necessary because the library returns
-            # multiple results when the location has multiple navigation
-            # points.
-            if (result.id, result.title) == last_id_and_title:
-                continue
-            last_id_and_title = (result.id, result.title)
 
             if result.error_code is not None:
                 feedback.reportError(
