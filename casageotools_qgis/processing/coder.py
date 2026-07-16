@@ -24,13 +24,13 @@ from qgis.core import (
     QgsFeatureSink,
     QgsField,
     QgsFields,
+    QgsProcessingAlgorithm,
     QgsProcessingContext,
     QgsProcessingException,  # pyright: ignore[reportAttributeAccessIssue]
     QgsProcessingFeedback,
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterNumber,
-    QgsProject,
 )
 from qgis.PyQt.QtCore import QMetaType
 
@@ -89,6 +89,51 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         )
 
     @override
+    def sinkProperties(
+        self,
+        sink: str | None,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        sourceProperties: dict[str | None, QgsProcessingAlgorithm.VectorProperties],
+    ) -> QgsProcessingAlgorithm.VectorProperties:
+        match sink:
+            case self.OUTPUT:
+                props = QgsProcessingAlgorithm.VectorProperties()
+                props.availability = Qgis.ProcessingPropertyAvailability.Available
+                props.crs = QgsCoordinateReferenceSystem.fromEpsgId(4326)
+                props.fields = QgsFields([
+                    QgsField("id", QMetaType.Type.Int),
+                    QgsField("subid", QMetaType.Type.Int),
+                    QgsField("address", QMetaType.Type.QString),
+                    QgsField("resulttype", QMetaType.Type.QString),
+                    QgsField("distance", QMetaType.Type.Double),
+                    QgsField("relevance", QMetaType.Type.Double),
+                    QgsField("timestamp", QMetaType.Type.QDateTime),
+                    # QgsField("error_code", QMetaType.Type.QString),
+                    # QgsField("error_message", QMetaType.Type.QString),
+                ])
+                props.wkbType = Qgis.WkbType.Point
+                return props
+
+        return super().sinkProperties(sink, parameters, context, sourceProperties)
+
+    @override
+    def validateInputCrs(
+        self, parameters: dict[str, Any], context: QgsProcessingContext
+    ) -> bool:
+        isTransformationPossible = QgsCoordinateTransform.isTransformationPossible
+        EPSG4326 = QgsCoordinateReferenceSystem.fromEpsgId(4326)
+
+        if (
+            (src := self.parameterAsSource(parameters, self.INPUT, context)) is not None
+            and (crs := src.sourceCrs()).isValid()
+            and not isTransformationPossible(crs, EPSG4326)
+        ):
+            return False
+
+        return super().validateInputCrs(parameters, context)
+
+    @override
     def processAlgorithm(
         self,
         parameters: dict[str, Any],
@@ -126,7 +171,10 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             self.INPUT,
             context,
         )
-        assert source is not None
+        if source is None:
+            raise QgsProcessingException(
+                self.invalidSourceError(parameters, self.INPUT)
+            )
 
         return DataFrame([feature.attributeMap() for feature in features_of(source)])
 
@@ -155,28 +203,20 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         feedback: QgsProcessingFeedback,
         results: "GeoDataFrame",
     ) -> dict[str, str]:
+        """Convert results to features and write them to the feature sink."""
 
-        fields = QgsFields([
-            QgsField("id", QMetaType.Type.Int),
-            QgsField("subid", QMetaType.Type.Int),
-            QgsField("address", QMetaType.Type.QString),
-            QgsField("resulttype", QMetaType.Type.QString),
-            QgsField("distance", QMetaType.Type.Double),
-            QgsField("relevance", QMetaType.Type.Double),
-            QgsField("timestamp", QMetaType.Type.QDateTime),
-            # QgsField("error_code", QMetaType.Type.QString),
-            # QgsField("error_message", QMetaType.Type.QString),
-        ])
-
+        sink_name = self.OUTPUT
+        sink_props = self.sinkProperties(sink_name, parameters, context, {})
         sink, dest_id = self.parameterAsSink(
             parameters,
-            self.OUTPUT,
+            sink_name,
             context,
-            fields,
-            Qgis.WkbType.Point,
-            QgsCoordinateReferenceSystem.fromEpsgId(4326),
+            sink_props.fields,
+            sink_props.wkbType,
+            sink_props.crs,
         )
-        assert sink is not None
+        if sink is None:
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
 
         last_id_and_address = (None, None)
         result: Any  # Make Pyright shut up about the named tuples.
@@ -196,7 +236,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 )
                 continue
 
-            feature = QgsFeature(fields)
+            feature = QgsFeature(sink_props.fields)
             feature.setGeometry(geometry_from_shapely(result.position))
             feature["id"] = result.id
             feature["subid"] = result.subid
@@ -265,6 +305,50 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 maxValue=100,
             )
         )
+
+    @override
+    def sinkProperties(
+        self,
+        sink: str | None,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        sourceProperties: dict[str | None, QgsProcessingAlgorithm.VectorProperties],
+    ) -> QgsProcessingAlgorithm.VectorProperties:
+        match sink:
+            case self.OUTPUT:
+                props = QgsProcessingAlgorithm.VectorProperties()
+                props.availability = Qgis.ProcessingPropertyAvailability.Available
+                props.crs = QgsCoordinateReferenceSystem.fromEpsgId(4326)
+                props.fields = QgsFields([
+                    QgsField("id", QMetaType.Type.Int),
+                    QgsField("subid", QMetaType.Type.Int),
+                    QgsField("title", QMetaType.Type.QString),
+                    QgsField("resulttype", QMetaType.Type.QString),
+                    QgsField("distance", QMetaType.Type.Double),
+                    QgsField("timestamp", QMetaType.Type.QDateTime),
+                    # QgsField("error_code", QMetaType.Type.QString),
+                    # QgsField("error_message", QMetaType.Type.QString),
+                ])
+                props.wkbType = Qgis.WkbType.Point
+                return props
+
+        return super().sinkProperties(sink, parameters, context, sourceProperties)
+
+    @override
+    def validateInputCrs(
+        self, parameters: dict[str, Any], context: QgsProcessingContext
+    ) -> bool:
+        isTransformationPossible = QgsCoordinateTransform.isTransformationPossible
+        EPSG4326 = QgsCoordinateReferenceSystem.fromEpsgId(4326)
+
+        if (
+            (src := self.parameterAsSource(parameters, self.INPUT, context)) is not None
+            and (crs := src.sourceCrs()).isValid()
+            and not isTransformationPossible(crs, EPSG4326)
+        ):
+            return False
+
+        return super().validateInputCrs(parameters, context)
 
     @override
     def processAlgorithm(
@@ -344,12 +428,15 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             self.INPUT,
             context,
         )
-        assert source is not None
+        if source is None:
+            raise QgsProcessingException(
+                self.invalidSourceError(parameters, self.INPUT)
+            )
 
         into_epsg4326 = QgsCoordinateTransform(
             source.sourceCrs(),
             QgsCoordinateReferenceSystem.fromEpsgId(4326),
-            QgsProject.instance(),
+            context.transformContext(),
         )
 
         data = []
@@ -407,26 +494,18 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     ) -> dict[str, str]:
         """Convert results to features and write them to the feature sink."""
 
-        fields = QgsFields([
-            QgsField("id", QMetaType.Type.Int),
-            QgsField("subid", QMetaType.Type.Int),
-            QgsField("title", QMetaType.Type.QString),
-            QgsField("resulttype", QMetaType.Type.QString),
-            QgsField("distance", QMetaType.Type.Double),
-            QgsField("timestamp", QMetaType.Type.QDateTime),
-            # QgsField("error_code", QMetaType.Type.QString),
-            # QgsField("error_message", QMetaType.Type.QString),
-        ])
-
+        sink_name = self.OUTPUT
+        sink_props = self.sinkProperties(sink_name, parameters, context, {})
         sink, dest_id = self.parameterAsSink(
             parameters,
-            self.OUTPUT,
+            sink_name,
             context,
-            fields,
-            Qgis.WkbType.Point,
-            QgsCoordinateReferenceSystem.fromEpsgId(4326),
+            sink_props.fields,
+            sink_props.wkbType,
+            sink_props.crs,
         )
-        assert sink is not None
+        if sink is None:
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
 
         last_id_and_title = (None, None)
         result: Any  # Make Pyright shut up about the named tuples.
@@ -446,7 +525,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 )
                 continue
 
-            feature = QgsFeature(fields)
+            feature = QgsFeature(sink_props.fields)
             feature.setGeometry(geometry_from_shapely(result.position))
             feature["id"] = result.id
             feature["subid"] = result.subid

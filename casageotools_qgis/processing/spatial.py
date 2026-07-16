@@ -26,6 +26,7 @@ from qgis.core import (
     QgsFeatureSink,
     QgsField,
     QgsFields,
+    QgsProcessingAlgorithm,
     QgsProcessingContext,
     QgsProcessingException,  # pyright: ignore[reportAttributeAccessIssue]
     QgsProcessingFeedback,
@@ -37,7 +38,6 @@ from qgis.core import (
     QgsProcessingParameterNumber,
     QgsProcessingParameterPoint,
     QgsProcessingParameterString,
-    QgsProject,
 )
 from qgis.PyQt.QtCore import QMetaType
 
@@ -205,6 +205,50 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         )
 
     @override
+    def sinkProperties(
+        self,
+        sink: str | None,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        sourceProperties: dict[str | None, QgsProcessingAlgorithm.VectorProperties],
+    ) -> QgsProcessingAlgorithm.VectorProperties:
+        match sink:
+            case self.OUTPUT:
+                props = QgsProcessingAlgorithm.VectorProperties()
+                props.availability = Qgis.ProcessingPropertyAvailability.Available
+                props.crs = QgsCoordinateReferenceSystem.fromEpsgId(4326)
+                props.fields = QgsFields([
+                    QgsField("id", QMetaType.Type.Int),
+                    QgsField("subid", QMetaType.Type.Int),
+                    QgsField("rangetype", QMetaType.Type.QString),
+                    QgsField("rangeunit", QMetaType.Type.QString),
+                    QgsField("rangevalue", QMetaType.Type.Double),
+                    QgsField("timestamp", QMetaType.Type.QDateTime),
+                    # QgsField("error_code", QMetaType.Type.QString),
+                    # QgsField("error_message", QMetaType.Type.QString),
+                ])
+                props.wkbType = Qgis.WkbType.Polygon
+                return props
+
+        return super().sinkProperties(sink, parameters, context, sourceProperties)
+
+    @override
+    def validateInputCrs(
+        self, parameters: dict[str, Any], context: QgsProcessingContext
+    ) -> bool:
+        isTransformationPossible = QgsCoordinateTransform.isTransformationPossible
+        EPSG4326 = QgsCoordinateReferenceSystem.fromEpsgId(4326)
+
+        if (
+            (src := self.parameterAsSource(parameters, self.INPUT, context)) is not None
+            and (crs := src.sourceCrs()).isValid()
+            and not isTransformationPossible(crs, EPSG4326)
+        ):
+            return False
+
+        return super().validateInputCrs(parameters, context)
+
+    @override
     def processAlgorithm(
         self,
         parameters: dict[str, Any],
@@ -242,12 +286,15 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             self.INPUT,
             context,
         )
-        assert source is not None
+        if source is None:
+            raise QgsProcessingException(
+                self.invalidSourceError(parameters, self.INPUT)
+            )
 
         into_epsg4326 = QgsCoordinateTransform(
             source.sourceCrs(),
             QgsCoordinateReferenceSystem.fromEpsgId(4326),
-            QgsProject.instance(),
+            context.transformContext(),
         )
 
         data = []
@@ -336,26 +383,18 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
     ) -> dict[str, str]:
         """Convert results to features and write them to the feature sink."""
 
-        fields = QgsFields([
-            QgsField("id", QMetaType.Type.Int),
-            QgsField("subid", QMetaType.Type.Int),
-            QgsField("rangetype", QMetaType.Type.QString),
-            QgsField("rangeunit", QMetaType.Type.QString),
-            QgsField("rangevalue", QMetaType.Type.Double),
-            QgsField("timestamp", QMetaType.Type.QDateTime),
-            # QgsField("error_code", QMetaType.Type.QString),
-            # QgsField("error_message", QMetaType.Type.QString),
-        ])
-
+        sink_name = self.OUTPUT
+        sink_props = self.sinkProperties(sink_name, parameters, context, {})
         sink, dest_id = self.parameterAsSink(
             parameters,
-            self.OUTPUT,
+            sink_name,
             context,
-            fields,
-            Qgis.WkbType.Polygon,
-            QgsCoordinateReferenceSystem.fromEpsgId(4326),
+            sink_props.fields,
+            sink_props.wkbType,
+            sink_props.crs,
         )
-        assert sink is not None
+        if sink is None:
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
 
         result: Any  # Make Pyright shut up about the named tuples.
         for result in results.itertuples():
@@ -367,7 +406,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 )
                 continue
 
-            feature = QgsFeature(fields)
+            feature = QgsFeature(sink_props.fields)
             feature.setGeometry(geometry_from_shapely(result.geometry))
             feature["id"] = result.id
             feature["subid"] = result.subid
@@ -523,6 +562,51 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         )
 
     @override
+    def sinkProperties(
+        self,
+        sink: str | None,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        sourceProperties: dict[str | None, QgsProcessingAlgorithm.VectorProperties],
+    ) -> QgsProcessingAlgorithm.VectorProperties:
+        match sink:
+            case self.OUTPUT:
+                props = QgsProcessingAlgorithm.VectorProperties()
+                props.availability = Qgis.ProcessingPropertyAvailability.Available
+                props.crs = QgsCoordinateReferenceSystem.fromEpsgId(4326)
+                props.fields = QgsFields([
+                    QgsField("id", QMetaType.Type.Int),
+                    QgsField("subid", QMetaType.Type.Int),
+                    QgsField("length", QMetaType.Type.Double),
+                    QgsField("duration", QMetaType.Type.Double),
+                    QgsField("timestamp", QMetaType.Type.QDateTime),
+                    # QgsField("error_code", QMetaType.Type.QString),
+                    # QgsField("error_message", QMetaType.Type.QString),
+                ])
+                # TODO: Make this a MultiLineStringZM with elevation and time datapoints.
+                props.wkbType = Qgis.WkbType.MultiLineString
+                return props
+
+        return super().sinkProperties(sink, parameters, context, sourceProperties)
+
+    @override
+    def validateInputCrs(
+        self, parameters: dict[str, Any], context: QgsProcessingContext
+    ) -> bool:
+        isTransformationPossible = QgsCoordinateTransform.isTransformationPossible
+        EPSG4326 = QgsCoordinateReferenceSystem.fromEpsgId(4326)
+
+        orig_crs = self.parameterAsPointCrs(parameters, self.ORIGIN, context)
+        if orig_crs.isValid() and not isTransformationPossible(orig_crs, EPSG4326):
+            return False
+
+        dest_crs = self.parameterAsPointCrs(parameters, self.DESTINATION, context)
+        if dest_crs.isValid() and not isTransformationPossible(dest_crs, EPSG4326):
+            return False
+
+        return super().validateInputCrs(parameters, context)
+
+    @override
     def processAlgorithm(
         self,
         parameters: dict[str, Any],
@@ -554,7 +638,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         origin = QgsCoordinateTransform(
             self.parameterAsPointCrs(parameters, self.ORIGIN, context),
             EPSG4326,
-            context.project(),
+            context.transformContext(),
         ).transform(self.parameterAsPoint(parameters, self.ORIGIN, context))
 
         if origin.isEmpty():
@@ -566,7 +650,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         destination = QgsCoordinateTransform(
             self.parameterAsPointCrs(parameters, self.DESTINATION, context),
             EPSG4326,
-            context.project(),
+            context.transformContext(),
         ).transform(self.parameterAsPoint(parameters, self.DESTINATION, context))
 
         if destination.isEmpty():
@@ -639,26 +723,18 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
     ) -> dict[str, str]:
         """Convert results to features and write them to the feature sink."""
 
-        fields = QgsFields([
-            QgsField("id", QMetaType.Type.Int),
-            QgsField("subid", QMetaType.Type.Int),
-            QgsField("length", QMetaType.Type.Double),
-            QgsField("duration", QMetaType.Type.Double),
-            QgsField("timestamp", QMetaType.Type.QDateTime),
-            # QgsField("error_code", QMetaType.Type.QString),
-            # QgsField("error_message", QMetaType.Type.QString),
-        ])
-
+        sink_name = self.OUTPUT
+        sink_props = self.sinkProperties(sink_name, parameters, context, {})
         sink, dest_id = self.parameterAsSink(
             parameters,
-            self.OUTPUT,
+            sink_name,
             context,
-            fields,
-            # TODO: Make this a MultiLineStringZM with elevation and time datapoints.
-            Qgis.WkbType.MultiLineString,
-            QgsCoordinateReferenceSystem.fromEpsgId(4326),
+            sink_props.fields,
+            sink_props.wkbType,
+            sink_props.crs,
         )
-        assert sink is not None
+        if sink is None:
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
 
         result: Any  # Make Pyright shut up about the named tuples.
         for result in results.itertuples():
@@ -670,7 +746,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 )
                 continue
 
-            feature = QgsFeature(fields)
+            feature = QgsFeature(sink_props.fields)
             feature.setGeometry(geometry_from_shapely(result.geometry))
             feature["id"] = result.id
             feature["subid"] = result.subid
@@ -776,7 +852,10 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
             self.INPUT,
             context,
         )
-        assert source is not None
+        if source is None:
+            raise QgsProcessingException(
+                self.invalidSourceError(parameters, self.INPUT)
+            )
 
         expr = QgsExpression(
             self.parameterAsExpression(
@@ -796,7 +875,7 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
         into_epsg4326 = QgsCoordinateTransform(
             source.sourceCrs(),
             QgsCoordinateReferenceSystem.fromEpsgId(4326),
-            QgsProject.instance(),
+            context.transformContext(),
         )
 
         data = []
@@ -887,7 +966,8 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
             Qgis.WkbType.MultiLineString,
             QgsCoordinateReferenceSystem.fromEpsgId(4326),
         )
-        assert sink is not None
+        if sink is None:
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
 
         result: Any  # Make Pyright shut up about the named tuples.
         for result in results.itertuples():
