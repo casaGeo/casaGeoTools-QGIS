@@ -232,7 +232,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                     # QgsField("error_code", QMetaType.Type.QString),
                     # QgsField("error_message", QMetaType.Type.QString),
                 ])
-                props.wkbType = Qgis.WkbType.Polygon
+                props.wkbType = Qgis.WkbType.MultiPolygon
                 return props
 
         return super().sinkProperties(sink, parameters, context, sourceProperties)
