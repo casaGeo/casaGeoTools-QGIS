@@ -47,6 +47,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     __tr = TrMethod()
 
     INPUT = "INPUT"
+    LIMIT = "LIMIT"
 
     OUTPUT_LOCATIONS = "OUTPUT_LOCATIONS"
 
@@ -83,12 +84,27 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             )
         )
 
+        with contextlib.suppress(ImportError):
+            self.addParameter(self._paramLimit())
+
         self.addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT_LOCATIONS,
                 self.__tr("Geocoded locations"),
                 Qgis.ProcessingSourceType.VectorPoint,
             )
+        )
+
+    def _paramLimit(self) -> QgsProcessingParameterNumber:
+        from casageo.coder import DEFAULT_LIMIT, MAX_LIMIT, MIN_LIMIT
+
+        return QgsProcessingParameterNumber(
+            self.LIMIT,
+            self.__tr("Limit"),
+            Qgis.ProcessingNumberParameterType.Integer,
+            defaultValue=DEFAULT_LIMIT,
+            minValue=MIN_LIMIT,
+            maxValue=MAX_LIMIT,
         )
 
     @override
@@ -198,7 +214,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         import casageo.tools
 
         client = self.plugin.casaGeoClient(feedback)
-        defaults = {}
+        defaults = {"limit": self.parameterAsInt(parameters, self.LIMIT, context)}
 
         try:
             return casageo.coder.address(client, queries, defaults)
