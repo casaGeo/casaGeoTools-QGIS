@@ -32,6 +32,7 @@ from qgis.core import (
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterNumber,
+    QgsProcessingParameterEnum,
 )
 from qgis.PyQt.QtCore import QMetaType
 
@@ -48,6 +49,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
     INPUT = "INPUT"
     LIMIT = "LIMIT"
+    ADDRESS_NAMES_MODE = "ADDRESS_NAMES_MODE"
 
     OUTPUT_LOCATIONS = "OUTPUT_LOCATIONS"
 
@@ -105,6 +107,18 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             defaultValue=DEFAULT_LIMIT,
             minValue=MIN_LIMIT,
             maxValue=MAX_LIMIT,
+        )
+
+    def _paramAddressNamesMode(self) -> QgsProcessingParameterEnum:
+        from casageo.coder import DEFAULT_ADDRESS_NAMES_MODE, ADDRESS_NAMES_MODES
+
+        displayname = self.plugin.coderTranslator.translateAddressNamesMode
+
+        return QgsProcessingParameterEnum(
+            self.ADDRESS_NAMES_MODE,
+            self.__tr("Address names mode"),
+            options=map(displayname, ADDRESS_NAMES_MODES),
+            defaultValue=displayname(DEFAULT_ADDRESS_NAMES_MODE),
         )
 
     @override
@@ -212,9 +226,17 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     ) -> "GeoDataFrame":
         import casageo.coder
         import casageo.tools
+        from casageo.coder import ADDRESS_NAMES_MODES
+
+        address_names_mode_index = self.parameterAsEnum(
+            parameters, self.ADDRESS_NAMES_MODE, context
+        )
 
         client = self.plugin.casaGeoClient(feedback)
-        defaults = {"limit": self.parameterAsInt(parameters, self.LIMIT, context)}
+        defaults = {
+            "limit": self.parameterAsInt(parameters, self.LIMIT, context),
+            "address_names_mode": ADDRESS_NAMES_MODES[address_names_mode_index],
+        }
 
         try:
             return casageo.coder.address(client, queries, defaults)
