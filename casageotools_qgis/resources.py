@@ -17,6 +17,9 @@
 import os
 from typing import cast
 
+LIBRARY_IDENTIFIER = "casaGeoTools"
+MINIMUM_REQUIRED_LIBRARY_VERSION = (1, 1, 0)
+
 PLUGIN_DIRECTORY = os.path.dirname(cast(str, __file__))
 PLUGIN_IDENTIFIER = os.path.basename(PLUGIN_DIRECTORY)
 

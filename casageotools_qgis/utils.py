@@ -185,6 +185,16 @@ def pydatetime(dt: "QDateTime", /) -> "datetime.datetime | None":
     return dt.toPyDateTime() if dt.isValid() else None
 
 
+def version_tuple(version: str) -> tuple[int, ...]:
+    import re
+
+    match = re.match(r"(\d+)(?:.(\d+))?(?:.(\d+))?", version)
+    if match is None:
+        raise ValueError(f"not a version string: {version!r}")
+
+    return tuple(map(int, match.groups(0)))
+
+
 # class Box[T: "QObject"]:
 #     def __init__(self) -> None:
 #         self.__value: T | None = None
