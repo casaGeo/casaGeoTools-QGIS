@@ -330,6 +330,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
     INPUT = "INPUT"
     LIMIT = "LIMIT"
+    COUNTRIES = "COUNTRIES"
 
     OUTPUT_LOCATIONS = "OUTPUT_LOCATIONS"
 
@@ -364,6 +365,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         with contextlib.suppress(ImportError):
             self.addParameter(self._paramLimit())
+            self.addParameter(self._paramCountries())
 
         self.addParameter(
             QgsProcessingParameterFeatureSink(
@@ -383,6 +385,13 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             defaultValue=DEFAULT_LIMIT,
             minValue=MIN_LIMIT,
             maxValue=MAX_LIMIT,
+        )
+
+    def _paramCountries(self) -> QgsProcessingParameterString:
+        return QgsProcessingParameterString(
+            self.COUNTRIES,
+            self.__tr("Countries (separated by comma)"),
+            optional=True,
         )
 
     @override
@@ -560,7 +569,10 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         import casageo.tools
 
         client = self.plugin.casaGeoClient(feedback)
-        defaults = {"limit": self.parameterAsInt(parameters, self.LIMIT, context)}
+        limit = self.parameterAsInt(parameters, self.LIMIT, context)
+        countries = self.parameterAsString(parameters, self.COUNTRIES, context)
+
+        defaults = {"limit": limit, "countries": countries}
 
         try:
             return casageo.coder.poi(client, queries, defaults)
