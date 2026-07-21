@@ -88,6 +88,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         with contextlib.suppress(ImportError):
             self.addParameter(self._paramLimit())
+            self.addParameter(self._paramAddressNamesMode())
 
         self.addParameter(
             QgsProcessingParameterFeatureSink(
