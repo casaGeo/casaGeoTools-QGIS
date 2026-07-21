@@ -232,34 +232,31 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 self.invalidSourceError(parameters, self.INPUT)
             )
 
+        # TODO: Maybe add this as constant to the coder module.
+        # FIXME: Make the names of the input fields configurable.
+        ADDRESS_FIELDS = {
+            "address",
+            "country",
+            "state",
+            "county",
+            "city",
+            "district",
+            "street",
+            "housenumber",
+            "postalcode",
+        }
+
+        if not any(fname in ADDRESS_FIELDS for fname in source.fields().names()):
+            msg = self.__tr("Input layer does not contain any address fields")
+            raise QgsProcessingException(msg)
+
         data = []
         for feature in features_of(source):
             if feedback.isCanceled():
                 break
             data.append(feature.attributeMap())
 
-        queries = DataFrame(data)
-
-        # extracted from https://casageotools.readthedocs.io/en/stable/casageo.coder.html#address-input-columns
-        # TODO: maybe add this as constant to the coder module
-        valid_columns = [
-            "id",
-            "address",
-            "country",
-            "city",
-            "district",
-            "street",
-            "housenumber",
-            "postalcode",
-        ]
-
-        if not any(col for col in queries.columns.names if col in valid_columns):
-            msg = self.__tr(
-                "No valid columns found in input layer see https://casageotools.readthedocs.io/en/stable/casageo.coder.html#address-input-columns for valid columns"
-            )
-            raise QgsProcessingException(msg)
-
-        return queries
+        return DataFrame(data)
 
     def _geocodeAddresses(
         self,
