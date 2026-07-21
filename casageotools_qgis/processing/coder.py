@@ -240,7 +240,28 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 break
             data.append(feature.attributeMap())
 
-        return DataFrame(data)
+        queries = DataFrame(data)
+
+        # extracted from https://casageotools.readthedocs.io/en/stable/casageo.coder.html#address-input-columns
+        # TODO: maybe add this as constant to the coder module
+        valid_columns = [
+            "id",
+            "address",
+            "country",
+            "city",
+            "district",
+            "street",
+            "housenumber",
+            "postalcode",
+        ]
+
+        if not any(col for col in queries.columns.names if col in valid_columns):
+            msg = self.__tr(
+                "No valid columns found in input layer see https://casageotools.readthedocs.io/en/stable/casageo.coder.html#address-input-columns for valid columns"
+            )
+            raise QgsProcessingException(msg)
+
+        return queries
 
     def _geocodeAddresses(
         self,
