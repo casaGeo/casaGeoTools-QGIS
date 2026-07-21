@@ -118,7 +118,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     def _paramCountries(self) -> QgsProcessingParameterString:
         return QgsProcessingParameterString(
             self.COUNTRIES,
-            self.__tr("Countries (separated by comma)"),
+            self.__tr("Search countries (separated by commas)"),
             optional=True,
         )
 
@@ -126,7 +126,6 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         from casageo.coder import ADDRESS_NAMES_MODES, DEFAULT_ADDRESS_NAMES_MODE
 
         displayname = self.plugin.coderTranslator.translateAddressNamesMode
-
         return QgsProcessingParameterEnum(
             self.ADDRESS_NAMES_MODE,
             self.__tr("Address names mode"),
@@ -138,7 +137,6 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         from casageo.coder import DEFAULT_POSTAL_CODE_MODE, POSTAL_CODE_MODES
 
         displayname = self.plugin.coderTranslator.translatePostalCodeMode
-
         return QgsProcessingParameterEnum(
             self.POSTAL_CODE_MODE,
             self.__tr("Postal code mode"),
@@ -274,6 +272,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         import casageo.tools
         from casageo.coder import ADDRESS_NAMES_MODES, POSTAL_CODE_MODES
 
+        limit = self.parameterAsInt(parameters, self.LIMIT, context)
         address_names_mode_index = self.parameterAsEnum(
             parameters, self.ADDRESS_NAMES_MODE, context
         )
@@ -284,7 +283,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         client = self.plugin.casaGeoClient(feedback)
         defaults = {
-            "limit": self.parameterAsInt(parameters, self.LIMIT, context),
+            "limit": limit,
             "countries": countries,
             "address_names_mode": ADDRESS_NAMES_MODES[address_names_mode_index],
             "postal_code_mode": POSTAL_CODE_MODES[postal_code_mode_index],
@@ -415,7 +414,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     def _paramCountries(self) -> QgsProcessingParameterString:
         return QgsProcessingParameterString(
             self.COUNTRIES,
-            self.__tr("Countries (separated by comma)"),
+            self.__tr("Search countries (separated by commas)"),
             optional=True,
         )
 
@@ -423,7 +422,6 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         from casageo.coder import ADDRESS_NAMES_MODES, DEFAULT_ADDRESS_NAMES_MODE
 
         displayname = self.plugin.coderTranslator.translateAddressNamesMode
-
         return QgsProcessingParameterEnum(
             self.ADDRESS_NAMES_MODE,
             self.__tr("Address names mode"),
@@ -435,7 +433,6 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         from casageo.coder import DEFAULT_POSTAL_CODE_MODE, POSTAL_CODE_MODES
 
         displayname = self.plugin.coderTranslator.translatePostalCodeMode
-
         return QgsProcessingParameterEnum(
             self.POSTAL_CODE_MODE,
             self.__tr("Postal code mode"),
