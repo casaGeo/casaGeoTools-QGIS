@@ -331,6 +331,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     INPUT = "INPUT"
     LIMIT = "LIMIT"
     COUNTRIES = "COUNTRIES"
+    ADDRESS_NAMES_MODE = "ADDRESS_NAMES_MODE"
 
     OUTPUT_LOCATIONS = "OUTPUT_LOCATIONS"
 
@@ -366,6 +367,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         with contextlib.suppress(ImportError):
             self.addParameter(self._paramLimit())
             self.addParameter(self._paramCountries())
+            self.addParameter(self._paramAddressNamesMode())
 
         self.addParameter(
             QgsProcessingParameterFeatureSink(
@@ -392,6 +394,18 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             self.COUNTRIES,
             self.__tr("Countries (separated by comma)"),
             optional=True,
+        )
+
+    def _paramAddressNamesMode(self) -> QgsProcessingParameterEnum:
+        from casageo.coder import ADDRESS_NAMES_MODES, DEFAULT_ADDRESS_NAMES_MODE
+
+        displayname = self.plugin.coderTranslator.translateAddressNamesMode
+
+        return QgsProcessingParameterEnum(
+            self.ADDRESS_NAMES_MODE,
+            self.__tr("Address names mode"),
+            options=map(displayname, ADDRESS_NAMES_MODES),
+            defaultValue=displayname(DEFAULT_ADDRESS_NAMES_MODE),
         )
 
     @override
@@ -567,12 +581,21 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     ) -> "GeoDataFrame":
         import casageo.coder
         import casageo.tools
+        from casageo.coder import ADDRESS_NAMES_MODES
 
         client = self.plugin.casaGeoClient(feedback)
+
         limit = self.parameterAsInt(parameters, self.LIMIT, context)
         countries = self.parameterAsString(parameters, self.COUNTRIES, context)
+        address_names_mode_index = self.parameterAsEnum(
+            parameters, self.ADDRESS_NAMES_MODE, context
+        )
 
-        defaults = {"limit": limit, "countries": countries}
+        defaults = {
+            "limit": limit,
+            "countries": countries,
+            "address_names_mode": ADDRESS_NAMES_MODES[address_names_mode_index],
+        }
 
         try:
             return casageo.coder.poi(client, queries, defaults)
