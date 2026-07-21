@@ -332,6 +332,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     LIMIT = "LIMIT"
     COUNTRIES = "COUNTRIES"
     ADDRESS_NAMES_MODE = "ADDRESS_NAMES_MODE"
+    POSTAL_CODE_MODE = "POSTAL_CODE_MODE"
 
     OUTPUT_LOCATIONS = "OUTPUT_LOCATIONS"
 
@@ -368,6 +369,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             self.addParameter(self._paramLimit())
             self.addParameter(self._paramCountries())
             self.addParameter(self._paramAddressNamesMode())
+            self.addParameter(self._paramPostalCodeMode())
 
         self.addParameter(
             QgsProcessingParameterFeatureSink(
@@ -406,6 +408,18 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             self.__tr("Address names mode"),
             options=map(displayname, ADDRESS_NAMES_MODES),
             defaultValue=displayname(DEFAULT_ADDRESS_NAMES_MODE),
+        )
+
+    def _paramPostalCodeMode(self) -> QgsProcessingParameterEnum:
+        from casageo.coder import DEFAULT_POSTAL_CODE_MODE, POSTAL_CODE_MODES
+
+        displayname = self.plugin.coderTranslator.translatePostalCodeMode
+
+        return QgsProcessingParameterEnum(
+            self.POSTAL_CODE_MODE,
+            self.__tr("Postal code mode"),
+            options=map(displayname, POSTAL_CODE_MODES),
+            defaultValue=displayname(DEFAULT_POSTAL_CODE_MODE),
         )
 
     @override
@@ -581,7 +595,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     ) -> "GeoDataFrame":
         import casageo.coder
         import casageo.tools
-        from casageo.coder import ADDRESS_NAMES_MODES
+        from casageo.coder import ADDRESS_NAMES_MODES, POSTAL_CODE_MODES
 
         client = self.plugin.casaGeoClient(feedback)
 
@@ -590,11 +604,15 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         address_names_mode_index = self.parameterAsEnum(
             parameters, self.ADDRESS_NAMES_MODE, context
         )
+        postal_code_mode_index = self.parameterAsEnum(
+            parameters, self.POSTAL_CODE_MODE, context
+        )
 
         defaults = {
             "limit": limit,
             "countries": countries,
             "address_names_mode": ADDRESS_NAMES_MODES[address_names_mode_index],
+            "postal_code_mode": POSTAL_CODE_MODES[postal_code_mode_index],
         }
 
         try:
