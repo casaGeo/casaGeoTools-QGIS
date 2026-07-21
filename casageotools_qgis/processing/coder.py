@@ -29,10 +29,10 @@ from qgis.core import (
     QgsProcessingContext,
     QgsProcessingException,  # pyright: ignore[reportAttributeAccessIssue]
     QgsProcessingFeedback,
+    QgsProcessingParameterEnum,
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterNumber,
-    QgsProcessingParameterEnum,
 )
 from qgis.PyQt.QtCore import QMetaType
 
@@ -110,7 +110,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         )
 
     def _paramAddressNamesMode(self) -> QgsProcessingParameterEnum:
-        from casageo.coder import DEFAULT_ADDRESS_NAMES_MODE, ADDRESS_NAMES_MODES
+        from casageo.coder import ADDRESS_NAMES_MODES, DEFAULT_ADDRESS_NAMES_MODE
 
         displayname = self.plugin.coderTranslator.translateAddressNamesMode
 
