@@ -33,6 +33,7 @@ from qgis.core import (
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterNumber,
+    QgsProcessingParameterString,
 )
 from qgis.PyQt.QtCore import QMetaType
 
@@ -51,6 +52,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     LIMIT = "LIMIT"
     ADDRESS_NAMES_MODE = "ADDRESS_NAMES_MODE"
     POSTAL_CODE_MODE = "POSTAL_CODE_MODE"
+    COUNTRIES = "COUNTRIES"
 
     OUTPUT_LOCATIONS = "OUTPUT_LOCATIONS"
 
@@ -89,6 +91,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         with contextlib.suppress(ImportError):
             self.addParameter(self._paramLimit())
+            self.addParameter(self._paramCountries())
             self.addParameter(self._paramAddressNamesMode())
             self.addParameter(self._paramPostalCodeMode())
 
@@ -110,6 +113,13 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             defaultValue=DEFAULT_LIMIT,
             minValue=MIN_LIMIT,
             maxValue=MAX_LIMIT,
+        )
+
+    def _paramCountries(self) -> QgsProcessingParameterString:
+        return QgsProcessingParameterString(
+            self.COUNTRIES,
+            self.__tr("Countries (separated by comma)"),
+            optional=True,
         )
 
     def _paramAddressNamesMode(self) -> QgsProcessingParameterEnum:
@@ -249,10 +259,12 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         postal_code_mode_index = self.parameterAsEnum(
             parameters, self.POSTAL_CODE_MODE, context
         )
+        countries = self.parameterAsString(parameters, self.COUNTRIES, context)
 
         client = self.plugin.casaGeoClient(feedback)
         defaults = {
             "limit": self.parameterAsInt(parameters, self.LIMIT, context),
+            "countries": countries,
             "address_names_mode": ADDRESS_NAMES_MODES[address_names_mode_index],
             "postal_code_mode": POSTAL_CODE_MODES[postal_code_mode_index],
         }
