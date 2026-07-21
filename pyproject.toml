@@ -15,12 +15,9 @@ dependencies = [
 Homepage = "https://www.casageo.de/en/here-connector-for-python.html"
 # TODO: Point this to the QGIS plugin section
 Documentation = "https://casageotools.readthedocs.io"
-# TODO: Point this to qgis/
-Source = "https://github.com/casaGeo/casaGeoTools"
-# TODO: Add QGIS issue tag.
-Issues = "https://github.com/casaGeo/casaGeoTools/issues"
-# TODO: Point this to qgis/CHANGELOG.md
-Changelog = "https://github.com/casaGeo/casaGeoTools/blob/main/CHANGELOG.md"
+Source = "https://github.com/casaGeo/casaGeoTools/tree/main/qgis"
+Issues = "https://github.com/casaGeo/casaGeoTools/issues?q=label%3Aqgis"
+Changelog = "https://github.com/casaGeo/casaGeoTools/blob/main/qgis/CHANGELOG.md"
 
 [dependency-groups]
 dev = [
