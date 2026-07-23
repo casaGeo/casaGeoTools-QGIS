@@ -15,6 +15,7 @@
 #  SPDX-License-Identifier: Apache-2.0
 
 import contextlib
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, override
 
 from qgis.core import (
@@ -43,6 +44,7 @@ from qgis.PyQt.QtCore import QMetaType
 
 from ..utils import (
     TrMethod,
+    and_then,
     features_of,
     geometry_from_shapely,
     pydatetime,
@@ -68,6 +70,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
     EXCLUDE_COUNTRIES = "EXCLUDE_COUNTRIES"
 
     OUTPUT_ISOLINES = "OUTPUT_ISOLINES"
+    OUTPUT_NAVIGATIONS = "OUTPUT_NAVIGATIONS"
 
     @override
     def groupId(self) -> str:
@@ -120,6 +123,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             self.addParameter(self._paramExcludeCountries())
 
         self.addParameter(self._paramOutputIsolines())
+        self.addParameter(self._paramOutputNavigations())
 
     def _paramRanges(self) -> QgsProcessingParameterString:
         # This could be converted into a QgsProcessingParameterMatrix.
@@ -205,8 +209,15 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
     def _paramOutputIsolines(self) -> QgsProcessingParameterFeatureSink:
         return QgsProcessingParameterFeatureSink(
             self.OUTPUT_ISOLINES,
-            self.__tr("Calculated isolines"),
+            self.__tr("Isoline polygons"),
             Qgis.ProcessingSourceType.VectorPolygon,
+        )
+
+    def _paramOutputNavigations(self) -> QgsProcessingParameterFeatureSink:
+        return QgsProcessingParameterFeatureSink(
+            self.OUTPUT_NAVIGATIONS,
+            self.__tr("Isoline navigation points"),
+            Qgis.ProcessingSourceType.VectorPoint,
         )
 
     @override
@@ -233,6 +244,19 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                     # QgsField("error_message", QMetaType.Type.QString),
                 ])
                 props.wkbType = Qgis.WkbType.MultiPolygon
+                return props
+
+            case self.OUTPUT_NAVIGATIONS:
+                props = QgsProcessingAlgorithm.VectorProperties()
+                props.availability = Qgis.ProcessingPropertyAvailability.Available
+                props.crs = QgsCoordinateReferenceSystem.fromEpsgId(4326)
+                props.fields = QgsFields([
+                    QgsField("id", QMetaType.Type.Int),
+                    QgsField("localtime", QMetaType.Type.QDateTime),
+                    QgsField("placename", QMetaType.Type.QString),
+                    QgsField("timestamp", QMetaType.Type.QDateTime),
+                ])
+                props.wkbType = Qgis.WkbType.Point
                 return props
 
         return super().sinkProperties(sink, parameters, context, sourceProperties)
@@ -380,7 +404,13 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         }
 
         try:
-            return casageo.spatial.isolines(client, queries, defaults)
+            return casageo.spatial.isolines(
+                client,
+                queries,
+                defaults,
+                departure_info=True,
+                arrival_info=True,
+            )
         except casageo.tools.CasaGeoError as err:
             raise QgsProcessingException(str(err)) from err
 
@@ -394,6 +424,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         """Convert results to features and write them to the feature sink."""
 
         isolines = self._getSink(self.OUTPUT_ISOLINES, parameters, context)
+        navigations = self._getSink(self.OUTPUT_NAVIGATIONS, parameters, context)
 
         result: Any  # Make Pyright shut up about the named tuples.
         for result in results.itertuples():
@@ -418,8 +449,42 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature["timestamp"] = result.timestamp.isoformat()
             isolines.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
 
+        for result in results.drop_duplicates(subset=["id"]).itertuples():
+            if feedback.isCanceled():
+                break
+
+            # HACK: The library should unify these output fields!
+            outgoing = (
+                result.departure_time is not None
+                or result.departure_placename is not None
+                or result.departure_position is not None
+            )
+
+            feature = QgsFeature(navigations.props.fields)
+            feature.setGeometry(
+                and_then(
+                    (
+                        result.departure_position
+                        if outgoing
+                        else result.arrival_position
+                    ),
+                    geometry_from_shapely,
+                )
+            )
+            feature["id"] = result.id
+            feature["localtime"] = and_then(
+                (result.departure_time if outgoing else result.arrival_time),
+                datetime.isoformat,
+            )
+            feature["placename"] = (
+                result.departure_placename if outgoing else result.arrival_placename
+            )
+            feature["timestamp"] = result.timestamp.isoformat()
+            navigations.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
+
         return {
             isolines.name: isolines.dest,
+            navigations.name: navigations.dest,
         }
 
 
@@ -437,6 +502,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
     EXCLUDE_COUNTRIES = "EXCLUDE_COUNTRIES"
 
     OUTPUT_ROUTES = "OUTPUT_ROUTES"
+    OUTPUT_NAVIGATIONS = "OUTPUT_NAVIGATIONS"
 
     @override
     def groupId(self) -> str:
@@ -487,6 +553,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             self.addParameter(self._paramExcludeCountries())
 
         self.addParameter(self._paramOutputRoutes())
+        self.addParameter(self._paramOutputNavigations())
 
     def _paramAlternatives(self):
         from casageo.spatial import (
@@ -570,6 +637,13 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             Qgis.ProcessingSourceType.VectorLine,
         )
 
+    def _paramOutputNavigations(self) -> QgsProcessingParameterFeatureSink:
+        return QgsProcessingParameterFeatureSink(
+            self.OUTPUT_NAVIGATIONS,
+            self.__tr("Routing navigation points"),
+            Qgis.ProcessingSourceType.VectorPoint,
+        )
+
     @override
     def sinkProperties(
         self,
@@ -594,6 +668,21 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 ])
                 # TODO: Make this a MultiLineStringZM with elevation and time datapoints.
                 props.wkbType = Qgis.WkbType.MultiLineString
+                return props
+
+            case self.OUTPUT_NAVIGATIONS:
+                props = QgsProcessingAlgorithm.VectorProperties()
+                props.availability = Qgis.ProcessingPropertyAvailability.Available
+                props.crs = QgsCoordinateReferenceSystem.fromEpsgId(4326)
+                props.fields = QgsFields([
+                    QgsField("id", QMetaType.Type.Int),
+                    QgsField("subid", QMetaType.Type.Int),
+                    QgsField("navid", QMetaType.Type.Int),
+                    QgsField("localtime", QMetaType.Type.QDateTime),
+                    QgsField("placename", QMetaType.Type.QString),
+                    QgsField("timestamp", QMetaType.Type.QDateTime),
+                ])
+                props.wkbType = Qgis.WkbType.Point
                 return props
 
         return super().sinkProperties(sink, parameters, context, sourceProperties)
@@ -720,7 +809,13 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         }
 
         try:
-            return casageo.spatial.routes(client, queries, defaults)
+            return casageo.spatial.routes(
+                client,
+                queries,
+                defaults,
+                departure_info=True,
+                arrival_info=True,
+            )
         except casageo.tools.CasaGeoError as err:
             raise QgsProcessingException(str(err)) from err
 
@@ -734,6 +829,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         """Convert results to features and write them to the feature sink."""
 
         routes = self._getSink(self.OUTPUT_ROUTES, parameters, context)
+        navigations = self._getSink(self.OUTPUT_NAVIGATIONS, parameters, context)
 
         result: Any  # Make Pyright shut up about the named tuples.
         for result in results.itertuples():
@@ -757,8 +853,33 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature["timestamp"] = result.timestamp.isoformat()
             routes.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
 
+            feature = QgsFeature(navigations.props.fields)
+            feature.setGeometry(
+                and_then(result.departure_position, geometry_from_shapely)
+            )
+            feature["id"] = result.id
+            feature["subid"] = result.subid
+            feature["navid"] = 0
+            feature["localtime"] = and_then(result.departure_time, datetime.isoformat)
+            feature["placename"] = result.departure_placename
+            feature["timestamp"] = and_then(result.timestamp, datetime.isoformat)
+            navigations.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
+
+            feature = QgsFeature(navigations.props.fields)
+            feature.setGeometry(
+                and_then(result.arrival_position, geometry_from_shapely)
+            )
+            feature["id"] = result.id
+            feature["subid"] = result.subid
+            feature["navid"] = 1
+            feature["localtime"] = and_then(result.arrival_time, datetime.isoformat)
+            feature["placename"] = result.arrival_placename
+            feature["timestamp"] = and_then(result.timestamp, datetime.isoformat)
+            navigations.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
+
         return {
             routes.name: routes.dest,
+            navigations.name: navigations.dest,
         }
 
 

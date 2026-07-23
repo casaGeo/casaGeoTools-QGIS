@@ -14,9 +14,8 @@
 #
 #  SPDX-License-Identifier: Apache-2.0
 
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass
-
-from collections.abc import Iterator
 from typing import TYPE_CHECKING, LiteralString, cast
 
 from qgis.PyQt.QtCore import QCoreApplication
@@ -165,6 +164,14 @@ class ProcessingFeatureSinkDefinition:
     props: "QgsProcessingAlgorithm.VectorProperties"
     dest: str
     sink: "QgsFeatureSink"
+
+
+def and_then(val, /, *funcs: Callable):
+    for func in funcs:
+        if val is None:
+            break
+        val = func(val)
+    return val
 
 
 def ensure[T](value: T | None, /) -> T:
