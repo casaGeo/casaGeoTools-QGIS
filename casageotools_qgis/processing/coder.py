@@ -55,6 +55,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     COUNTRIES = "COUNTRIES"
 
     OUTPUT_LOCATIONS = "OUTPUT_LOCATIONS"
+    OUTPUT_NAVIGATIONS = "OUTPUT_NAVIGATIONS"
 
     @override
     def groupId(self) -> str:
@@ -99,6 +100,14 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT_LOCATIONS,
                 self.__tr("Geocoded locations"),
+                Qgis.ProcessingSourceType.VectorPoint,
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterFeatureSink(
+                self.OUTPUT_NAVIGATIONS,
+                self.__tr("Geocoded navigation points"),
                 Qgis.ProcessingSourceType.VectorPoint,
             )
         )
@@ -153,13 +162,14 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         sourceProperties: dict[str | None, QgsProcessingAlgorithm.VectorProperties],
     ) -> QgsProcessingAlgorithm.VectorProperties:
         match sink:
-            case self.OUTPUT_LOCATIONS:
+            case self.OUTPUT_LOCATIONS | self.OUTPUT_NAVIGATIONS:
                 props = QgsProcessingAlgorithm.VectorProperties()
                 props.availability = Qgis.ProcessingPropertyAvailability.Available
                 props.crs = QgsCoordinateReferenceSystem.fromEpsgId(4326)
                 props.fields = QgsFields([
                     QgsField("id", QMetaType.Type.Int),
                     QgsField("subid", QMetaType.Type.Int),
+                    QgsField("navid", QMetaType.Type.Int),
                     QgsField("address", QMetaType.Type.QString),
                     QgsField("resulttype", QMetaType.Type.QString),
                     QgsField("distance", QMetaType.Type.Double),
@@ -287,7 +297,12 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         }
 
         try:
-            return casageo.coder.address(client, queries, defaults)
+            return casageo.coder.address(
+                client,
+                queries,
+                defaults,
+                navigation_points=True,
+            )
         except casageo.tools.CasaGeoError as err:
             raise QgsProcessingException(str(err)) from err
 
@@ -300,20 +315,8 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     ) -> dict[str, str]:
         """Convert results to features and write them to the feature sink."""
 
-        sink_name = self.OUTPUT_LOCATIONS
-        sink_props = self.sinkProperties(sink_name, parameters, context, {})
-        sink, dest_id = self.parameterAsSink(
-            parameters,
-            sink_name,
-            context,
-            sink_props.fields,
-            sink_props.wkbType,
-            sink_props.crs,
-        )
-        if sink is None:
-            raise QgsProcessingException(
-                self.invalidSinkError(parameters, self.OUTPUT_LOCATIONS)
-            )
+        locations = self._getSink(self.OUTPUT_LOCATIONS, parameters, context)
+        navigations = self._getSink(self.OUTPUT_NAVIGATIONS, parameters, context)
 
         result: Any  # Make Pyright shut up about the named tuples.
         for result in results.itertuples():
@@ -328,18 +331,23 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 )
                 continue
 
-            feature = QgsFeature(sink_props.fields)
+            output = locations if result.navid == -1 else navigations
+            feature = QgsFeature(output.props.fields)
             feature.setGeometry(geometry_from_shapely(result.position))
             feature["id"] = result.id
             feature["subid"] = result.subid
+            feature["navid"] = result.navid
             feature["address"] = result.address
             feature["resulttype"] = result.resulttype
             feature["distance"] = result.distance
             feature["relevance"] = result.relevance
             feature["timestamp"] = result.timestamp.isoformat()
-            sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
+            output.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
 
-        return {self.OUTPUT_LOCATIONS: dest_id}
+        return {
+            locations.name: locations.dest,
+            navigations.name: navigations.dest,
+        }
 
 
 class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
@@ -352,6 +360,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     POSTAL_CODE_MODE = "POSTAL_CODE_MODE"
 
     OUTPUT_LOCATIONS = "OUTPUT_LOCATIONS"
+    OUTPUT_NAVIGATIONS = "OUTPUT_NAVIGATIONS"
 
     @override
     def groupId(self) -> str:
@@ -392,6 +401,14 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT_LOCATIONS,
                 self.__tr("POI locations"),
+                Qgis.ProcessingSourceType.VectorPoint,
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterFeatureSink(
+                self.OUTPUT_NAVIGATIONS,
+                self.__tr("POI navigation points"),
                 Qgis.ProcessingSourceType.VectorPoint,
             )
         )
@@ -446,13 +463,14 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         sourceProperties: dict[str | None, QgsProcessingAlgorithm.VectorProperties],
     ) -> QgsProcessingAlgorithm.VectorProperties:
         match sink:
-            case self.OUTPUT_LOCATIONS:
+            case self.OUTPUT_LOCATIONS | self.OUTPUT_NAVIGATIONS:
                 props = QgsProcessingAlgorithm.VectorProperties()
                 props.availability = Qgis.ProcessingPropertyAvailability.Available
                 props.crs = QgsCoordinateReferenceSystem.fromEpsgId(4326)
                 props.fields = QgsFields([
                     QgsField("id", QMetaType.Type.Int),
                     QgsField("subid", QMetaType.Type.Int),
+                    QgsField("navid", QMetaType.Type.Int),
                     QgsField("title", QMetaType.Type.QString),
                     QgsField("resulttype", QMetaType.Type.QString),
                     QgsField("distance", QMetaType.Type.Double),
@@ -631,7 +649,12 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         }
 
         try:
-            return casageo.coder.poi(client, queries, defaults)
+            return casageo.coder.poi(
+                client,
+                queries,
+                defaults,
+                navigation_points=True,
+            )
         except casageo.tools.CasaGeoError as err:
             raise QgsProcessingException(str(err)) from err
 
@@ -644,20 +667,8 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     ) -> dict[str, str]:
         """Convert results to features and write them to the feature sink."""
 
-        sink_name = self.OUTPUT_LOCATIONS
-        sink_props = self.sinkProperties(sink_name, parameters, context, {})
-        sink, dest_id = self.parameterAsSink(
-            parameters,
-            sink_name,
-            context,
-            sink_props.fields,
-            sink_props.wkbType,
-            sink_props.crs,
-        )
-        if sink is None:
-            raise QgsProcessingException(
-                self.invalidSinkError(parameters, self.OUTPUT_LOCATIONS)
-            )
+        locations = self._getSink(self.OUTPUT_LOCATIONS, parameters, context)
+        navigations = self._getSink(self.OUTPUT_NAVIGATIONS, parameters, context)
 
         result: Any  # Make Pyright shut up about the named tuples.
         for result in results.itertuples():
@@ -672,14 +683,19 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 )
                 continue
 
-            feature = QgsFeature(sink_props.fields)
+            output = locations if result.navid == -1 else navigations
+            feature = QgsFeature(output.props.fields)
             feature.setGeometry(geometry_from_shapely(result.position))
             feature["id"] = result.id
             feature["subid"] = result.subid
+            feature["subid"] = result.navid
             feature["title"] = result.title
             feature["resulttype"] = result.resulttype
             feature["distance"] = result.distance
             feature["timestamp"] = result.timestamp.isoformat()
-            sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
+            output.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
 
-        return {self.OUTPUT_LOCATIONS: dest_id}
+        return {
+            locations.name: locations.dest,
+            navigations.name: navigations.dest,
+        }
