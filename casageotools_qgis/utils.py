@@ -14,6 +14,7 @@
 #
 #  SPDX-License-Identifier: Apache-2.0
 
+from dataclasses import dataclass
 
 from collections.abc import Iterator
 from typing import TYPE_CHECKING, LiteralString, cast
@@ -26,7 +27,9 @@ if TYPE_CHECKING:
     from qgis.core import (
         QgsFeature,
         QgsFeatureRequest,
+        QgsFeatureSink,
         QgsGeometry,
+        QgsProcessingAlgorithm,
         QgsProcessingFeatureSource,
     )
     from qgis.PyQt.QtCore import QDateTime
@@ -154,6 +157,14 @@ class CasaGeoToolsSpatialTranslator:
 
     def translateAvoidableFeature(self, avoidable_feature: str) -> str:
         return self.avoidable_feature_map.get(avoidable_feature, avoidable_feature)
+
+
+@dataclass(kw_only=True)
+class ProcessingFeatureSinkDefinition:
+    name: str
+    props: "QgsProcessingAlgorithm.VectorProperties"
+    dest: str
+    sink: "QgsFeatureSink"
 
 
 def ensure[T](value: T | None, /) -> T:

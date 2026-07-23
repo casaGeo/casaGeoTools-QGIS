@@ -17,12 +17,15 @@
 from typing import TYPE_CHECKING, Any, Self, override
 
 from qgis.core import (
+    Qgis,
     QgsProcessingAlgorithm,
+    QgsProcessingContext,
+    QgsProcessingException,  # pyright: ignore[reportAttributeAccessIssue]
     QgsProcessingProvider,
 )
 
 from ..resources import LIBRARY_IDENTIFIER, MINIMUM_REQUIRED_LIBRARY_VERSION
-from ..utils import TrMethod, version_tuple
+from ..utils import ProcessingFeatureSinkDefinition, TrMethod, version_tuple
 
 if TYPE_CHECKING:
     from qgis.PyQt.QtGui import QIcon
@@ -159,3 +162,31 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
             self.status_ok = False
             self.status_message = self.__tr("Please input your API key in the settings")
             return
+
+    def _getSink(
+        self,
+        name: str,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+    ) -> ProcessingFeatureSinkDefinition:
+        props = self.sinkProperties(name, parameters, context, {})
+        if props.availability == Qgis.ProcessingPropertyAvailability.NotAvailable:
+            raise QgsProcessingException(self.invalidSinkError(parameters, name))
+
+        sink, dest = self.parameterAsSink(
+            parameters,
+            name,
+            context,
+            props.fields,
+            props.wkbType,
+            props.crs,
+        )
+        if sink is None:
+            raise QgsProcessingException(self.invalidSinkError(parameters, name))
+
+        return ProcessingFeatureSinkDefinition(
+            name=name,
+            props=props,
+            dest=dest,
+            sink=sink,
+        )

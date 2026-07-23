@@ -393,20 +393,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
     ) -> dict[str, str]:
         """Convert results to features and write them to the feature sink."""
 
-        sink_name = self.OUTPUT_ISOLINES
-        sink_props = self.sinkProperties(sink_name, parameters, context, {})
-        sink, dest_id = self.parameterAsSink(
-            parameters,
-            sink_name,
-            context,
-            sink_props.fields,
-            sink_props.wkbType,
-            sink_props.crs,
-        )
-        if sink is None:
-            raise QgsProcessingException(
-                self.invalidSinkError(parameters, self.OUTPUT_ISOLINES)
-            )
+        isolines = self._getSink(self.OUTPUT_ISOLINES, parameters, context)
 
         result: Any  # Make Pyright shut up about the named tuples.
         for result in results.itertuples():
@@ -421,7 +408,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 )
                 continue
 
-            feature = QgsFeature(sink_props.fields)
+            feature = QgsFeature(isolines.props.fields)
             feature.setGeometry(geometry_from_shapely(result.geometry))
             feature["id"] = result.id
             feature["subid"] = result.subid
@@ -429,9 +416,11 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature["rangeunit"] = result.rangeunit
             feature["rangevalue"] = result.rangevalue
             feature["timestamp"] = result.timestamp.isoformat()
-            sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
+            isolines.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
 
-        return {self.OUTPUT_ISOLINES: dest_id}
+        return {
+            isolines.name: isolines.dest,
+        }
 
 
 class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
@@ -744,20 +733,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
     ) -> dict[str, str]:
         """Convert results to features and write them to the feature sink."""
 
-        sink_name = self.OUTPUT_ROUTES
-        sink_props = self.sinkProperties(sink_name, parameters, context, {})
-        sink, dest_id = self.parameterAsSink(
-            parameters,
-            sink_name,
-            context,
-            sink_props.fields,
-            sink_props.wkbType,
-            sink_props.crs,
-        )
-        if sink is None:
-            raise QgsProcessingException(
-                self.invalidSinkError(parameters, self.OUTPUT_ROUTES)
-            )
+        routes = self._getSink(self.OUTPUT_ROUTES, parameters, context)
 
         result: Any  # Make Pyright shut up about the named tuples.
         for result in results.itertuples():
@@ -772,16 +748,18 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 )
                 continue
 
-            feature = QgsFeature(sink_props.fields)
+            feature = QgsFeature(routes.props.fields)
             feature.setGeometry(geometry_from_shapely(result.geometry))
             feature["id"] = result.id
             feature["subid"] = result.subid
             feature["length"] = result.length
             feature["duration"] = result.duration
             feature["timestamp"] = result.timestamp.isoformat()
-            sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
+            routes.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
 
-        return {self.OUTPUT_ROUTES: dest_id}
+        return {
+            routes.name: routes.dest,
+        }
 
 
 class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
