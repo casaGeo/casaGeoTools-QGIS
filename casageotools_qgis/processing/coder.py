@@ -688,7 +688,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature.setGeometry(geometry_from_shapely(result.position))
             feature["id"] = result.id
             feature["subid"] = result.subid
-            feature["subid"] = result.navid
+            feature["navid"] = result.navid
             feature["title"] = result.title
             feature["resulttype"] = result.resulttype
             feature["distance"] = result.distance
