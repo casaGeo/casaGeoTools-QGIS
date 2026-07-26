@@ -342,7 +342,10 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature["distance"] = result.distance
             feature["relevance"] = result.relevance
             feature["timestamp"] = result.timestamp.isoformat()
-            output.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
+            if not output.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert):
+                feedback.reportError(
+                    self.writeFeatureError(output.sink, parameters, output.name)
+                )
 
         return {
             locations.name: locations.dest,
@@ -693,7 +696,10 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature["resulttype"] = result.resulttype
             feature["distance"] = result.distance
             feature["timestamp"] = result.timestamp.isoformat()
-            output.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
+            if not output.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert):
+                feedback.reportError(
+                    self.writeFeatureError(output.sink, parameters, output.name)
+                )
 
         return {
             locations.name: locations.dest,

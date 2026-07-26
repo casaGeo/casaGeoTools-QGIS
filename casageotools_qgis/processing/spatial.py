@@ -447,7 +447,10 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature["rangeunit"] = result.rangeunit
             feature["rangevalue"] = result.rangevalue
             feature["timestamp"] = result.timestamp.isoformat()
-            isolines.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
+            if not isolines.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert):
+                feedback.reportError(
+                    self.writeFeatureError(isolines.sink, parameters, isolines.name)
+                )
 
         for result in results.drop_duplicates(subset=["id"]).itertuples():
             if feedback.isCanceled():
@@ -480,7 +483,12 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 result.departure_placename if outgoing else result.arrival_placename
             )
             feature["timestamp"] = result.timestamp.isoformat()
-            navigations.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
+            if not navigations.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert):
+                feedback.reportError(
+                    self.writeFeatureError(
+                        navigations.sink, parameters, navigations.name
+                    )
+                )
 
         return {
             isolines.name: isolines.dest,
@@ -851,7 +859,10 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature["length"] = result.length
             feature["duration"] = result.duration
             feature["timestamp"] = result.timestamp.isoformat()
-            routes.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
+            if not routes.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert):
+                feedback.reportError(
+                    self.writeFeatureError(routes.sink, parameters, routes.name)
+                )
 
             feature = QgsFeature(navigations.props.fields)
             feature.setGeometry(
@@ -863,7 +874,12 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature["localtime"] = and_then(result.departure_time, datetime.isoformat)
             feature["placename"] = result.departure_placename
             feature["timestamp"] = and_then(result.timestamp, datetime.isoformat)
-            navigations.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
+            if not navigations.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert):
+                feedback.reportError(
+                    self.writeFeatureError(
+                        navigations.sink, parameters, navigations.name
+                    )
+                )
 
             feature = QgsFeature(navigations.props.fields)
             feature.setGeometry(
@@ -875,7 +891,12 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature["localtime"] = and_then(result.arrival_time, datetime.isoformat)
             feature["placename"] = result.arrival_placename
             feature["timestamp"] = and_then(result.timestamp, datetime.isoformat)
-            navigations.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
+            if not navigations.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert):
+                feedback.reportError(
+                    self.writeFeatureError(
+                        navigations.sink, parameters, navigations.name
+                    )
+                )
 
         return {
             routes.name: routes.dest,
