@@ -61,15 +61,20 @@ class CasaGeoToolsQgisEnabledCasaGeoClient(CasaGeoClient):
             case _:
                 raise ValueError(f"Unsupported method: {method}")
 
+        # QByteArray does implement the buffer protocol, even though the
+        # documentation doesn’t mention it.
+        # noinspection bad-argument-type,unbound-local-variable
+        response = str(reply.content(), "utf-8")
+
         match reply.error():
             case NetworkError.NoError:
-                return jsonlib.loads(str(reply.content(), "utf-8"))
+                return jsonlib.loads(response)
 
             case NetworkError.OperationCanceledError:
                 return None
 
             case NetworkError.ProtocolInvalidOperationError:
-                raise APIValueError(str(reply.content(), "utf-8"))
+                raise APIValueError(response)
 
         msg = f"Request failed (code {reply.error()}): {reply.errorString()}"
         raise CasaGeoError(msg)
