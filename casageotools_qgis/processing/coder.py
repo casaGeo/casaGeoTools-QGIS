@@ -132,24 +132,24 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         )
 
     def _paramAddressNamesMode(self) -> QgsProcessingParameterEnum:
-        from casageo.coder import ADDRESS_NAMES_MODES, DEFAULT_ADDRESS_NAMES_MODE
+        from casageo.coder import DEFAULT_ADDRESS_NAMES_MODE, AddressNamesMode
 
         displayname = self.plugin.coderTranslator.translateAddressNamesMode
         return QgsProcessingParameterEnum(
             self.ADDRESS_NAMES_MODE,
             self.__tr("Address names mode"),
-            options=map(displayname, ADDRESS_NAMES_MODES),
+            options=map(displayname, AddressNamesMode),
             defaultValue=displayname(DEFAULT_ADDRESS_NAMES_MODE),
         )
 
     def _paramPostalCodeMode(self) -> QgsProcessingParameterEnum:
-        from casageo.coder import DEFAULT_POSTAL_CODE_MODE, POSTAL_CODE_MODES
+        from casageo.coder import DEFAULT_POSTAL_CODE_MODE, PostalCodeMode
 
         displayname = self.plugin.coderTranslator.translatePostalCodeMode
         return QgsProcessingParameterEnum(
             self.POSTAL_CODE_MODE,
             self.__tr("Postal code mode"),
-            options=map(displayname, POSTAL_CODE_MODES),
+            options=map(displayname, PostalCodeMode),
             defaultValue=displayname(DEFAULT_POSTAL_CODE_MODE),
         )
 
@@ -277,7 +277,10 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     ) -> "GeoDataFrame":
         import casageo.coder
         import casageo.tools
-        from casageo.coder import ADDRESS_NAMES_MODES, POSTAL_CODE_MODES
+        from casageo.coder import AddressNamesMode, PostalCodeMode
+
+        ADDRESS_NAMES_MODES = list(AddressNamesMode)
+        POSTAL_CODE_MODES = list(PostalCodeMode)
 
         limit = self.parameterAsInt(parameters, self.LIMIT, context)
         address_names_mode_index = self.parameterAsEnum(
@@ -436,24 +439,24 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         )
 
     def _paramAddressNamesMode(self) -> QgsProcessingParameterEnum:
-        from casageo.coder import ADDRESS_NAMES_MODES, DEFAULT_ADDRESS_NAMES_MODE
+        from casageo.coder import DEFAULT_ADDRESS_NAMES_MODE, AddressNamesMode
 
         displayname = self.plugin.coderTranslator.translateAddressNamesMode
         return QgsProcessingParameterEnum(
             self.ADDRESS_NAMES_MODE,
             self.__tr("Address names mode"),
-            options=map(displayname, ADDRESS_NAMES_MODES),
+            options=map(displayname, AddressNamesMode),
             defaultValue=displayname(DEFAULT_ADDRESS_NAMES_MODE),
         )
 
     def _paramPostalCodeMode(self) -> QgsProcessingParameterEnum:
-        from casageo.coder import DEFAULT_POSTAL_CODE_MODE, POSTAL_CODE_MODES
+        from casageo.coder import DEFAULT_POSTAL_CODE_MODE, PostalCodeMode
 
         displayname = self.plugin.coderTranslator.translatePostalCodeMode
         return QgsProcessingParameterEnum(
             self.POSTAL_CODE_MODE,
             self.__tr("Postal code mode"),
-            options=map(displayname, POSTAL_CODE_MODES),
+            options=map(displayname, PostalCodeMode),
             defaultValue=displayname(DEFAULT_POSTAL_CODE_MODE),
         )
 
@@ -631,7 +634,10 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     ) -> "GeoDataFrame":
         import casageo.coder
         import casageo.tools
-        from casageo.coder import ADDRESS_NAMES_MODES, POSTAL_CODE_MODES
+        from casageo.coder import AddressNamesMode, PostalCodeMode
+
+        ADDRESS_NAMES_MODES = list(AddressNamesMode)
+        POSTAL_CODE_MODES = list(PostalCodeMode)
 
         client = self.plugin.casaGeoClient(feedback)
 
