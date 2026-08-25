@@ -304,7 +304,6 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 client,
                 queries,
                 defaults,
-                navigation_points=True,
             )
         except casageo.tools.CasaGeoError as err:
             raise QgsProcessingException(str(err)) from err
@@ -321,20 +320,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         locations = self._getSink(self.OUTPUT_LOCATIONS, parameters, context)
         navigations = self._getSink(self.OUTPUT_NAVIGATIONS, parameters, context)
 
-        result: Any  # Make Pyright shut up about the named tuples.
-        for result in results.itertuples():
-            if feedback.isCanceled():
-                break
-
-            if result.error_code is not None:
-                feedback.reportError(
-                    self.__tr("Error ({code}): {message}").format(
-                        code=result.error_code, message=result.error_message
-                    )
-                )
-                continue
-
-            output = locations if result.navid == -1 else navigations
+        def writeFeature(result, output):
             feature = QgsFeature(output.props.fields)
             feature.setGeometry(geometry_from_shapely(result.position))
             feature["id"] = result.id
@@ -349,6 +335,24 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 feedback.reportError(
                     self.writeFeatureError(output.sink, parameters, output.name)
                 )
+
+        result: Any  # Make Pyright shut up about the named tuples.
+        for result in results.itertuples():
+            if feedback.isCanceled():
+                break
+
+            if result.error_code is not None:
+                feedback.reportError(
+                    self.__tr("Error ({code}): {message}").format(
+                        code=result.error_code, message=result.error_message
+                    )
+                )
+                continue
+
+            if result.navid == 0:
+                writeFeature(result, locations)
+
+            writeFeature(result, navigations)
 
         return {
             locations.name: locations.dest,
@@ -662,7 +666,6 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 client,
                 queries,
                 defaults,
-                navigation_points=True,
             )
         except casageo.tools.CasaGeoError as err:
             raise QgsProcessingException(str(err)) from err
@@ -679,20 +682,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         locations = self._getSink(self.OUTPUT_LOCATIONS, parameters, context)
         navigations = self._getSink(self.OUTPUT_NAVIGATIONS, parameters, context)
 
-        result: Any  # Make Pyright shut up about the named tuples.
-        for result in results.itertuples():
-            if feedback.isCanceled():
-                break
-
-            if result.error_code is not None:
-                feedback.reportError(
-                    self.__tr("Error ({code}): {message}").format(
-                        code=result.error_code, message=result.error_message
-                    )
-                )
-                continue
-
-            output = locations if result.navid == -1 else navigations
+        def writeFeature(result, output):
             feature = QgsFeature(output.props.fields)
             feature.setGeometry(geometry_from_shapely(result.position))
             feature["id"] = result.id
@@ -706,6 +696,24 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 feedback.reportError(
                     self.writeFeatureError(output.sink, parameters, output.name)
                 )
+
+        result: Any  # Make Pyright shut up about the named tuples.
+        for result in results.itertuples():
+            if feedback.isCanceled():
+                break
+
+            if result.error_code is not None:
+                feedback.reportError(
+                    self.__tr("Error ({code}): {message}").format(
+                        code=result.error_code, message=result.error_message
+                    )
+                )
+                continue
+
+            if result.navid == 0:
+                writeFeature(result, locations)
+
+            writeFeature(result, navigations)
 
         return {
             locations.name: locations.dest,
