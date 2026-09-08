@@ -1,3 +1,41 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[codz]
+*$py.class
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Sphinx documentation
+_build/
+
+# Environments
+.env
+.envrc
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
 # Qt
 /.qmake.cache
 /.qmake.stash
@@ -12,3 +50,12 @@
 *.prl
 *.qmlls.ini
 *.autosave
+
+# Development resources
+.demout/
+.devres/
+
+# IDE configuration
+.idea/
+.qtcreator/
+.vscode/

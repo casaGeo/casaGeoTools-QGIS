@@ -44,7 +44,6 @@ PATH+=":/usr/lib64/qt6/libexec"
 
 setup-venv() {
 	uv venv --python="$QGIS_PYTHON" --system-site-packages
-	# uv pip install --editable ..
 	uv sync
 }
 
@@ -119,9 +118,13 @@ build-forms-and-resources() {
 	sed -i 's/^from PyQt6/from qgis.PyQt/' -- "$PLUGINDIR/ui"/*.py
 }
 
-build-help() {
+build-docs() {
 	sphinx-make html
 	ln -fT -- docs/LICENSE docs/_build/html/LICENSE
+}
+
+build-help() {
+	build-docs
 	ln -sfrT -- docs/_build/html "$PLUGINDIR/help"
 }
 

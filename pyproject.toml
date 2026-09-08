@@ -12,12 +12,13 @@ dependencies = [
 ]
 
 [project.urls]
+# TODO: Separate homepage
 Homepage = "https://www.casageo.de/en/here-connector-for-python.html"
-# TODO: Point this to the QGIS plugin section
-Documentation = "https://casageotools.readthedocs.io"
-Source = "https://github.com/casaGeo/casaGeoTools/tree/main/qgis"
-Issues = "https://github.com/casaGeo/casaGeoTools/issues?q=label%3Aqgis"
-Changelog = "https://github.com/casaGeo/casaGeoTools/blob/main/qgis/CHANGELOG.md"
+# TODO: Documentation
+# Documentation = "https://casageotools.readthedocs.io"
+Source = "https://github.com/casaGeo/casaGeoTools-QGIS"
+Issues = "https://github.com/casaGeo/casaGeoTools-QGIS/issues"
+Changelog = "https://github.com/casaGeo/casaGeoTools-QGIS/blob/main/CHANGELOG.md"
 
 [dependency-groups]
 dev = [
@@ -89,4 +90,4 @@ extend-immutable-calls = [
 ]
 
 [tool.uv.sources]
-casageotools = { path = ".." }
+casageotools = { path = "../casaGeoTools" }

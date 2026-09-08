@@ -1,0 +1,51 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+
+########
+# Code #
+########
+
+[{Taskfile,*.bash,*.sh,*.zsh}]
+indent_size = unset
+indent_style = tab
+
+[{*.py,*.pyw}]
+indent_size = 4
+indent_style = space
+# See https://youtrack.jetbrains.com/issue/IJPL-235265
+# ij_formatter_off_tag = @formatter:off|# fmt: ?off
+# ij_formatter_on_tag = @formatter:on|# fmt: ?on
+# ij_formatter_tags_enabled = true
+
+#################
+# Configuration #
+#################
+
+[*.json]
+indent_size = 2
+indent_style = space
+
+[*.toml]
+indent_size = 4
+indent_style = space
+max_line_length = 80
+
+#################
+# Documentation #
+#################
+
+[*.md]
+# Based on https://google.github.io/styleguide/docguide/style.html
+indent_size = 4
+indent_style = space
+max_line_length = 80
+
+[*.rst]
+# Based on https://devguide.python.org/documentation/markup/
+indent_size = 3
+indent_style = space
+max_line_length = 80

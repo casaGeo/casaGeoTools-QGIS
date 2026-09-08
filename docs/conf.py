@@ -17,15 +17,15 @@ extensions = [
     "sphinx.ext.intersphinx",
 ]
 
-templates_path = ["_templates", "../../docs/_templates"]
+templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = "alabaster"
-html_favicon = "../../docs/_static/favicon.png"
-html_static_path = ["_static", "../../docs/_static"]
+html_favicon = "_static/favicon.png"
+html_static_path = ["_static"]
 
 # -- Autodoc configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#configuration

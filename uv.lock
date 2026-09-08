@@ -59,7 +59,7 @@ wheels = [
 [[package]]
 name = "casageotools"
 version = "1.1.0.dev0"
-source = { directory = "../" }
+source = { directory = "../casaGeoTools" }
 dependencies = [
     { name = "flexpolyline" },
     { name = "geopandas" },
@@ -115,7 +115,7 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "casageotools", directory = "../" }]
+requires-dist = [{ name = "casageotools", directory = "../casaGeoTools" }]
 
 [package.metadata.requires-dev]
 dev = [
