@@ -18,14 +18,23 @@ from typing import TYPE_CHECKING, Any, Self, override
 
 from qgis.core import (
     Qgis,
+    QgsCoordinateReferenceSystem,
+    QgsCoordinateTransform,
     QgsProcessingAlgorithm,
     QgsProcessingContext,
     QgsProcessingException,  # pyright: ignore[reportAttributeAccessIssue]
+    QgsProcessingFeatureSource,
+    QgsProcessingFeedback,
     QgsProcessingProvider,
 )
 
 from ..resources import LIBRARY_IDENTIFIER, MINIMUM_REQUIRED_LIBRARY_VERSION
-from ..utils import ProcessingFeatureSinkDefinition, TrMethod, version_tuple
+from ..utils import (
+    ProcessingFeatureSinkDefinition,
+    TrMethod,
+    features_of,
+    version_tuple,
+)
 
 if TYPE_CHECKING:
     from qgis.PyQt.QtGui import QIcon
@@ -163,6 +172,17 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
             self.status_message = self.__tr("Please input your API key in the settings")
             return
 
+    def _getSource(
+        self,
+        name: str,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+    ) -> QgsProcessingFeatureSource:
+        source = self.parameterAsSource(parameters, name, context)
+        if source is None:
+            raise QgsProcessingException(self.invalidSourceError(parameters, name))
+        return source
+
     def _getSink(
         self,
         name: str,
@@ -190,3 +210,39 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
             dest=dest,
             sink=sink,
         )
+
+    def _transformedNonemptyFeaturesOf(
+        self,
+        source: QgsProcessingFeatureSource,
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback,
+    ):
+        into_epsg4326 = QgsCoordinateTransform(
+            source.sourceCrs(),
+            QgsCoordinateReferenceSystem.fromEpsgId(4326),
+            context.transformContext(),
+        )
+
+        for feature in features_of(source):
+            if feedback.isCanceled():
+                break
+
+            geometry = feature.geometry()
+            if geometry.isEmpty():
+                feedback.pushInfo(
+                    self.__tr(
+                        "Skipping feature {featid} due to empty geometry",
+                    ).format(featid=feature.id())
+                )
+                continue
+
+            geometry.transform(into_epsg4326)
+            if geometry.isEmpty():
+                feedback.pushInfo(
+                    self.__tr(
+                        "Skipping feature {featid} due to reprojection failure",
+                    ).format(featid=feature.id())
+                )
+                continue
+
+            yield feature, geometry

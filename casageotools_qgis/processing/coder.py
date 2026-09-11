@@ -232,15 +232,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     ) -> "DataFrame":
         from pandas import DataFrame
 
-        source = self.parameterAsSource(
-            parameters,
-            self.INPUT,
-            context,
-        )
-        if source is None:
-            raise QgsProcessingException(
-                self.invalidSourceError(parameters, self.INPUT)
-            )
+        source = self._getSource(self.INPUT, parameters, context)
 
         # TODO: Maybe add this as constant to the coder module.
         # FIXME: Make the names of the input fields configurable.
@@ -582,45 +574,10 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     ) -> "DataFrame":
         from pandas import DataFrame
 
-        source = self.parameterAsSource(
-            parameters,
-            self.INPUT,
-            context,
-        )
-        if source is None:
-            raise QgsProcessingException(
-                self.invalidSourceError(parameters, self.INPUT)
-            )
-
-        into_epsg4326 = QgsCoordinateTransform(
-            source.sourceCrs(),
-            QgsCoordinateReferenceSystem.fromEpsgId(4326),
-            context.transformContext(),
-        )
+        source = self._getSource(self.INPUT, parameters, context)
 
         data = []
-        for feature in features_of(source):
-            if feedback.isCanceled():
-                break
-
-            geometry = feature.geometry()
-            if geometry.isEmpty():
-                feedback.pushInfo(
-                    self.__tr(
-                        "Skipping feature {featid} due to empty geometry",
-                    ).format(featid=feature.id())
-                )
-                continue
-
-            geometry.transform(into_epsg4326)
-            if geometry.isEmpty():
-                feedback.pushInfo(
-                    self.__tr(
-                        "Skipping feature {featid} due to reprojection failure",
-                    ).format(featid=feature.id())
-                )
-                continue
-
+        for feature, geometry in self._transformedNonemptyFeaturesOf(source, context, feedback):
             position = geometry.asPoint()
             data.append({
                 "position_longitude": position.x(),
