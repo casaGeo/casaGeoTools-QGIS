@@ -3,7 +3,6 @@ FORMS = \
 
 SOURCES = \
     casageotools_qgis/__init__.py \
-    casageotools_qgis/cgutils.py \
     casageotools_qgis/models.py \
     casageotools_qgis/plugin.py \
     casageotools_qgis/options.py \
@@ -11,7 +10,8 @@ SOURCES = \
     casageotools_qgis/processing/coder.py \
     casageotools_qgis/processing/spatial.py \
     casageotools_qgis/resources.py \
-    casageotools_qgis/utils.py
+    casageotools_qgis/utils.py \
+    casageotools_qgis/utilscg.py
 
 TRANSLATIONS = \
     casageotools_qgis/i18n/casageotools_qgis.de.ts

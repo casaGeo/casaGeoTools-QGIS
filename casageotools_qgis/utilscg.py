@@ -18,17 +18,19 @@ import json as jsonlib
 from typing import Any
 
 from casageo.tools import APIValueError, CasaGeoClient, CasaGeoError
-from qgis.core import QgsNetworkAccessManager
+from qgis.core import QgsFeedback, QgsNetworkAccessManager
 from qgis.PyQt.QtCore import QUrl
 from qgis.PyQt.QtNetwork import QNetworkReply, QNetworkRequest
 
 
 class CasaGeoToolsQgisEnabledCasaGeoClient(CasaGeoClient):
-    def __init__(self, key: str, **kwargs) -> None:
-        self.__feedback = kwargs.pop("qgis_feedback", None)
-        super().__init__(key, **kwargs)
-        self.__auth_header = key.encode()
+    def __init__(
+        self, *args, qgis_feedback: QgsFeedback | None = None, **kwargs
+    ) -> None:
+        super().__init__(*args, **kwargs)
+        self.__auth_header = self.apikey.encode()
         self.__server_url = QUrl(self.server)
+        self.__feedback = qgis_feedback
 
     def request(self, method: str, url: str, *, json: Any | None = None) -> Any:
         NetworkError = QNetworkReply.NetworkError

@@ -263,7 +263,7 @@ class CasaGeoToolsPlugin:
         QCoreApplication.removeTranslator(self.translator)
 
     def casaGeoClient(self, feedback: QgsFeedback | None = None) -> "CasaGeoClient":
-        from .cgutils import CasaGeoToolsQgisEnabledCasaGeoClient
+        from .utilscg import CasaGeoToolsQgisEnabledCasaGeoClient
 
         return CasaGeoToolsQgisEnabledCasaGeoClient(
             self.settingApikey.value(),
