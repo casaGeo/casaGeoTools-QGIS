@@ -14,15 +14,13 @@
 #
 #  SPDX-License-Identifier: Apache-2.0
 
-from collections.abc import Generator
-from typing import TYPE_CHECKING, Any, Self, override
+from typing import TYPE_CHECKING, Any, Never, Self, override
 
 from qgis.core import (
     Qgis,
     QgsCoordinateReferenceSystem,
-    QgsCoordinateTransform,
     QgsFeature,
-    QgsGeometry,
+    QgsFeatureRequest,
     QgsProcessingAlgorithm,
     QgsProcessingContext,
     QgsProcessingException,  # pyright: ignore[reportAttributeAccessIssue]
@@ -35,8 +33,6 @@ from ..resources import LIBRARY_IDENTIFIER, MINIMUM_REQUIRED_LIBRARY_VERSION
 from ..utils import (
     ProcessingFeatureSinkDefinition,
     TrMethod,
-    error_name,
-    features_of,
     version_tuple,
 )
 
@@ -215,43 +211,31 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
             sink=sink,
         )
 
-    def _transformedFeaturesOf(
+    def _simpleFeatureRequest(
         self,
-        source: QgsProcessingFeatureSource,
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
-        *,
-        allow_empty_geometries: bool = False,
-    ) -> Generator[tuple[QgsFeature, QgsGeometry]]:
-        transformation = QgsCoordinateTransform(
-            source.sourceCrs(),
+    ) -> QgsFeatureRequest:
+        request = QgsFeatureRequest()
+        request.setExpressionContext(context.expressionContext())
+        request.setFeedback(feedback)
+        request.setTransformErrorCallback(self._onTransformError)
+        return request
+
+    def _epsg4326FeatureRequest(
+        self,
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback,
+    ) -> QgsFeatureRequest:
+        request = self._simpleFeatureRequest(context, feedback)
+        request.setDestinationCrs(
             QgsCoordinateReferenceSystem.fromEpsgId(4326),
             context.transformContext(),
         )
+        return request
 
-        for feature in features_of(source):
-            if feedback.isCanceled():
-                break
-
-            geometry = feature.geometry()
-
-            if allow_empty_geometries and geometry.isEmpty():
-                err = Qgis.GeometryOperationResult.NothingHappened
-            else:
-                err = geometry.transform(transformation)
-
-            if err not in (
-                Qgis.GeometryOperationResult.Success,
-                Qgis.GeometryOperationResult.NothingHappened,
-            ):
-                msg = self.__tr(
-                    "Reprojection of feature {featid} from {sourcecrs} to {targetcrs} failed: {error}"
-                ).format(
-                    featid=feature.id(),
-                    sourcecrs=transformation.sourceCrs().authid(),
-                    targetcrs=transformation.destinationCrs().authid(),
-                    error=error_name(err),
-                )
-                raise QgsProcessingException(msg)
-
-            yield feature, geometry
+    def _onTransformError(self, feature: QgsFeature) -> Never:
+        msg = self.__tr("Reprojection of feature {featid} failed").format(
+            featid=feature.id()
+        )
+        raise QgsProcessingException(msg)

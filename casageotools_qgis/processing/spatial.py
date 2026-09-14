@@ -22,7 +22,6 @@ from qgis.core import (
     Qgis,
     QgsCoordinateReferenceSystem,
     QgsCoordinateTransform,
-    QgsExpression,
     QgsFeature,
     QgsFeatureSink,
     QgsField,
@@ -45,6 +44,8 @@ from qgis.PyQt.QtCore import QMetaType
 from ..utils import (
     TrMethod,
     and_then,
+    features_of,
+    geometry_as_shapely,
     geometry_from_shapely,
     pydatetime,
 )
@@ -310,14 +311,13 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         from pandas import DataFrame
 
         source = self._getSource(self.INPUT, parameters, context)
-
-        data = []
-        for feature, geometry in self._transformedFeaturesOf(source, context, feedback):
-            position = geometry.asPoint()
-            data.append({
-                "position_longitude": position.x(),
-                "position_latitude": position.y(),
-            })
+        request = self._epsg4326FeatureRequest(context, feedback)
+        data = [
+            {
+                "position": geometry_as_shapely(feature.geometry()),
+            }
+            for feature in features_of(source, request)
+        ]
 
         return DataFrame(data)
 
@@ -969,36 +969,21 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
         from pandas import DataFrame
 
         source = self._getSource(self.INPUT, parameters, context)
-
-        expr = QgsExpression(
-            self.parameterAsExpression(
-                parameters,
-                self.SEQUENCE_EXPRESSION,
-                context,
-            )
+        sequence_expression = self.parameterAsExpression(
+            parameters,
+            self.SEQUENCE_EXPRESSION,
+            context,
         )
 
-        if expr.hasParserError():
-            raise QgsProcessingException(
-                self.__tr("Invalid sequence expression: {error}").format(
-                    error=expr.parserErrorString(),
-                )
-            )
+        request = self._epsg4326FeatureRequest(context, feedback)
+        request.addOrderBy(sequence_expression)
 
-        data = []
-        for feature, geometry in self._transformedFeaturesOf(source, context, feedback):
-            position = geometry.asPoint()
-            sequence_id = -1  # FIXME
-
-            # ctx = QgsExpressionContext()
-            # ctx.setFeature(feature)
-            # expr.evaluate()
-
-            data.append({
-                "position_longitude": position.x(),
-                "position_latitude": position.y(),
-                "sequence_id": sequence_id,
-            })
+        data = [
+            {
+                "position": geometry_as_shapely(feature.geometry()),
+            }
+            for feature in features_of(source, request)
+        ]
 
         if len(data) > 2:
             feedback.pushWarning(
@@ -1007,7 +992,7 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 )
             )
 
-        return DataFrame(data).sort_values("sequence_id", ignore_index=True)
+        return DataFrame(data)
 
     def _calculateRoutes(
         self,

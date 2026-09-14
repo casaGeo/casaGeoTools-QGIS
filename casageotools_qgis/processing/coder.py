@@ -37,7 +37,7 @@ from qgis.core import (
 )
 from qgis.PyQt.QtCore import QMetaType
 
-from ..utils import TrMethod, geometry_from_shapely
+from ..utils import TrMethod, features_of, geometry_as_shapely, geometry_from_shapely
 from . import CasaGeoToolsProcessingAlgorithm
 
 if TYPE_CHECKING:
@@ -252,11 +252,9 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             msg = self.__tr("Input layer does not contain any address fields")
             raise QgsProcessingException(msg)
 
-        data = []
-        for feature, geometry in self._transformedFeaturesOf(
-            source, context, feedback, allow_empty_geometries=True
-        ):
-            data.append(feature.attributeMap())
+        request = self._simpleFeatureRequest(context, feedback)
+
+        data = [feature.attributeMap() for feature in features_of(source, request)]
 
         return DataFrame(data)
 
@@ -575,14 +573,13 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         from pandas import DataFrame
 
         source = self._getSource(self.INPUT, parameters, context)
-
-        data = []
-        for feature, geometry in self._transformedFeaturesOf(source, context, feedback):
-            position = geometry.asPoint()
-            data.append({
-                "position_longitude": position.x(),
-                "position_latitude": position.y(),
-            })
+        request = self._epsg4326FeatureRequest(context, feedback)
+        data = [
+            {
+                "position": geometry_as_shapely(feature.geometry()),
+            }
+            for feature in features_of(source, request)
+        ]
 
         return DataFrame(data)
 
