@@ -45,7 +45,6 @@ from qgis.PyQt.QtCore import QMetaType
 from ..utils import (
     TrMethod,
     and_then,
-    features_of,
     geometry_from_shapely,
     pydatetime,
 )
@@ -313,7 +312,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         source = self._getSource(self.INPUT, parameters, context)
 
         data = []
-        for feature, geometry in self._transformedNonemptyFeaturesOf(source, context, feedback):
+        for feature, geometry in self._transformedFeaturesOf(source, context, feedback):
             position = geometry.asPoint()
             data.append({
                 "position_longitude": position.x(),
@@ -987,7 +986,7 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
             )
 
         data = []
-        for feature, geometry in self._transformedNonemptyFeaturesOf(source, context, feedback):
+        for feature, geometry in self._transformedFeaturesOf(source, context, feedback):
             position = geometry.asPoint()
             sequence_id = -1  # FIXME
 

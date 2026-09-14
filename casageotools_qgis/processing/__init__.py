@@ -14,12 +14,15 @@
 #
 #  SPDX-License-Identifier: Apache-2.0
 
+from collections.abc import Generator
 from typing import TYPE_CHECKING, Any, Self, override
 
 from qgis.core import (
     Qgis,
     QgsCoordinateReferenceSystem,
     QgsCoordinateTransform,
+    QgsFeature,
+    QgsGeometry,
     QgsProcessingAlgorithm,
     QgsProcessingContext,
     QgsProcessingException,  # pyright: ignore[reportAttributeAccessIssue]
@@ -32,6 +35,7 @@ from ..resources import LIBRARY_IDENTIFIER, MINIMUM_REQUIRED_LIBRARY_VERSION
 from ..utils import (
     ProcessingFeatureSinkDefinition,
     TrMethod,
+    error_name,
     features_of,
     version_tuple,
 )
@@ -211,13 +215,15 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
             sink=sink,
         )
 
-    def _transformedNonemptyFeaturesOf(
+    def _transformedFeaturesOf(
         self,
         source: QgsProcessingFeatureSource,
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
-    ):
-        into_epsg4326 = QgsCoordinateTransform(
+        *,
+        allow_empty_geometries: bool = False,
+    ) -> Generator[tuple[QgsFeature, QgsGeometry]]:
+        transformation = QgsCoordinateTransform(
             source.sourceCrs(),
             QgsCoordinateReferenceSystem.fromEpsgId(4326),
             context.transformContext(),
@@ -228,21 +234,24 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
                 break
 
             geometry = feature.geometry()
-            if geometry.isEmpty():
-                feedback.pushInfo(
-                    self.__tr(
-                        "Skipping feature {featid} due to empty geometry",
-                    ).format(featid=feature.id())
-                )
-                continue
 
-            geometry.transform(into_epsg4326)
-            if geometry.isEmpty():
-                feedback.pushInfo(
-                    self.__tr(
-                        "Skipping feature {featid} due to reprojection failure",
-                    ).format(featid=feature.id())
+            if allow_empty_geometries and geometry.isEmpty():
+                err = Qgis.GeometryOperationResult.NothingHappened
+            else:
+                err = geometry.transform(transformation)
+
+            if err not in (
+                Qgis.GeometryOperationResult.Success,
+                Qgis.GeometryOperationResult.NothingHappened,
+            ):
+                msg = self.__tr(
+                    "Reprojection of feature {featid} from {sourcecrs} to {targetcrs} failed: {error}"
+                ).format(
+                    featid=feature.id(),
+                    sourcecrs=transformation.sourceCrs().authid(),
+                    targetcrs=transformation.destinationCrs().authid(),
+                    error=error_name(err),
                 )
-                continue
+                raise QgsProcessingException(msg)
 
             yield feature, geometry

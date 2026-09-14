@@ -24,6 +24,7 @@ if TYPE_CHECKING:
     import datetime
 
     from qgis.core import (
+        Qgis,
         QgsFeature,
         QgsFeatureRequest,
         QgsFeatureSink,
@@ -177,6 +178,14 @@ def and_then(val, /, *funcs: Callable):
 def ensure[T](value: T | None, /) -> T:
     assert value is not None
     return value
+
+
+def error_name(err: "Qgis.GeometryOperationResult", /) -> str:
+    # The error code type is a subclass of IntEnum, while the typing
+    # stubs incorrectly annotate it as just a subclass of int.
+
+    # noinspection unresolved-references
+    return err.name  # pyright: ignore[reportAttributeAccessIssue]
 
 
 def features_of(
