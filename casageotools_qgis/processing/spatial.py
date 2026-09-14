@@ -398,16 +398,12 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         result: Any  # Make Pyright shut up about the named tuples.
         for result in results.itertuples():
-            if feedback.isCanceled():
-                break
-
             if result.error_code is not None:
                 feedback.reportError(
                     self.__tr("Error ({code}): {message}").format(
                         code=result.error_code, message=result.error_message
                     )
                 )
-                continue
 
             feature = QgsFeature(isolines.props.fields)
             and_then(result.geometry, geometry_from_shapely, feature.setGeometry)
@@ -423,9 +419,6 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 )
 
         for result in results.drop_duplicates(subset=["id"]).itertuples():
-            if feedback.isCanceled():
-                break
-
             # HACK: The library should unify these output fields!
             outgoing = (
                 result.departure_time is not None
@@ -811,16 +804,12 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         result: Any  # Make Pyright shut up about the named tuples.
         for result in results.itertuples():
-            if feedback.isCanceled():
-                break
-
             if result.error_code is not None:
                 feedback.reportError(
                     self.__tr("Error ({code}): {message}").format(
                         code=result.error_code, message=result.error_message
                     )
                 )
-                continue
 
             feature = QgsFeature(routes.props.fields)
             and_then(result.geometry, geometry_from_shapely, feature.setGeometry)
@@ -1043,16 +1032,12 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         result: Any  # Make Pyright shut up about the named tuples.
         for result in results.itertuples():
-            if feedback.isCanceled():
-                break
-
             if result.error_code is not None:
                 feedback.reportError(
                     self.__tr("Error ({code}): {message}").format(
                         code=result.error_code, message=result.error_message
                     )
                 )
-                continue
 
             feature = QgsFeature(fields)
             and_then(result.geometry, geometry_from_shapely, feature.setGeometry)

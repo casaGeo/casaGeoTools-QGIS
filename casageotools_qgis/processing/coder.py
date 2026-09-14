@@ -337,16 +337,12 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         result: Any  # Make Pyright shut up about the named tuples.
         for result in results.itertuples():
-            if feedback.isCanceled():
-                break
-
             if result.error_code is not None:
                 feedback.reportError(
                     self.__tr("Error ({code}): {message}").format(
                         code=result.error_code, message=result.error_message
                     )
                 )
-                continue
 
             if result.navid == 0:
                 feature = QgsFeature(locations.props.fields)
@@ -668,16 +664,12 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         result: Any  # Make Pyright shut up about the named tuples.
         for result in results.itertuples():
-            if feedback.isCanceled():
-                break
-
             if result.error_code is not None:
                 feedback.reportError(
                     self.__tr("Error ({code}): {message}").format(
                         code=result.error_code, message=result.error_message
                     )
                 )
-                continue
 
             if result.navid == 0:
                 writeFeature(result, locations)
