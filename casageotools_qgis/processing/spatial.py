@@ -42,6 +42,7 @@ from qgis.core import (
 from qgis.PyQt.QtCore import QMetaType
 
 from ..utils import (
+    ProcessingFeatureSinkDefinition,
     TrMethod,
     and_then,
     features_of,
@@ -240,8 +241,8 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                     QgsField("rangeunit", QMetaType.Type.QString),
                     QgsField("rangevalue", QMetaType.Type.Double),
                     QgsField("timestamp", QMetaType.Type.QDateTime),
-                    # QgsField("error_code", QMetaType.Type.QString),
-                    # QgsField("error_message", QMetaType.Type.QString),
+                    QgsField("error_code", QMetaType.Type.QString),
+                    QgsField("error_message", QMetaType.Type.QString),
                 ])
                 props.wkbType = Qgis.WkbType.MultiPolygon
                 return props
@@ -255,6 +256,8 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                     QgsField("localtime", QMetaType.Type.QDateTime),
                     QgsField("placename", QMetaType.Type.QString),
                     QgsField("timestamp", QMetaType.Type.QDateTime),
+                    QgsField("error_code", QMetaType.Type.QString),
+                    QgsField("error_message", QMetaType.Type.QString),
                 ])
                 props.wkbType = Qgis.WkbType.Point
                 return props
@@ -396,6 +399,13 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         isolines = self._getSink(self.OUTPUT_ISOLINES, parameters, context)
         navigations = self._getSink(self.OUTPUT_NAVIGATIONS, parameters, context)
 
+        def addFeature(
+            output: ProcessingFeatureSinkDefinition, feature: QgsFeature
+        ) -> None:
+            if not output.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert):
+                error = self.writeFeatureError(output.sink, parameters, output.name)
+                feedback.reportError(error)
+
         result: Any  # Make Pyright shut up about the named tuples.
         for result in results.itertuples():
             if result.error_code is not None:
@@ -413,10 +423,9 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature["rangeunit"] = result.rangeunit
             feature["rangevalue"] = result.rangevalue
             feature["timestamp"] = result.timestamp.isoformat()
-            if not isolines.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert):
-                feedback.reportError(
-                    self.writeFeatureError(isolines.sink, parameters, isolines.name)
-                )
+            feature["error_code"] = result.error_code
+            feature["error_message"] = result.error_message
+            addFeature(isolines, feature)
 
         for result in results.drop_duplicates(subset=["id"]).itertuples():
             # HACK: The library should unify these output fields!
@@ -442,12 +451,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 result.departure_placename if outgoing else result.arrival_placename
             )
             feature["timestamp"] = result.timestamp.isoformat()
-            if not navigations.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert):
-                feedback.reportError(
-                    self.writeFeatureError(
-                        navigations.sink, parameters, navigations.name
-                    )
-                )
+            addFeature(navigations, feature)
 
         return {
             isolines.name: isolines.dest,
@@ -630,8 +634,8 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                     QgsField("length", QMetaType.Type.Double),
                     QgsField("duration", QMetaType.Type.Double),
                     QgsField("timestamp", QMetaType.Type.QDateTime),
-                    # QgsField("error_code", QMetaType.Type.QString),
-                    # QgsField("error_message", QMetaType.Type.QString),
+                    QgsField("error_code", QMetaType.Type.QString),
+                    QgsField("error_message", QMetaType.Type.QString),
                 ])
                 # TODO: Make this a MultiLineStringZM with elevation and time datapoints.
                 props.wkbType = Qgis.WkbType.MultiLineString
@@ -648,6 +652,8 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                     QgsField("localtime", QMetaType.Type.QDateTime),
                     QgsField("placename", QMetaType.Type.QString),
                     QgsField("timestamp", QMetaType.Type.QDateTime),
+                    QgsField("error_code", QMetaType.Type.QString),
+                    QgsField("error_message", QMetaType.Type.QString),
                 ])
                 props.wkbType = Qgis.WkbType.Point
                 return props
@@ -802,6 +808,13 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         routes = self._getSink(self.OUTPUT_ROUTES, parameters, context)
         navigations = self._getSink(self.OUTPUT_NAVIGATIONS, parameters, context)
 
+        def addFeature(
+            output: ProcessingFeatureSinkDefinition, feature: QgsFeature
+        ) -> None:
+            if not output.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert):
+                error = self.writeFeatureError(output.sink, parameters, output.name)
+                feedback.reportError(error)
+
         result: Any  # Make Pyright shut up about the named tuples.
         for result in results.itertuples():
             if result.error_code is not None:
@@ -818,10 +831,9 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature["length"] = result.length
             feature["duration"] = result.duration
             feature["timestamp"] = result.timestamp.isoformat()
-            if not routes.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert):
-                feedback.reportError(
-                    self.writeFeatureError(routes.sink, parameters, routes.name)
-                )
+            feature["error_code"] = result.error_code
+            feature["error_message"] = result.error_message
+            addFeature(routes, feature)
 
             feature = QgsFeature(navigations.props.fields)
             and_then(
@@ -833,12 +845,9 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature["localtime"] = and_then(result.departure_time, datetime.isoformat)
             feature["placename"] = result.departure_placename
             feature["timestamp"] = and_then(result.timestamp, datetime.isoformat)
-            if not navigations.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert):
-                feedback.reportError(
-                    self.writeFeatureError(
-                        navigations.sink, parameters, navigations.name
-                    )
-                )
+            feature["error_code"] = result.error_code
+            feature["error_message"] = result.error_message
+            addFeature(navigations, feature)
 
             feature = QgsFeature(navigations.props.fields)
             and_then(
@@ -850,12 +859,9 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature["localtime"] = and_then(result.arrival_time, datetime.isoformat)
             feature["placename"] = result.arrival_placename
             feature["timestamp"] = and_then(result.timestamp, datetime.isoformat)
-            if not navigations.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert):
-                feedback.reportError(
-                    self.writeFeatureError(
-                        navigations.sink, parameters, navigations.name
-                    )
-                )
+            feature["error_code"] = result.error_code
+            feature["error_message"] = result.error_message
+            addFeature(navigations, feature)
 
         return {
             routes.name: routes.dest,
