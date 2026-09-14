@@ -387,6 +387,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         data = [
             {
+                "id": feature.id(),
                 "address": feature[address_field] if address_field else None,
                 "country": feature[country_field] if country_field else None,
                 "state": feature[state_field] if state_field else None,
@@ -731,6 +732,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         request = self._epsg4326FeatureRequest(context, feedback)
         data = [
             {
+                "id": feature.id(),
                 "position": geometry_as_shapely(feature.geometry()),
             }
             for feature in features_of(source, request)

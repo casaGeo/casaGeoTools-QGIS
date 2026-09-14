@@ -319,6 +319,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         request = self._epsg4326FeatureRequest(context, feedback)
         data = [
             {
+                "id": feature.id(),
                 "position": geometry_as_shapely(feature.geometry()),
             }
             for feature in features_of(source, request)
@@ -973,6 +974,7 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         data = [
             {
+                "id": feature.id(),
                 "position": geometry_as_shapely(feature.geometry()),
             }
             for feature in features_of(source, request)
