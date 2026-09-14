@@ -14,7 +14,6 @@
 #
 #  SPDX-License-Identifier: Apache-2.0
 
-import contextlib
 from typing import TYPE_CHECKING, Any, override
 
 from qgis.core import (
@@ -97,8 +96,24 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         if not self.status_ok:
             return
 
-        if configuration is None:
-            configuration = {}
+        try:
+            from casageo.coder import (
+                DEFAULT_ADDRESS_NAMES_MODE,
+                DEFAULT_LIMIT,
+                DEFAULT_POSTAL_CODE_MODE,
+                MAX_LIMIT,
+                MIN_LIMIT,
+                AddressNamesMode,
+                PostalCodeMode,
+            )
+        except ImportError as err:
+            self.status_ok = False
+            self.status_message = str(err)
+            return
+
+        translator = self.plugin.coderTranslator
+        trAddressNamesMode = translator.translateAddressNamesMode
+        trPostalCodeMode = translator.translatePostalCodeMode
 
         self.addParameter(
             QgsProcessingParameterFeatureSource(
@@ -107,6 +122,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 [Qgis.ProcessingSourceType.Vector],
             )
         )
+
         self.addParameter(
             QgsProcessingParameterField(
                 self.INPUT_ADDRESS_FIELD,
@@ -116,6 +132,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 optional=True,
             )
         )
+
         self.addParameter(
             QgsProcessingParameterField(
                 self.INPUT_COUNTRY_FIELD,
@@ -125,6 +142,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 optional=True,
             )
         )
+
         self.addParameter(
             QgsProcessingParameterField(
                 self.INPUT_STATE_FIELD,
@@ -134,6 +152,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 optional=True,
             )
         )
+
         self.addParameter(
             QgsProcessingParameterField(
                 self.INPUT_COUNTY_FIELD,
@@ -143,6 +162,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 optional=True,
             )
         )
+
         self.addParameter(
             QgsProcessingParameterField(
                 self.INPUT_CITY_FIELD,
@@ -152,6 +172,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 optional=True,
             )
         )
+
         self.addParameter(
             QgsProcessingParameterField(
                 self.INPUT_DISTRICT_FIELD,
@@ -161,6 +182,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 optional=True,
             )
         )
+
         self.addParameter(
             QgsProcessingParameterField(
                 self.INPUT_STREET_FIELD,
@@ -170,6 +192,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 optional=True,
             )
         )
+
         self.addParameter(
             QgsProcessingParameterField(
                 self.INPUT_HOUSENUMBER_FIELD,
@@ -179,6 +202,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 optional=True,
             )
         )
+
         self.addParameter(
             QgsProcessingParameterField(
                 self.INPUT_POSTALCODE_FIELD,
@@ -189,11 +213,42 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             )
         )
 
-        with contextlib.suppress(ImportError):
-            self.addParameter(self._paramLimit())
-            self.addParameter(self._paramCountries())
-            self.addParameter(self._paramAddressNamesMode())
-            self.addParameter(self._paramPostalCodeMode())
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.LIMIT,
+                self.__tr("Limit"),
+                Qgis.ProcessingNumberParameterType.Integer,
+                defaultValue=DEFAULT_LIMIT,
+                minValue=MIN_LIMIT,
+                maxValue=MAX_LIMIT,
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterString(
+                self.COUNTRIES,
+                self.__tr("Search countries (separated by commas)"),
+                optional=True,
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterEnum(
+                self.ADDRESS_NAMES_MODE,
+                self.__tr("Address names mode"),
+                options=map(trAddressNamesMode, AddressNamesMode),
+                defaultValue=trAddressNamesMode(DEFAULT_ADDRESS_NAMES_MODE),
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterEnum(
+                self.POSTAL_CODE_MODE,
+                self.__tr("Postal code mode"),
+                options=map(trPostalCodeMode, PostalCodeMode),
+                defaultValue=trPostalCodeMode(DEFAULT_POSTAL_CODE_MODE),
+            )
+        )
 
         self.addParameter(
             QgsProcessingParameterFeatureSink(
@@ -209,47 +264,6 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 self.__tr("Geocoded navigation points"),
                 Qgis.ProcessingSourceType.VectorPoint,
             )
-        )
-
-    def _paramLimit(self) -> QgsProcessingParameterNumber:
-        from casageo.coder import DEFAULT_LIMIT, MAX_LIMIT, MIN_LIMIT
-
-        return QgsProcessingParameterNumber(
-            self.LIMIT,
-            self.__tr("Limit"),
-            Qgis.ProcessingNumberParameterType.Integer,
-            defaultValue=DEFAULT_LIMIT,
-            minValue=MIN_LIMIT,
-            maxValue=MAX_LIMIT,
-        )
-
-    def _paramCountries(self) -> QgsProcessingParameterString:
-        return QgsProcessingParameterString(
-            self.COUNTRIES,
-            self.__tr("Search countries (separated by commas)"),
-            optional=True,
-        )
-
-    def _paramAddressNamesMode(self) -> QgsProcessingParameterEnum:
-        from casageo.coder import DEFAULT_ADDRESS_NAMES_MODE, AddressNamesMode
-
-        displayname = self.plugin.coderTranslator.translateAddressNamesMode
-        return QgsProcessingParameterEnum(
-            self.ADDRESS_NAMES_MODE,
-            self.__tr("Address names mode"),
-            options=map(displayname, AddressNamesMode),
-            defaultValue=displayname(DEFAULT_ADDRESS_NAMES_MODE),
-        )
-
-    def _paramPostalCodeMode(self) -> QgsProcessingParameterEnum:
-        from casageo.coder import DEFAULT_POSTAL_CODE_MODE, PostalCodeMode
-
-        displayname = self.plugin.coderTranslator.translatePostalCodeMode
-        return QgsProcessingParameterEnum(
-            self.POSTAL_CODE_MODE,
-            self.__tr("Postal code mode"),
-            options=map(displayname, PostalCodeMode),
-            defaultValue=displayname(DEFAULT_POSTAL_CODE_MODE),
         )
 
     @override
@@ -515,8 +529,24 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         if not self.status_ok:
             return
 
-        if configuration is None:
-            configuration = {}
+        try:
+            from casageo.coder import (
+                DEFAULT_ADDRESS_NAMES_MODE,
+                DEFAULT_LIMIT,
+                DEFAULT_POSTAL_CODE_MODE,
+                MAX_LIMIT,
+                MIN_LIMIT,
+                AddressNamesMode,
+                PostalCodeMode,
+            )
+        except ImportError as err:
+            self.status_ok = False
+            self.status_message = str(err)
+            return
+
+        translator = self.plugin.coderTranslator
+        trAddressNamesMode = translator.translateAddressNamesMode
+        trPostalCodeMode = translator.translatePostalCodeMode
 
         self.addParameter(
             QgsProcessingParameterFeatureSource(
@@ -526,11 +556,42 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             )
         )
 
-        with contextlib.suppress(ImportError):
-            self.addParameter(self._paramLimit())
-            self.addParameter(self._paramCountries())
-            self.addParameter(self._paramAddressNamesMode())
-            self.addParameter(self._paramPostalCodeMode())
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.LIMIT,
+                self.__tr("Limit"),
+                Qgis.ProcessingNumberParameterType.Integer,
+                defaultValue=DEFAULT_LIMIT,
+                minValue=MIN_LIMIT,
+                maxValue=MAX_LIMIT,
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterString(
+                self.COUNTRIES,
+                self.__tr("Search countries (separated by commas)"),
+                optional=True,
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterEnum(
+                self.ADDRESS_NAMES_MODE,
+                self.__tr("Address names mode"),
+                options=map(trAddressNamesMode, AddressNamesMode),
+                defaultValue=trAddressNamesMode(DEFAULT_ADDRESS_NAMES_MODE),
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterEnum(
+                self.POSTAL_CODE_MODE,
+                self.__tr("Postal code mode"),
+                options=map(trPostalCodeMode, PostalCodeMode),
+                defaultValue=trPostalCodeMode(DEFAULT_POSTAL_CODE_MODE),
+            )
+        )
 
         self.addParameter(
             QgsProcessingParameterFeatureSink(
@@ -546,47 +607,6 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 self.__tr("POI navigation points"),
                 Qgis.ProcessingSourceType.VectorPoint,
             )
-        )
-
-    def _paramLimit(self) -> QgsProcessingParameterNumber:
-        from casageo.coder import DEFAULT_LIMIT, MAX_LIMIT, MIN_LIMIT
-
-        return QgsProcessingParameterNumber(
-            self.LIMIT,
-            self.__tr("Limit"),
-            Qgis.ProcessingNumberParameterType.Integer,
-            defaultValue=DEFAULT_LIMIT,
-            minValue=MIN_LIMIT,
-            maxValue=MAX_LIMIT,
-        )
-
-    def _paramCountries(self) -> QgsProcessingParameterString:
-        return QgsProcessingParameterString(
-            self.COUNTRIES,
-            self.__tr("Search countries (separated by commas)"),
-            optional=True,
-        )
-
-    def _paramAddressNamesMode(self) -> QgsProcessingParameterEnum:
-        from casageo.coder import DEFAULT_ADDRESS_NAMES_MODE, AddressNamesMode
-
-        displayname = self.plugin.coderTranslator.translateAddressNamesMode
-        return QgsProcessingParameterEnum(
-            self.ADDRESS_NAMES_MODE,
-            self.__tr("Address names mode"),
-            options=map(displayname, AddressNamesMode),
-            defaultValue=displayname(DEFAULT_ADDRESS_NAMES_MODE),
-        )
-
-    def _paramPostalCodeMode(self) -> QgsProcessingParameterEnum:
-        from casageo.coder import DEFAULT_POSTAL_CODE_MODE, PostalCodeMode
-
-        displayname = self.plugin.coderTranslator.translatePostalCodeMode
-        return QgsProcessingParameterEnum(
-            self.POSTAL_CODE_MODE,
-            self.__tr("Postal code mode"),
-            options=map(displayname, PostalCodeMode),
-            defaultValue=displayname(DEFAULT_POSTAL_CODE_MODE),
         )
 
     @override

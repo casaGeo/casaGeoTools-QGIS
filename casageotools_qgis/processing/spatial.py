@@ -14,7 +14,6 @@
 #
 #  SPDX-License-Identifier: Apache-2.0
 
-import contextlib
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, override
 
@@ -102,8 +101,31 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         if not self.status_ok:
             return
 
-        if configuration is None:
-            configuration = {}
+        try:
+            from casageo.spatial import (
+                DEFAULT_AVOID_FEATURES,
+                DEFAULT_DIRECTION,
+                DEFAULT_EXCLUDE_COUNTRIES,
+                DEFAULT_RANGE_UNIT,
+                DEFAULT_ROUTING_MODE,
+                DEFAULT_TRANSPORT_MODE,
+                AvoidableFeature,
+                DirectionType,
+                RangeUnit,
+                RoutingMode,
+                TransportMode,
+            )
+        except ImportError as err:
+            self.status_ok = False
+            self.status_message = str(err)
+            return
+
+        translator = self.plugin.spatialTranslator
+        trRangeUnit = translator.translateRangeUnit
+        trTransportMode = translator.translateTransportMode
+        trRoutingMode = translator.translateRoutingMode
+        trDirectionType = translator.translateDirectionType
+        trAvoidableFeature = translator.translateAvoidableFeature
 
         self.addParameter(
             QgsProcessingParameterFeatureSource(
@@ -113,112 +135,92 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             )
         )
 
-        with contextlib.suppress(ImportError):
-            self.addParameter(self._paramRanges())
-            self.addParameter(self._paramRangesUnit())
-            self.addParameter(self._paramTransportMode())
-            self.addParameter(self._paramRoutingMode())
-            self.addParameter(self._paramDirection())
-            self.addParameter(self._paramDateTime())
-            self.addParameter(self._paramAvoidFeatures())
-            self.addParameter(self._paramExcludeCountries())
-
-        self.addParameter(self._paramOutputIsolines())
-        self.addParameter(self._paramOutputNavigations())
-
-    def _paramRanges(self) -> QgsProcessingParameterString:
         # This could be converted into a QgsProcessingParameterMatrix.
-        return QgsProcessingParameterString(
-            self.RANGES,
-            self.__tr("Ranges (separated by semicolons)"),
+        self.addParameter(
+            QgsProcessingParameterString(
+                self.RANGES,
+                self.__tr("Ranges (separated by semicolons)"),
+            )
         )
 
-    def _paramRangesUnit(self) -> QgsProcessingParameterEnum:
-        from casageo.spatial import DEFAULT_RANGE_UNIT, RangeUnit
-
-        displayname = self.plugin.spatialTranslator.translateRangeUnit
-        return QgsProcessingParameterEnum(
-            self.RANGES_UNIT,
-            self.__tr("Ranges unit"),
-            options=map(displayname, RangeUnit),
-            defaultValue=displayname(DEFAULT_RANGE_UNIT),
+        self.addParameter(
+            QgsProcessingParameterEnum(
+                self.RANGES_UNIT,
+                self.__tr("Ranges unit"),
+                options=map(trRangeUnit, RangeUnit),
+                defaultValue=trRangeUnit(DEFAULT_RANGE_UNIT),
+            )
         )
 
-    def _paramTransportMode(self) -> QgsProcessingParameterEnum:
-        from casageo.spatial import DEFAULT_TRANSPORT_MODE, TransportMode
-
-        displayname = self.plugin.spatialTranslator.translateTransportMode
-        return QgsProcessingParameterEnum(
-            self.TRANSPORT_MODE,
-            self.__tr("Transport mode"),
-            options=map(displayname, TransportMode),
-            defaultValue=displayname(DEFAULT_TRANSPORT_MODE),
+        self.addParameter(
+            QgsProcessingParameterEnum(
+                self.TRANSPORT_MODE,
+                self.__tr("Transport mode"),
+                options=map(trTransportMode, TransportMode),
+                defaultValue=trTransportMode(DEFAULT_TRANSPORT_MODE),
+            )
         )
 
-    def _paramRoutingMode(self) -> QgsProcessingParameterEnum:
-        from casageo.spatial import DEFAULT_ROUTING_MODE, RoutingMode
-
-        displayname = self.plugin.spatialTranslator.translateRoutingMode
-        return QgsProcessingParameterEnum(
-            self.ROUTING_MODE,
-            self.__tr("Routing mode"),
-            options=map(displayname, RoutingMode),
-            defaultValue=displayname(DEFAULT_ROUTING_MODE),
+        self.addParameter(
+            QgsProcessingParameterEnum(
+                self.ROUTING_MODE,
+                self.__tr("Routing mode"),
+                options=map(trRoutingMode, RoutingMode),
+                defaultValue=trRoutingMode(DEFAULT_ROUTING_MODE),
+            )
         )
 
-    def _paramDirection(self) -> QgsProcessingParameterEnum:
-        from casageo.spatial import DEFAULT_DIRECTION, DirectionType
-
-        displayname = self.plugin.spatialTranslator.translateDirectionType
-        return QgsProcessingParameterEnum(
-            self.DIRECTION,
-            self.__tr("Direction"),
-            options=map(displayname, DirectionType),
-            defaultValue=displayname(DEFAULT_DIRECTION),
+        self.addParameter(
+            QgsProcessingParameterEnum(
+                self.DIRECTION,
+                self.__tr("Direction"),
+                options=map(trDirectionType, DirectionType),
+                defaultValue=trDirectionType(DEFAULT_DIRECTION),
+            )
         )
 
-    def _paramDateTime(self) -> QgsProcessingParameterDateTime:
-        return QgsProcessingParameterDateTime(
-            self.DATETIME,
-            self.__tr("Time of departure/arrival"),
-            optional=True,
+        self.addParameter(
+            QgsProcessingParameterDateTime(
+                self.DATETIME,
+                self.__tr("Time of departure/arrival"),
+                optional=True,
+            )
         )
 
-    def _paramAvoidFeatures(self) -> QgsProcessingParameterEnum:
-        from casageo.spatial import DEFAULT_AVOID_FEATURES, AvoidableFeature
-
-        displayname = self.plugin.spatialTranslator.translateAvoidableFeature
-        return QgsProcessingParameterEnum(
-            self.AVOID_FEATURES,
-            self.__tr("Avoid features"),
-            options=map(displayname, AvoidableFeature),
-            allowMultiple=True,
-            defaultValue=list(map(displayname, DEFAULT_AVOID_FEATURES)),
-            optional=True,
+        self.addParameter(
+            QgsProcessingParameterEnum(
+                self.AVOID_FEATURES,
+                self.__tr("Avoid features"),
+                options=map(trAvoidableFeature, AvoidableFeature),
+                allowMultiple=True,
+                defaultValue=list(map(trAvoidableFeature, DEFAULT_AVOID_FEATURES)),
+                optional=True,
+            )
         )
 
-    def _paramExcludeCountries(self) -> QgsProcessingParameterString:
-        from casageo.spatial import DEFAULT_EXCLUDE_COUNTRIES
-
-        return QgsProcessingParameterString(
-            self.EXCLUDE_COUNTRIES,
-            self.__tr("Exclude countries (separated by commas)"),
-            optional=True,
-            defaultValue=",".join(DEFAULT_EXCLUDE_COUNTRIES),
+        self.addParameter(
+            QgsProcessingParameterString(
+                self.EXCLUDE_COUNTRIES,
+                self.__tr("Exclude countries (separated by commas)"),
+                optional=True,
+                defaultValue=",".join(DEFAULT_EXCLUDE_COUNTRIES),
+            )
         )
 
-    def _paramOutputIsolines(self) -> QgsProcessingParameterFeatureSink:
-        return QgsProcessingParameterFeatureSink(
-            self.OUTPUT_ISOLINES,
-            self.__tr("Isoline polygons"),
-            Qgis.ProcessingSourceType.VectorPolygon,
+        self.addParameter(
+            QgsProcessingParameterFeatureSink(
+                self.OUTPUT_ISOLINES,
+                self.__tr("Isoline polygons"),
+                Qgis.ProcessingSourceType.VectorPolygon,
+            )
         )
 
-    def _paramOutputNavigations(self) -> QgsProcessingParameterFeatureSink:
-        return QgsProcessingParameterFeatureSink(
-            self.OUTPUT_NAVIGATIONS,
-            self.__tr("Isoline navigation points"),
-            Qgis.ProcessingSourceType.VectorPoint,
+        self.addParameter(
+            QgsProcessingParameterFeatureSink(
+                self.OUTPUT_NAVIGATIONS,
+                self.__tr("Isoline navigation points"),
+                Qgis.ProcessingSourceType.VectorPoint,
+            )
         )
 
     @override
@@ -497,8 +499,28 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         if not self.status_ok:
             return
 
-        if configuration is None:
-            configuration = {}
+        try:
+            from casageo.spatial import (
+                DEFAULT_ALTERNATIVES,
+                DEFAULT_AVOID_FEATURES,
+                DEFAULT_EXCLUDE_COUNTRIES,
+                DEFAULT_ROUTING_MODE,
+                DEFAULT_TRANSPORT_MODE,
+                MAX_ALTERNATIVES,
+                MIN_ALTERNATIVES,
+                AvoidableFeature,
+                RoutingMode,
+                TransportMode,
+            )
+        except ImportError as err:
+            self.status_ok = False
+            self.status_message = str(err)
+            return
+
+        translator = self.plugin.spatialTranslator
+        trTransportMode = translator.translateTransportMode
+        trRoutingMode = translator.translateRoutingMode
+        trAvoidableFeature = translator.translateAvoidableFeature
 
         self.addParameter(
             QgsProcessingParameterPoint(
@@ -514,105 +536,85 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             )
         )
 
-        with contextlib.suppress(ImportError):
-            self.addParameter(self._paramAlternatives())
-            self.addParameter(self._paramTransportMode())
-            self.addParameter(self._paramRoutingMode())
-            self.addParameter(self._paramDepartureTime())
-            self.addParameter(self._paramArrivalTime())
-            self.addParameter(self._paramAvoidFeatures())
-            self.addParameter(self._paramExcludeCountries())
-
-        self.addParameter(self._paramOutputRoutes())
-        self.addParameter(self._paramOutputNavigations())
-
-    def _paramAlternatives(self):
-        from casageo.spatial import (
-            DEFAULT_ALTERNATIVES,
-            MAX_ALTERNATIVES,
-            MIN_ALTERNATIVES,
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.ALTERNATIVES,
+                self.__tr("Number of alternative routes", "Parameter"),
+                Qgis.ProcessingNumberParameterType.Integer,
+                minValue=MIN_ALTERNATIVES,
+                maxValue=MAX_ALTERNATIVES,
+                defaultValue=DEFAULT_ALTERNATIVES,
+            )
         )
 
-        return QgsProcessingParameterNumber(
-            self.ALTERNATIVES,
-            self.__tr("Number of alternative routes", "Parameter"),
-            Qgis.ProcessingNumberParameterType.Integer,
-            minValue=MIN_ALTERNATIVES,
-            maxValue=MAX_ALTERNATIVES,
-            defaultValue=DEFAULT_ALTERNATIVES,
+        self.addParameter(
+            QgsProcessingParameterEnum(
+                self.TRANSPORT_MODE,
+                self.__tr("Transport mode"),
+                options=map(trTransportMode, TransportMode),
+                defaultValue=trTransportMode(DEFAULT_TRANSPORT_MODE),
+            )
         )
 
-    def _paramTransportMode(self) -> QgsProcessingParameterEnum:
-        from casageo.spatial import DEFAULT_TRANSPORT_MODE, TransportMode
-
-        displayname = self.plugin.spatialTranslator.translateTransportMode
-        return QgsProcessingParameterEnum(
-            self.TRANSPORT_MODE,
-            self.__tr("Transport mode"),
-            options=map(displayname, TransportMode),
-            defaultValue=displayname(DEFAULT_TRANSPORT_MODE),
+        self.addParameter(
+            QgsProcessingParameterEnum(
+                self.ROUTING_MODE,
+                self.__tr("Routing mode"),
+                options=map(trRoutingMode, RoutingMode),
+                defaultValue=trRoutingMode(DEFAULT_ROUTING_MODE),
+            )
         )
 
-    def _paramRoutingMode(self) -> QgsProcessingParameterEnum:
-        from casageo.spatial import DEFAULT_ROUTING_MODE, RoutingMode
-
-        displayname = self.plugin.spatialTranslator.translateRoutingMode
-        return QgsProcessingParameterEnum(
-            self.ROUTING_MODE,
-            self.__tr("Routing mode"),
-            options=map(displayname, RoutingMode),
-            defaultValue=displayname(DEFAULT_ROUTING_MODE),
+        self.addParameter(
+            QgsProcessingParameterDateTime(
+                self.DEPARTURE_TIME,
+                self.__tr("Departure time", "Parameter"),
+                optional=True,
+            )
         )
 
-    def _paramDepartureTime(self):
-        return QgsProcessingParameterDateTime(
-            self.DEPARTURE_TIME,
-            self.__tr("Departure time", "Parameter"),
-            optional=True,
+        self.addParameter(
+            QgsProcessingParameterDateTime(
+                self.ARRIVAL_TIME,
+                self.__tr("Arrival time", "Parameter"),
+                optional=True,
+            )
         )
 
-    def _paramArrivalTime(self):
-        return QgsProcessingParameterDateTime(
-            self.ARRIVAL_TIME,
-            self.__tr("Arrival time", "Parameter"),
-            optional=True,
+        self.addParameter(
+            QgsProcessingParameterEnum(
+                self.AVOID_FEATURES,
+                self.__tr("Avoid features"),
+                options=map(trAvoidableFeature, AvoidableFeature),
+                allowMultiple=True,
+                defaultValue=list(map(trAvoidableFeature, DEFAULT_AVOID_FEATURES)),
+                optional=True,
+            )
         )
 
-    def _paramAvoidFeatures(self) -> QgsProcessingParameterEnum:
-        from casageo.spatial import DEFAULT_AVOID_FEATURES, AvoidableFeature
-
-        displayname = self.plugin.spatialTranslator.translateAvoidableFeature
-        return QgsProcessingParameterEnum(
-            self.AVOID_FEATURES,
-            self.__tr("Avoid features"),
-            options=map(displayname, AvoidableFeature),
-            allowMultiple=True,
-            defaultValue=list(map(displayname, DEFAULT_AVOID_FEATURES)),
-            optional=True,
+        self.addParameter(
+            QgsProcessingParameterString(
+                self.EXCLUDE_COUNTRIES,
+                self.__tr("Exclude countries (separated by commas)"),
+                optional=True,
+                defaultValue=",".join(DEFAULT_EXCLUDE_COUNTRIES),
+            )
         )
 
-    def _paramExcludeCountries(self) -> QgsProcessingParameterString:
-        from casageo.spatial import DEFAULT_EXCLUDE_COUNTRIES
-
-        return QgsProcessingParameterString(
-            self.EXCLUDE_COUNTRIES,
-            self.__tr("Exclude countries (separated by commas)"),
-            optional=True,
-            defaultValue=",".join(DEFAULT_EXCLUDE_COUNTRIES),
+        self.addParameter(
+            QgsProcessingParameterFeatureSink(
+                self.OUTPUT_ROUTES,
+                self.__tr("Calculated routes", "Parameter"),
+                Qgis.ProcessingSourceType.VectorLine,
+            )
         )
 
-    def _paramOutputRoutes(self) -> QgsProcessingParameterFeatureSink:
-        return QgsProcessingParameterFeatureSink(
-            self.OUTPUT_ROUTES,
-            self.__tr("Calculated routes", "Parameter"),
-            Qgis.ProcessingSourceType.VectorLine,
-        )
-
-    def _paramOutputNavigations(self) -> QgsProcessingParameterFeatureSink:
-        return QgsProcessingParameterFeatureSink(
-            self.OUTPUT_NAVIGATIONS,
-            self.__tr("Routing navigation points"),
-            Qgis.ProcessingSourceType.VectorPoint,
+        self.addParameter(
+            QgsProcessingParameterFeatureSink(
+                self.OUTPUT_NAVIGATIONS,
+                self.__tr("Routing navigation points"),
+                Qgis.ProcessingSourceType.VectorPoint,
+            )
         )
 
     @override
