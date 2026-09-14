@@ -28,6 +28,7 @@ from qgis.core import (
     QgsProcessingContext,
     QgsProcessingException,  # pyright: ignore[reportAttributeAccessIssue]
     QgsProcessingFeedback,
+    QgsProcessingParameterBoolean,
     QgsProcessingParameterEnum,
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterFeatureSource,
@@ -56,6 +57,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     __tr = TrMethod()
 
     INPUT = "INPUT"
+    INPUT_USE_GEOMETRY = "INPUT_USE_GEOMETRY"
     INPUT_ADDRESS_FIELD = "INPUT_ADDRESS_FIELD"
     INPUT_COUNTRY_FIELD = "INPUT_COUNTRY_FIELD"
     INPUT_STATE_FIELD = "INPUT_STATE_FIELD"
@@ -120,6 +122,14 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 self.INPUT,
                 self.__tr("Input layer"),
                 [Qgis.ProcessingSourceType.Vector],
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterBoolean(
+                self.INPUT_USE_GEOMETRY,
+                self.__tr("Search around feature location"),
+                defaultValue=True,
             )
         )
 
@@ -373,30 +383,44 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             return self.parameterAsString(parameters, name, context)
 
         source = self._getSource(self.INPUT, parameters, context)
-        address_field = getString(self.INPUT_ADDRESS_FIELD)
-        country_field = getString(self.INPUT_COUNTRY_FIELD)
-        state_field = getString(self.INPUT_STATE_FIELD)
-        county_field = getString(self.INPUT_COUNTY_FIELD)
-        city_field = getString(self.INPUT_CITY_FIELD)
-        district_field = getString(self.INPUT_DISTRICT_FIELD)
-        street_field = getString(self.INPUT_STREET_FIELD)
-        hnr_field = getString(self.INPUT_HOUSENUMBER_FIELD)
-        postalcode_field = getString(self.INPUT_POSTALCODE_FIELD)
+        param_fields = {
+            "address": getString(self.INPUT_ADDRESS_FIELD),
+            "country": getString(self.INPUT_COUNTRY_FIELD),
+            "state": getString(self.INPUT_STATE_FIELD),
+            "county": getString(self.INPUT_COUNTY_FIELD),
+            "city": getString(self.INPUT_CITY_FIELD),
+            "district": getString(self.INPUT_DISTRICT_FIELD),
+            "street": getString(self.INPUT_STREET_FIELD),
+            "housenumber": getString(self.INPUT_HOUSENUMBER_FIELD),
+            "postalcode": getString(self.INPUT_POSTALCODE_FIELD),
+        }
+        use_geometry = self.parameterAsBoolean(
+            parameters, self.INPUT_USE_GEOMETRY, context
+        )
 
-        request = self._simpleFeatureRequest(context, feedback)
+        if use_geometry:
+            request = self._epsg4326FeatureRequest(context, feedback)
+        else:
+            request = self._simpleFeatureRequest(context, feedback)
+            request.setFlags(Qgis.FeatureRequestFlag.NoGeometry)
+
+        request.setSubsetOfAttributes(
+            (f for f in param_fields.values() if f),
+            source.fields(),
+        )
 
         data = [
             {
                 "id": feature.id(),
-                "address": feature[address_field] if address_field else None,
-                "country": feature[country_field] if country_field else None,
-                "state": feature[state_field] if state_field else None,
-                "county": feature[county_field] if county_field else None,
-                "city": feature[city_field] if city_field else None,
-                "district": feature[district_field] if district_field else None,
-                "street": feature[street_field] if street_field else None,
-                "housenumber": feature[hnr_field] if hnr_field else None,
-                "postalcode": feature[postalcode_field] if postalcode_field else None,
+                **{
+                    param: feature[field] if field else None
+                    for param, field in param_fields.items()
+                },
+                "position": (
+                    geometry_as_shapely(feature.geometry())
+                    if feature.hasGeometry()
+                    else None
+                ),
             }
             for feature in features_of(source, request)
         ]
