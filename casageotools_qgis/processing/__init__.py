@@ -121,9 +121,7 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
 
     @override
     def helpUrl(self) -> str:
-        return self.plugin.helpUrl(
-            f"algorithms/{self.groupId()}/{self.name()}.html"
-        ).toString()
+        return self.plugin.helpUrl(f"algorithms/{self.name()}.html").toString()
 
     @override
     def initAlgorithm(self, configuration: dict[str, Any] | None = None) -> None:
