@@ -41,7 +41,6 @@ from qgis.PyQt.QtCore import QMetaType
 from ..utils import (
     ProcessingFeatureSinkDefinition,
     TrMethod,
-    and_then,
     features_of,
     geometry_as_shapely,
     geometry_from_shapely,
@@ -479,7 +478,12 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         locations = self._getSink(self.OUTPUT_LOCATIONS, parameters, context)
         navigations = self._getSink(self.OUTPUT_NAVIGATIONS, parameters, context)
 
-        def setCommonAttributes(feature: QgsFeature, result: Any) -> None:
+        def addFeature(
+            output: ProcessingFeatureSinkDefinition,
+            result: Any,
+            geometryfield: str,
+        ) -> None:
+            feature = QgsFeature(output.props.fields)
             feature["id"] = result.id
             feature["subid"] = result.subid
             feature["navid"] = result.navid
@@ -491,9 +495,9 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature["error_code"] = result.error_code
             feature["error_message"] = result.error_message
 
-        def addFeature(
-            output: ProcessingFeatureSinkDefinition, feature: QgsFeature
-        ) -> None:
+            if (geom := result[geometryfield]) is not None:
+                feature.setGeometry(geometry_from_shapely(geom))
+
             if not output.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert):
                 error = self.writeFeatureError(output.sink, parameters, output.name)
                 feedback.reportError(error)
@@ -508,15 +512,9 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 )
 
             if result.navid == 0:
-                feature = QgsFeature(locations.props.fields)
-                and_then(result.position, geometry_from_shapely, feature.setGeometry)
-                setCommonAttributes(feature, result)
-                addFeature(locations, feature)
+                addFeature(locations, result, "position")
 
-            feature = QgsFeature(navigations.props.fields)
-            and_then(result.navigation, geometry_from_shapely, feature.setGeometry)
-            setCommonAttributes(feature, result)
-            addFeature(navigations, feature)
+            addFeature(navigations, result, "navigation")
 
         return {
             locations.name: locations.dest,
@@ -817,7 +815,12 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         locations = self._getSink(self.OUTPUT_LOCATIONS, parameters, context)
         navigations = self._getSink(self.OUTPUT_NAVIGATIONS, parameters, context)
 
-        def setCommonAttributes(feature: QgsFeature, result: Any) -> None:
+        def addFeature(
+            output: ProcessingFeatureSinkDefinition,
+            result: Any,
+            geometryfield: str,
+        ) -> None:
+            feature = QgsFeature(output.props.fields)
             feature["id"] = result.id
             feature["subid"] = result.subid
             feature["navid"] = result.navid
@@ -828,9 +831,9 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature["error_code"] = result.error_code
             feature["error_message"] = result.error_message
 
-        def addFeature(
-            output: ProcessingFeatureSinkDefinition, feature: QgsFeature
-        ) -> None:
+            if (geom := result[geometryfield]) is not None:
+                feature.setGeometry(geometry_from_shapely(geom))
+
             if not output.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert):
                 error = self.writeFeatureError(output.sink, parameters, output.name)
                 feedback.reportError(error)
@@ -845,15 +848,9 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 )
 
             if result.navid == 0:
-                feature = QgsFeature(locations.props.fields)
-                and_then(result.position, geometry_from_shapely, feature.setGeometry)
-                setCommonAttributes(feature, result)
-                addFeature(locations, feature)
+                addFeature(locations, result, "position")
 
-            feature = QgsFeature(navigations.props.fields)
-            and_then(result.position, geometry_from_shapely, feature.setGeometry)
-            setCommonAttributes(feature, result)
-            addFeature(navigations, feature)
+            addFeature(navigations, result, "navigation")
 
         return {
             locations.name: locations.dest,
