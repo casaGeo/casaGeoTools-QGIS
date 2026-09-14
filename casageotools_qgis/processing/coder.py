@@ -32,6 +32,7 @@ from qgis.core import (
     QgsProcessingParameterEnum,
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterFeatureSource,
+    QgsProcessingParameterField,
     QgsProcessingParameterNumber,
     QgsProcessingParameterString,
 )
@@ -56,6 +57,16 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     __tr = TrMethod()
 
     INPUT = "INPUT"
+    INPUT_ADDRESS_FIELD = "INPUT_ADDRESS_FIELD"
+    INPUT_COUNTRY_FIELD = "INPUT_COUNTRY_FIELD"
+    INPUT_STATE_FIELD = "INPUT_STATE_FIELD"
+    INPUT_COUNTY_FIELD = "INPUT_COUNTY_FIELD"
+    INPUT_CITY_FIELD = "INPUT_CITY_FIELD"
+    INPUT_DISTRICT_FIELD = "INPUT_DISTRICT_FIELD"
+    INPUT_STREET_FIELD = "INPUT_STREET_FIELD"
+    INPUT_HOUSENUMBER_FIELD = "INPUT_HOUSENUMBER_FIELD"
+    INPUT_POSTALCODE_FIELD = "INPUT_POSTALCODE_FIELD"
+
     LIMIT = "LIMIT"
     ADDRESS_NAMES_MODE = "ADDRESS_NAMES_MODE"
     POSTAL_CODE_MODE = "POSTAL_CODE_MODE"
@@ -94,6 +105,87 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 self.INPUT,
                 self.__tr("Input layer"),
                 [Qgis.ProcessingSourceType.Vector],
+            )
+        )
+        self.addParameter(
+            QgsProcessingParameterField(
+                self.INPUT_ADDRESS_FIELD,
+                self.__tr("Free-form address field"),
+                parentLayerParameterName=self.INPUT,
+                type=Qgis.ProcessingFieldParameterDataType.String,
+                optional=True,
+            )
+        )
+        self.addParameter(
+            QgsProcessingParameterField(
+                self.INPUT_COUNTRY_FIELD,
+                self.__tr("Country field"),
+                parentLayerParameterName=self.INPUT,
+                type=Qgis.ProcessingFieldParameterDataType.String,
+                optional=True,
+            )
+        )
+        self.addParameter(
+            QgsProcessingParameterField(
+                self.INPUT_STATE_FIELD,
+                self.__tr("State field"),
+                parentLayerParameterName=self.INPUT,
+                type=Qgis.ProcessingFieldParameterDataType.String,
+                optional=True,
+            )
+        )
+        self.addParameter(
+            QgsProcessingParameterField(
+                self.INPUT_COUNTY_FIELD,
+                self.__tr("County field"),
+                parentLayerParameterName=self.INPUT,
+                type=Qgis.ProcessingFieldParameterDataType.String,
+                optional=True,
+            )
+        )
+        self.addParameter(
+            QgsProcessingParameterField(
+                self.INPUT_CITY_FIELD,
+                self.__tr("City field"),
+                parentLayerParameterName=self.INPUT,
+                type=Qgis.ProcessingFieldParameterDataType.String,
+                optional=True,
+            )
+        )
+        self.addParameter(
+            QgsProcessingParameterField(
+                self.INPUT_DISTRICT_FIELD,
+                self.__tr("District field"),
+                parentLayerParameterName=self.INPUT,
+                type=Qgis.ProcessingFieldParameterDataType.String,
+                optional=True,
+            )
+        )
+        self.addParameter(
+            QgsProcessingParameterField(
+                self.INPUT_STREET_FIELD,
+                self.__tr("Street field"),
+                parentLayerParameterName=self.INPUT,
+                type=Qgis.ProcessingFieldParameterDataType.String,
+                optional=True,
+            )
+        )
+        self.addParameter(
+            QgsProcessingParameterField(
+                self.INPUT_HOUSENUMBER_FIELD,
+                self.__tr("House number field"),
+                parentLayerParameterName=self.INPUT,
+                type=Qgis.ProcessingFieldParameterDataType.String,
+                optional=True,
+            )
+        )
+        self.addParameter(
+            QgsProcessingParameterField(
+                self.INPUT_POSTALCODE_FIELD,
+                self.__tr("Postal code field"),
+                parentLayerParameterName=self.INPUT,
+                type=Qgis.ProcessingFieldParameterDataType.String,
+                optional=True,
             )
         )
 
@@ -207,6 +299,30 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         return super().validateInputCrs(parameters, context)
 
     @override
+    def checkParameterValues(
+        self,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+    ) -> tuple[bool, str]:
+        if not any(
+            self.parameterAsString(parameters, name, context)
+            for name in (
+                self.INPUT_ADDRESS_FIELD,
+                self.INPUT_COUNTRY_FIELD,
+                self.INPUT_STATE_FIELD,
+                self.INPUT_COUNTY_FIELD,
+                self.INPUT_CITY_FIELD,
+                self.INPUT_DISTRICT_FIELD,
+                self.INPUT_STREET_FIELD,
+                self.INPUT_HOUSENUMBER_FIELD,
+                self.INPUT_POSTALCODE_FIELD,
+            )
+        ):
+            return False, self.__tr("At least one input field must be specified")
+
+        return super().checkParameterValues(parameters, context)
+
+    @override
     def processAlgorithm(
         self,
         parameters: dict[str, Any],
@@ -239,29 +355,36 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     ) -> "DataFrame":
         from pandas import DataFrame
 
+        def getString(name: str, /) -> str:
+            return self.parameterAsString(parameters, name, context)
+
         source = self._getSource(self.INPUT, parameters, context)
-
-        # TODO: Maybe add this as constant to the coder module.
-        # FIXME: Make the names of the input fields configurable.
-        ADDRESS_FIELDS = {
-            "address",
-            "country",
-            "state",
-            "county",
-            "city",
-            "district",
-            "street",
-            "housenumber",
-            "postalcode",
-        }
-
-        if not any(fname in ADDRESS_FIELDS for fname in source.fields().names()):
-            msg = self.__tr("Input layer does not contain any address fields")
-            raise QgsProcessingException(msg)
+        address_field = getString(self.INPUT_ADDRESS_FIELD)
+        country_field = getString(self.INPUT_COUNTRY_FIELD)
+        state_field = getString(self.INPUT_STATE_FIELD)
+        county_field = getString(self.INPUT_COUNTY_FIELD)
+        city_field = getString(self.INPUT_CITY_FIELD)
+        district_field = getString(self.INPUT_DISTRICT_FIELD)
+        street_field = getString(self.INPUT_STREET_FIELD)
+        hnr_field = getString(self.INPUT_HOUSENUMBER_FIELD)
+        postalcode_field = getString(self.INPUT_POSTALCODE_FIELD)
 
         request = self._simpleFeatureRequest(context, feedback)
 
-        data = [feature.attributeMap() for feature in features_of(source, request)]
+        data = [
+            {
+                "address": feature[address_field] if address_field else None,
+                "country": feature[country_field] if country_field else None,
+                "state": feature[state_field] if state_field else None,
+                "county": feature[county_field] if county_field else None,
+                "city": feature[city_field] if city_field else None,
+                "district": feature[district_field] if district_field else None,
+                "street": feature[street_field] if street_field else None,
+                "housenumber": feature[hnr_field] if hnr_field else None,
+                "postalcode": feature[postalcode_field] if postalcode_field else None,
+            }
+            for feature in features_of(source, request)
+        ]
 
         return DataFrame(data)
 
