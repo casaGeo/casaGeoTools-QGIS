@@ -37,7 +37,14 @@ from qgis.core import (
 )
 from qgis.PyQt.QtCore import QMetaType
 
-from ..utils import TrMethod, features_of, geometry_as_shapely, geometry_from_shapely
+from ..utils import (
+    ProcessingFeatureSinkDefinition,
+    TrMethod,
+    and_then,
+    features_of,
+    geometry_as_shapely,
+    geometry_from_shapely,
+)
 from . import CasaGeoToolsProcessingAlgorithm
 
 if TYPE_CHECKING:
@@ -310,9 +317,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         locations = self._getSink(self.OUTPUT_LOCATIONS, parameters, context)
         navigations = self._getSink(self.OUTPUT_NAVIGATIONS, parameters, context)
 
-        def writeFeature(result, output):
-            feature = QgsFeature(output.props.fields)
-            feature.setGeometry(geometry_from_shapely(result.position))
+        def setCommonAttributes(feature: QgsFeature, result: Any) -> None:
             feature["id"] = result.id
             feature["subid"] = result.subid
             feature["navid"] = result.navid
@@ -321,10 +326,14 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature["distance"] = result.distance
             feature["relevance"] = result.relevance
             feature["timestamp"] = result.timestamp.isoformat()
+            # FIXME: Add error info columns
+
+        def writeFeature(
+            feature: QgsFeature, output: ProcessingFeatureSinkDefinition
+        ) -> None:
             if not output.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert):
-                feedback.reportError(
-                    self.writeFeatureError(output.sink, parameters, output.name)
-                )
+                error = self.writeFeatureError(output.sink, parameters, output.name)
+                feedback.reportError(error)
 
         result: Any  # Make Pyright shut up about the named tuples.
         for result in results.itertuples():
@@ -340,9 +349,15 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 continue
 
             if result.navid == 0:
-                writeFeature(result, locations)
+                feature = QgsFeature(locations.props.fields)
+                and_then(result.position, geometry_from_shapely, feature.setGeometry)
+                setCommonAttributes(feature, result)
+                writeFeature(feature, locations)
 
-            writeFeature(result, navigations)
+            feature = QgsFeature(navigations.props.fields)
+            and_then(result.navigation, geometry_from_shapely, feature.setGeometry)
+            setCommonAttributes(feature, result)
+            writeFeature(feature, navigations)
 
         return {
             locations.name: locations.dest,
@@ -638,7 +653,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         def writeFeature(result, output):
             feature = QgsFeature(output.props.fields)
-            feature.setGeometry(geometry_from_shapely(result.position))
+            and_then(result.position, geometry_from_shapely, feature.setGeometry)
             feature["id"] = result.id
             feature["subid"] = result.subid
             feature["navid"] = result.navid

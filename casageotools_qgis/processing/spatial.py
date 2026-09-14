@@ -410,7 +410,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 continue
 
             feature = QgsFeature(isolines.props.fields)
-            feature.setGeometry(geometry_from_shapely(result.geometry))
+            and_then(result.geometry, geometry_from_shapely, feature.setGeometry)
             feature["id"] = result.id
             feature["subid"] = result.subid
             feature["rangetype"] = result.rangetype
@@ -434,16 +434,12 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             )
 
             feature = QgsFeature(navigations.props.fields)
-            feature.setGeometry(
-                and_then(
-                    (
-                        result.departure_position
-                        if outgoing
-                        else result.arrival_position
-                    ),
-                    geometry_from_shapely,
-                )
+            and_then(
+                (result.departure_position if outgoing else result.arrival_position),
+                geometry_from_shapely,
+                feature.setGeometry,
             )
+
             feature["id"] = result.id
             feature["localtime"] = and_then(
                 (result.departure_time if outgoing else result.arrival_time),
@@ -827,7 +823,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 continue
 
             feature = QgsFeature(routes.props.fields)
-            feature.setGeometry(geometry_from_shapely(result.geometry))
+            and_then(result.geometry, geometry_from_shapely, feature.setGeometry)
             feature["id"] = result.id
             feature["subid"] = result.subid
             feature["length"] = result.length
@@ -839,8 +835,8 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 )
 
             feature = QgsFeature(navigations.props.fields)
-            feature.setGeometry(
-                and_then(result.departure_position, geometry_from_shapely)
+            and_then(
+                result.departure_position, geometry_from_shapely, feature.setGeometry
             )
             feature["id"] = result.id
             feature["subid"] = result.subid
@@ -856,8 +852,8 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 )
 
             feature = QgsFeature(navigations.props.fields)
-            feature.setGeometry(
-                and_then(result.arrival_position, geometry_from_shapely)
+            and_then(
+                result.arrival_position, geometry_from_shapely, feature.setGeometry
             )
             feature["id"] = result.id
             feature["subid"] = result.subid
@@ -1059,7 +1055,7 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 continue
 
             feature = QgsFeature(fields)
-            feature.setGeometry(geometry_from_shapely(result.geometry))
+            and_then(result.geometry, geometry_from_shapely, feature.setGeometry)
             feature["id"] = result.id
             feature["subid"] = result.subid
             feature["length"] = result.length
