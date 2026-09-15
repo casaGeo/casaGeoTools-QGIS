@@ -478,6 +478,9 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             geometryfield: str,
         ) -> None:
             feature = QgsFeature(output.props.fields)
+            if (geom := getattr(result, geometryfield)) is not None:
+                feature.setGeometry(geometry_from_shapely(geom))
+
             feature["id"] = result.id
             feature["subid"] = result.subid
             feature["navid"] = result.navid
@@ -489,8 +492,6 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature["error_code"] = result.error_code
             feature["error_message"] = result.error_message
 
-            if (geom := result[geometryfield]) is not None:
-                feature.setGeometry(geometry_from_shapely(geom))
 
             if not output.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert):
                 error = self.writeFeatureError(output.sink, parameters, output.name)
@@ -810,7 +811,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature["error_code"] = result.error_code
             feature["error_message"] = result.error_message
 
-            if (geom := result[geometryfield]) is not None:
+            if (geom := getattr(result, geometryfield)) is not None:
                 feature.setGeometry(geometry_from_shapely(geom))
 
             if not output.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert):
