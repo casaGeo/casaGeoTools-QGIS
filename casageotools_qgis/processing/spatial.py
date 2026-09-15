@@ -503,8 +503,6 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         try:
             from casageo.spatial import (
                 DEFAULT_ALTERNATIVES,
-                DEFAULT_AVOID_FEATURES,
-                DEFAULT_EXCLUDE_COUNTRIES,
                 DEFAULT_ROUTING_MODE,
                 DEFAULT_TRANSPORT_MODE,
                 MAX_ALTERNATIVES,
@@ -588,7 +586,6 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 self.__tr("Avoid features"),
                 options=map(trAvoidableFeature, AvoidableFeature),
                 allowMultiple=True,
-                defaultValue=list(map(trAvoidableFeature, DEFAULT_AVOID_FEATURES)),
                 optional=True,
             )
         )
@@ -598,7 +595,6 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 self.EXCLUDE_COUNTRIES,
                 self.__tr("Exclude countries (separated by commas)"),
                 optional=True,
-                defaultValue=",".join(DEFAULT_EXCLUDE_COUNTRIES),
             )
         )
 
