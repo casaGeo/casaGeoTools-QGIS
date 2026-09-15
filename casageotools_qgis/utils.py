@@ -16,7 +16,7 @@
 
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, LiteralString, cast
+from typing import TYPE_CHECKING, Any, LiteralString, cast, overload
 
 from qgis.PyQt.QtCore import QCoreApplication
 
@@ -167,7 +167,49 @@ class ProcessingFeatureSinkDefinition:
     sink: "QgsFeatureSink"
 
 
-def and_then(val, /, *funcs: Callable):
+@overload
+def and_then[T0](val: T0, /) -> T0: ...
+@overload
+def and_then[T0, T1](
+    val: T0 | None,
+    f1: Callable[[T0], T1 | None],
+    /,
+) -> T1 | None: ...
+@overload
+def and_then[T0, T1, T2](
+    val: T0 | None,
+    f1: Callable[[T0], T1 | None],
+    f2: Callable[[T1], T2 | None],
+    /,
+) -> T2 | None: ...
+@overload
+def and_then[T0, T1, T2, T3](
+    val: T0 | None,
+    f1: Callable[[T0], T1 | None],
+    f2: Callable[[T1], T2 | None],
+    f3: Callable[[T2], T3 | None],
+    /,
+) -> T3 | None: ...
+@overload
+def and_then[T0, T1, T2, T3, T4](
+    val: T0 | None,
+    f1: Callable[[T0], T1 | None],
+    f2: Callable[[T1], T2 | None],
+    f3: Callable[[T2], T3 | None],
+    f4: Callable[[T3], T4 | None],
+    /,
+) -> T4 | None: ...
+@overload
+def and_then[T0, T1, T2, T3, T4, T5](
+    val: T0 | None,
+    f1: Callable[[T0], T1 | None],
+    f2: Callable[[T1], T2 | None],
+    f3: Callable[[T2], T3 | None],
+    f4: Callable[[T3], T4 | None],
+    f5: Callable[[T4], T5 | None],
+    /,
+) -> T5 | None: ...
+def and_then(val: Any | None, /, *funcs: Callable[[Any], Any | None]) -> Any | None:
     for func in funcs:
         if val is None:
             break
