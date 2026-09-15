@@ -270,17 +270,11 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
     def validateInputCrs(
         self, parameters: dict[str, Any], context: QgsProcessingContext
     ) -> bool:
-        isTransformationPossible = QgsCoordinateTransform.isTransformationPossible
-        EPSG4326 = QgsCoordinateReferenceSystem.fromEpsgId(4326)
-
-        if (
-            (src := self.parameterAsSource(parameters, self.INPUT, context)) is not None
-            and (crs := src.sourceCrs()).isValid()
-            and not isTransformationPossible(crs, EPSG4326)
-        ):
-            return False
-
-        return super().validateInputCrs(parameters, context)
+        return (
+            super().validateInputCrs(parameters, context)
+            and self._validateSourceCrsCompatible(self.INPUT, parameters, context)
+            and True
+        )
 
     @override
     def processAlgorithm(
@@ -663,18 +657,11 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
     def validateInputCrs(
         self, parameters: dict[str, Any], context: QgsProcessingContext
     ) -> bool:
-        isTransformationPossible = QgsCoordinateTransform.isTransformationPossible
-        EPSG4326 = QgsCoordinateReferenceSystem.fromEpsgId(4326)
-
-        orig_crs = self.parameterAsPointCrs(parameters, self.ORIGIN, context)
-        if orig_crs.isValid() and not isTransformationPossible(orig_crs, EPSG4326):
-            return False
-
-        dest_crs = self.parameterAsPointCrs(parameters, self.DESTINATION, context)
-        if dest_crs.isValid() and not isTransformationPossible(dest_crs, EPSG4326):
-            return False
-
-        return super().validateInputCrs(parameters, context)
+        return (
+            super().validateInputCrs(parameters, context)
+            and self._validatePointCrsCompatible(self.ORIGIN, parameters, context)
+            and self._validatePointCrsCompatible(self.DESTINATION, parameters, context)
+        )
 
     @override
     def processAlgorithm(
@@ -923,6 +910,16 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 self.__tr("Calculated routes"),
                 Qgis.ProcessingSourceType.VectorLine,
             )
+        )
+
+    @override
+    def validateInputCrs(
+        self, parameters: dict[str, Any], context: QgsProcessingContext
+    ) -> bool:
+        return (
+            super().validateInputCrs(parameters, context)
+            and self._validateSourceCrsCompatible(self.INPUT, parameters, context)
+            and True
         )
 
     @override

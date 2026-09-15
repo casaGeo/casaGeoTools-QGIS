@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING, Any, Never, Self, override
 from qgis.core import (
     Qgis,
     QgsCoordinateReferenceSystem,
+    QgsCoordinateTransform,
     QgsFeature,
     QgsFeatureRequest,
     QgsProcessingAlgorithm,
@@ -33,6 +34,7 @@ from ..resources import LIBRARY_IDENTIFIER, MINIMUM_REQUIRED_LIBRARY_VERSION
 from ..utils import (
     ProcessingFeatureSinkDefinition,
     TrMethod,
+    and_then,
     version_tuple,
 )
 
@@ -40,6 +42,9 @@ if TYPE_CHECKING:
     from qgis.PyQt.QtGui import QIcon
 
     from ..plugin import CasaGeoToolsPlugin
+
+
+EPSG4326 = QgsCoordinateReferenceSystem.fromEpsgId(4326)
 
 
 class CasaGeoToolsProcessingProvider(QgsProcessingProvider):
@@ -209,6 +214,31 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
             sink=sink,
         )
 
+    def _validateSourceCrsCompatible(
+        self,
+        name: str,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+    ) -> bool:
+        crs = and_then(
+            self.parameterAsSource(parameters, name, context),
+            QgsProcessingFeatureSource.sourceCrs,
+        )
+        if crs is None or not crs.isValid():
+            return True
+        return QgsCoordinateTransform.isTransformationPossible(crs, EPSG4326)
+
+    def _validatePointCrsCompatible(
+        self,
+        name: str,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+    ) -> bool:
+        crs = self.parameterAsPointCrs(parameters, name, context)
+        if crs is None or not crs.isValid():
+            return True
+        return QgsCoordinateTransform.isTransformationPossible(crs, EPSG4326)
+
     def _simpleFeatureRequest(
         self,
         context: QgsProcessingContext,
@@ -226,10 +256,7 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
         feedback: QgsProcessingFeedback,
     ) -> QgsFeatureRequest:
         request = self._simpleFeatureRequest(context, feedback)
-        request.setDestinationCrs(
-            QgsCoordinateReferenceSystem.fromEpsgId(4326),
-            context.transformContext(),
-        )
+        request.setDestinationCrs(EPSG4326, context.transformContext())
         return request
 
     def _onTransformError(self, feature: QgsFeature) -> Never:

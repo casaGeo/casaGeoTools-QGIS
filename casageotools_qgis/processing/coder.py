@@ -309,17 +309,11 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     def validateInputCrs(
         self, parameters: dict[str, Any], context: QgsProcessingContext
     ) -> bool:
-        isTransformationPossible = QgsCoordinateTransform.isTransformationPossible
-        EPSG4326 = QgsCoordinateReferenceSystem.fromEpsgId(4326)
-
-        if (
-            (src := self.parameterAsSource(parameters, self.INPUT, context)) is not None
-            and (crs := src.sourceCrs()).isValid()
-            and not isTransformationPossible(crs, EPSG4326)
-        ):
-            return False
-
-        return super().validateInputCrs(parameters, context)
+        return (
+            super().validateInputCrs(parameters, context)
+            and self._validateSourceCrsCompatible(self.INPUT, parameters, context)
+            and True
+        )
 
     @override
     def checkParameterValues(
@@ -665,17 +659,11 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     def validateInputCrs(
         self, parameters: dict[str, Any], context: QgsProcessingContext
     ) -> bool:
-        isTransformationPossible = QgsCoordinateTransform.isTransformationPossible
-        EPSG4326 = QgsCoordinateReferenceSystem.fromEpsgId(4326)
-
-        if (
-            (src := self.parameterAsSource(parameters, self.INPUT, context)) is not None
-            and (crs := src.sourceCrs()).isValid()
-            and not isTransformationPossible(crs, EPSG4326)
-        ):
-            return False
-
-        return super().validateInputCrs(parameters, context)
+        return (
+            super().validateInputCrs(parameters, context)
+            and self._validateSourceCrsCompatible(self.INPUT, parameters, context)
+            and True
+        )
 
     @override
     def processAlgorithm(
