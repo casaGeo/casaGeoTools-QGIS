@@ -72,6 +72,10 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     POSTAL_CODE_MODE = "POSTAL_CODE_MODE"
     COUNTRIES = "COUNTRIES"
 
+    WITH_ADDRESS_DETAILS = "WITH_ADDRESS_DETAILS"
+    WITH_COORDINATES = "WITH_COORDINATES"
+    WITH_MATCH_QUALITY = "WITH_MATCH_QUALITY"
+
     OUTPUT_LOCATIONS = "OUTPUT_LOCATIONS"
     OUTPUT_NAVIGATIONS = "OUTPUT_NAVIGATIONS"
 
@@ -260,6 +264,30 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         )
 
         self.addParameter(
+            QgsProcessingParameterBoolean(
+                self.WITH_ADDRESS_DETAILS,
+                self.__tr("Include address details"),
+                defaultValue=True,
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterBoolean(
+                self.WITH_COORDINATES,
+                self.__tr("Include coordinates"),
+                defaultValue=True,
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterBoolean(
+                self.WITH_MATCH_QUALITY,
+                self.__tr("Include match quality"),
+                defaultValue=True,
+            )
+        )
+
+        self.addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT_LOCATIONS,
                 self.__tr("Geocoded locations"),
@@ -283,12 +311,23 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         context: QgsProcessingContext,
         sourceProperties: dict[str | None, QgsProcessingAlgorithm.VectorProperties],
     ) -> QgsProcessingAlgorithm.VectorProperties:
+        with_address_details = self.parameterAsBool(
+            parameters, self.WITH_ADDRESS_DETAILS, context
+        )
+        with_coordinates = self.parameterAsBool(
+            parameters, self.WITH_COORDINATES, context
+        )
+        with_match_quality = self.parameterAsBool(
+            parameters, self.WITH_MATCH_QUALITY, context
+        )
+
         match sink:
             case self.OUTPUT_LOCATIONS | self.OUTPUT_NAVIGATIONS:
                 props = QgsProcessingAlgorithm.VectorProperties()
                 props.availability = Qgis.ProcessingPropertyAvailability.Available
                 props.crs = QgsCoordinateReferenceSystem.fromEpsgId(4326)
-                props.fields = QgsFields([
+                props.wkbType = Qgis.WkbType.Point
+                props.fields.append([
                     QgsField("id", QMetaType.Type.Int),
                     QgsField("subid", QMetaType.Type.Int),
                     QgsField("navid", QMetaType.Type.Int),
@@ -300,7 +339,56 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                     QgsField("error_code", QMetaType.Type.QString),
                     QgsField("error_message", QMetaType.Type.QString),
                 ])
-                props.wkbType = Qgis.WkbType.Point
+
+                if with_address_details:
+                    props.fields.append([
+                        QgsField("postaladdress", QMetaType.Type.QString),
+                        QgsField("country", QMetaType.Type.QString),
+                        QgsField("countrycode", QMetaType.Type.QString),
+                        QgsField("state", QMetaType.Type.QString),
+                        QgsField("statecode", QMetaType.Type.QString),
+                        QgsField("county", QMetaType.Type.QString),
+                        QgsField("countycode", QMetaType.Type.QString),
+                        QgsField("city", QMetaType.Type.QString),
+                        QgsField("district", QMetaType.Type.QString),
+                        QgsField("subdistrict", QMetaType.Type.QString),
+                        QgsField("street", QMetaType.Type.QString),
+                        QgsField("block", QMetaType.Type.QString),
+                        QgsField("subblock", QMetaType.Type.QString),
+                        QgsField("postalcode", QMetaType.Type.QString),
+                        QgsField("housenumber", QMetaType.Type.QString),
+                        QgsField("building", QMetaType.Type.QString),
+                        QgsField("unit", QMetaType.Type.QString),
+                    ])
+
+                if with_coordinates:
+                    props.fields.append([
+                        QgsField("longitude", QMetaType.Type.Double),
+                        QgsField("latitude", QMetaType.Type.Double),
+                    ])
+
+                if with_match_quality:
+                    props.fields.append([
+                        QgsField("mq_country", QMetaType.Type.Double),
+                        QgsField("mq_countrycode", QMetaType.Type.Double),
+                        QgsField("mq_state", QMetaType.Type.Double),
+                        QgsField("mq_statecode", QMetaType.Type.Double),
+                        QgsField("mq_county", QMetaType.Type.Double),
+                        QgsField("mq_countycode", QMetaType.Type.Double),
+                        QgsField("mq_city", QMetaType.Type.Double),
+                        QgsField("mq_district", QMetaType.Type.Double),
+                        QgsField("mq_subdistrict", QMetaType.Type.Double),
+                        QgsField("mq_street", QMetaType.Type.Double),
+                        QgsField("mq_block", QMetaType.Type.Double),
+                        QgsField("mq_subblock", QMetaType.Type.Double),
+                        QgsField("mq_postalcode", QMetaType.Type.Double),
+                        QgsField("mq_housenumber", QMetaType.Type.Double),
+                        QgsField("mq_building", QMetaType.Type.Double),
+                        QgsField("mq_unit", QMetaType.Type.Double),
+                        QgsField("mq_placename", QMetaType.Type.Double),
+                        QgsField("mq_ontologyname", QMetaType.Type.Double),
+                    ])
+
                 return props
 
         return super().sinkProperties(sink, parameters, context, sourceProperties)
@@ -442,6 +530,15 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             parameters, self.POSTAL_CODE_MODE, context
         )
         countries = self.parameterAsString(parameters, self.COUNTRIES, context)
+        with_address_details = self.parameterAsBool(
+            parameters, self.WITH_ADDRESS_DETAILS, context
+        )
+        with_coordinates = self.parameterAsBool(
+            parameters, self.WITH_COORDINATES, context
+        )
+        with_match_quality = self.parameterAsBool(
+            parameters, self.WITH_MATCH_QUALITY, context
+        )
 
         client = self.plugin.casaGeoClient(feedback)
         defaults = {
@@ -456,6 +553,9 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 client,
                 queries,
                 defaults,
+                address_details=with_address_details,
+                coordinates=with_coordinates,
+                match_quality=with_match_quality,
             )
         except Exception as err:
             raise QgsProcessingException(str(err)) from err
@@ -471,6 +571,15 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         locations = self._getSink(self.OUTPUT_LOCATIONS, parameters, context)
         navigations = self._getSink(self.OUTPUT_NAVIGATIONS, parameters, context)
+        with_address_details = self.parameterAsBool(
+            parameters, self.WITH_ADDRESS_DETAILS, context
+        )
+        with_coordinates = self.parameterAsBool(
+            parameters, self.WITH_COORDINATES, context
+        )
+        with_match_quality = self.parameterAsBool(
+            parameters, self.WITH_MATCH_QUALITY, context
+        )
 
         def addFeature(
             output: ProcessingFeatureSinkDefinition,
@@ -492,6 +601,48 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature["error_code"] = result.error_code
             feature["error_message"] = result.error_message
 
+            if with_address_details:
+                feature["postaladdress"] = result.postaladdress
+                feature["country"] = result.country
+                feature["countrycode"] = result.countrycode
+                feature["state"] = result.state
+                feature["statecode"] = result.statecode
+                feature["county"] = result.county
+                feature["countycode"] = result.countycode
+                feature["city"] = result.city
+                feature["district"] = result.district
+                feature["subdistrict"] = result.subdistrict
+                feature["street"] = result.street
+                feature["block"] = result.block
+                feature["subblock"] = result.subblock
+                feature["postalcode"] = result.postalcode
+                feature["housenumber"] = result.housenumber
+                feature["building"] = result.building
+                feature["unit"] = result.unit
+
+            if with_coordinates:
+                feature["longitude"] = getattr(result, f"{geometryfield}_longitude")
+                feature["latitude"] = getattr(result, f"{geometryfield}_latitude")
+
+            if with_match_quality:
+                feature["mq_country"] = result.mq_country
+                feature["mq_countrycode"] = result.mq_countrycode
+                feature["mq_state"] = result.mq_state
+                feature["mq_statecode"] = result.mq_statecode
+                feature["mq_county"] = result.mq_county
+                feature["mq_countycode"] = result.mq_countycode
+                feature["mq_city"] = result.mq_city
+                feature["mq_district"] = result.mq_district
+                feature["mq_subdistrict"] = result.mq_subdistrict
+                feature["mq_street"] = result.mq_street
+                feature["mq_block"] = result.mq_block
+                feature["mq_subblock"] = result.mq_subblock
+                feature["mq_postalcode"] = result.mq_postalcode
+                feature["mq_housenumber"] = result.mq_housenumber
+                feature["mq_building"] = result.mq_building
+                feature["mq_unit"] = result.mq_unit
+                feature["mq_placename"] = result.mq_placename
+                feature["mq_ontologyname"] = result.mq_ontologyname
 
             if not output.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert):
                 error = self.writeFeatureError(output.sink, parameters, output.name)
