@@ -463,7 +463,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 queries,
                 defaults,
             )
-        except casageo.tools.CasaGeoError as err:
+        except Exception as err:
             raise QgsProcessingException(str(err)) from err
 
     def _writeOutputGeometries(
@@ -800,7 +800,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 queries,
                 defaults,
             )
-        except casageo.tools.CasaGeoError as err:
+        except Exception as err:
             raise QgsProcessingException(str(err)) from err
 
     def _writeOutputGeometries(

@@ -387,7 +387,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 departure_info=True,
                 arrival_info=True,
             )
-        except casageo.tools.CasaGeoError as err:
+        except Exception as err:
             raise QgsProcessingException(str(err)) from err
 
     def _writeOutputGeometries(
@@ -796,7 +796,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 departure_info=True,
                 arrival_info=True,
             )
-        except casageo.tools.CasaGeoError as err:
+        except Exception as err:
             raise QgsProcessingException(str(err)) from err
 
     def _writeOutputGeometries(
@@ -1004,7 +1004,7 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         try:
             return casageo.spatial.routes(client, queries, defaults)
-        except casageo.tools.CasaGeoError as err:
+        except Exception as err:
             raise QgsProcessingException(str(err)) from err
 
     def _writeOutputGeometries(
