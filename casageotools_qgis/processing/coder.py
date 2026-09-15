@@ -56,7 +56,6 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     __tr = TrMethod()
 
     INPUT = "INPUT"
-    INPUT_USE_GEOMETRY = "INPUT_USE_GEOMETRY"
     INPUT_ADDRESS_FIELD = "INPUT_ADDRESS_FIELD"
     INPUT_COUNTRY_FIELD = "INPUT_COUNTRY_FIELD"
     INPUT_STATE_FIELD = "INPUT_STATE_FIELD"
@@ -66,6 +65,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     INPUT_STREET_FIELD = "INPUT_STREET_FIELD"
     INPUT_HOUSENUMBER_FIELD = "INPUT_HOUSENUMBER_FIELD"
     INPUT_POSTALCODE_FIELD = "INPUT_POSTALCODE_FIELD"
+    INPUT_USE_GEOMETRY = "INPUT_USE_GEOMETRY"
 
     LIMIT = "LIMIT"
     ADDRESS_NAMES_MODE = "ADDRESS_NAMES_MODE"
@@ -121,14 +121,6 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 self.INPUT,
                 self.__tr("Input layer"),
                 [Qgis.ProcessingSourceType.Vector],
-            )
-        )
-
-        self.addParameter(
-            QgsProcessingParameterBoolean(
-                self.INPUT_USE_GEOMETRY,
-                self.__tr("Search around feature location"),
-                defaultValue=True,
             )
         )
 
@@ -219,6 +211,14 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 parentLayerParameterName=self.INPUT,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterBoolean(
+                self.INPUT_USE_GEOMETRY,
+                self.__tr("Search around feature location"),
+                defaultValue=False,
             )
         )
 
