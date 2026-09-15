@@ -403,15 +403,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 error = self.writeFeatureError(output.sink, parameters, output.name)
                 feedback.reportError(error)
 
-        result: Any  # Make Pyright shut up about the named tuples.
-        for result in results.itertuples():
-            if result.error_code is not None:
-                feedback.reportError(
-                    self.__tr("Error ({code}): {message}").format(
-                        code=result.error_code, message=result.error_message
-                    )
-                )
-
+        for result in self._resultsOf(results, feedback):
             feature = QgsFeature(isolines.props.fields)
             and_then(result.geometry, geometry_from_shapely, feature.setGeometry)
             feature["id"] = result.id
@@ -424,7 +416,9 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature["error_message"] = result.error_message
             addFeature(isolines, feature)
 
-        for result in results.drop_duplicates(subset=["id"]).itertuples():
+            if result.subid > 0:
+                continue
+
             # HACK: The library should unify these output fields!
             outgoing = (
                 result.departure_time is not None
@@ -801,15 +795,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 error = self.writeFeatureError(output.sink, parameters, output.name)
                 feedback.reportError(error)
 
-        result: Any  # Make Pyright shut up about the named tuples.
-        for result in results.itertuples():
-            if result.error_code is not None:
-                feedback.reportError(
-                    self.__tr("Error ({code}): {message}").format(
-                        code=result.error_code, message=result.error_message
-                    )
-                )
-
+        for result in self._resultsOf(results, feedback):
             feature = QgsFeature(routes.props.fields)
             and_then(result.geometry, geometry_from_shapely, feature.setGeometry)
             feature["id"] = result.id
@@ -1033,15 +1019,7 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 self.invalidSinkError(parameters, self.OUTPUT_ROUTES)
             )
 
-        result: Any  # Make Pyright shut up about the named tuples.
-        for result in results.itertuples():
-            if result.error_code is not None:
-                feedback.reportError(
-                    self.__tr("Error ({code}): {message}").format(
-                        code=result.error_code, message=result.error_message
-                    )
-                )
-
+        for result in self._resultsOf(results, feedback):
             feature = QgsFeature(fields)
             and_then(result.geometry, geometry_from_shapely, feature.setGeometry)
             feature["id"] = result.id

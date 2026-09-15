@@ -496,18 +496,9 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 error = self.writeFeatureError(output.sink, parameters, output.name)
                 feedback.reportError(error)
 
-        result: Any  # Make Pyright shut up about the named tuples.
-        for result in results.itertuples():
-            if result.error_code is not None:
-                feedback.reportError(
-                    self.__tr("Error ({code}): {message}").format(
-                        code=result.error_code, message=result.error_message
-                    )
-                )
-
+        for result in self._resultsOf(results, feedback):
             if result.navid == 0:
                 addFeature(locations, result, "position")
-
             addFeature(navigations, result, "navigation")
 
         return {
@@ -826,18 +817,9 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 error = self.writeFeatureError(output.sink, parameters, output.name)
                 feedback.reportError(error)
 
-        result: Any  # Make Pyright shut up about the named tuples.
-        for result in results.itertuples():
-            if result.error_code is not None:
-                feedback.reportError(
-                    self.__tr("Error ({code}): {message}").format(
-                        code=result.error_code, message=result.error_message
-                    )
-                )
-
+        for result in self._resultsOf(results, feedback):
             if result.navid == 0:
                 addFeature(locations, result, "position")
-
             addFeature(navigations, result, "navigation")
 
         return {

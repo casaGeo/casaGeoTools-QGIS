@@ -14,6 +14,7 @@
 #
 #  SPDX-License-Identifier: Apache-2.0
 
+from collections.abc import Generator
 from typing import TYPE_CHECKING, Any, Never, Self, override
 
 from qgis.core import (
@@ -39,6 +40,7 @@ from ..utils import (
 )
 
 if TYPE_CHECKING:
+    from pandas import DataFrame
     from qgis.PyQt.QtGui import QIcon
 
     from ..plugin import CasaGeoToolsPlugin
@@ -258,6 +260,24 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
         request = self._simpleFeatureRequest(context, feedback)
         request.setDestinationCrs(EPSG4326, context.transformContext())
         return request
+
+    def _resultsOf(
+        self, df: "DataFrame", /, feedback: QgsProcessingFeedback
+    ) -> Generator[Any]:
+        for result in df.itertuples():
+            # We DO NOT check for feedback.isCanceled() because we never want to skip already computed results.
+
+            if error_code := getattr(result, "error_code", None):
+                if error_message := getattr(result, "error_message", None):
+                    error = self.__tr("Error ({code}): {message}").format(
+                        code=error_code, message=error_message
+                    )
+                else:
+                    error = self.__tr("Error ({code})").format(code=error_code)
+
+                feedback.reportError(error)
+
+            yield result
 
     def _onTransformError(self, feature: QgsFeature) -> Never:
         msg = self.__tr("Reprojection of feature {featid} failed").format(
