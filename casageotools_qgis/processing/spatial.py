@@ -103,9 +103,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         try:
             from casageo.spatial import (
-                DEFAULT_AVOID_FEATURES,
                 DEFAULT_DIRECTION,
-                DEFAULT_EXCLUDE_COUNTRIES,
                 DEFAULT_RANGE_UNIT,
                 DEFAULT_ROUTING_MODE,
                 DEFAULT_TRANSPORT_MODE,
@@ -193,7 +191,6 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 self.__tr("Avoid features"),
                 options=map(trAvoidableFeature, AvoidableFeature),
                 allowMultiple=True,
-                defaultValue=list(map(trAvoidableFeature, DEFAULT_AVOID_FEATURES)),
                 optional=True,
             )
         )
@@ -203,7 +200,6 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 self.EXCLUDE_COUNTRIES,
                 self.__tr("Exclude countries (separated by commas)"),
                 optional=True,
-                defaultValue=",".join(DEFAULT_EXCLUDE_COUNTRIES),
             )
         )
 
