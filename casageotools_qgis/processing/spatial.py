@@ -438,6 +438,8 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 result.departure_placename if outgoing else result.arrival_placename
             )
             feature["timestamp"] = result.timestamp.isoformat()
+            feature["error_code"] = result.error_code
+            feature["error_message"] = result.error_message
             addFeature(navigations, feature)
 
         return {
