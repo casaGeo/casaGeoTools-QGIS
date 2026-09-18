@@ -238,6 +238,11 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                     QgsField("rangetype", QMetaType.Type.QString),
                     QgsField("rangeunit", QMetaType.Type.QString),
                     QgsField("rangevalue", QMetaType.Type.Double),
+                    QgsField("direction", QMetaType.Type.QString),
+                    QgsField("location_placename", QMetaType.Type.QString),
+                    QgsField("location_longitude", QMetaType.Type.Double),
+                    QgsField("location_latitude", QMetaType.Type.Double),
+                    QgsField("location_datetime", QMetaType.Type.QDateTime),
                     QgsField("timestamp", QMetaType.Type.QDateTime),
                     QgsField("error_code", QMetaType.Type.QString),
                     QgsField("error_message", QMetaType.Type.QString),
@@ -251,8 +256,10 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 props.crs = QgsCoordinateReferenceSystem.fromEpsgId(4326)
                 props.fields = QgsFields([
                     QgsField("id", QMetaType.Type.Int),
-                    QgsField("localtime", QMetaType.Type.QDateTime),
                     QgsField("placename", QMetaType.Type.QString),
+                    QgsField("longitude", QMetaType.Type.Double),
+                    QgsField("latitude", QMetaType.Type.Double),
+                    QgsField("datetime", QMetaType.Type.QDateTime),
                     QgsField("timestamp", QMetaType.Type.QDateTime),
                     QgsField("error_code", QMetaType.Type.QString),
                     QgsField("error_message", QMetaType.Type.QString),
@@ -376,6 +383,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 defaults,
                 departure_info=True,
                 arrival_info=True,
+                coordinates=True,
             )
         except Exception as err:
             raise QgsProcessingException(str(err)) from err
@@ -389,6 +397,10 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
     ) -> dict[str, str]:
         """Convert results to features and write them to the feature sink."""
 
+        from casageo.spatial import DirectionType
+
+        isoformat = datetime.isoformat
+
         isolines = self._getSink(self.OUTPUT_ISOLINES, parameters, context)
         navigations = self._getSink(self.OUTPUT_NAVIGATIONS, parameters, context)
 
@@ -399,15 +411,29 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 error = self.writeFeatureError(output.sink, parameters, output.name)
                 feedback.reportError(error)
 
+        def center(result: Any, key: str, /) -> Any:
+            if result.direction == DirectionType.OUTGOING:
+                return getattr(result, f"departure_{key}")
+            if result.direction == DirectionType.INCOMING:
+                return getattr(result, f"arrival_{key}")
+            return None
+
         for result in self._resultsOf(results, feedback):
             feature = QgsFeature(isolines.props.fields)
-            and_then(result.geometry, geometry_from_shapely, feature.setGeometry)
+            if (geom := result.geometry) is not None:
+                feature.setGeometry(geometry_from_shapely(geom))
+
             feature["id"] = result.id
             feature["subid"] = result.subid
             feature["rangetype"] = result.rangetype
             feature["rangeunit"] = result.rangeunit
             feature["rangevalue"] = result.rangevalue
-            feature["timestamp"] = result.timestamp.isoformat()
+            feature["direction"] = result.direction
+            feature["location_placename"] = center(result, "placename")
+            feature["location_longitude"] = center(result, "longitude")
+            feature["location_latitude"] = center(result, "latitude")
+            feature["location_datetime"] = and_then(center(result, "time"), isoformat)
+            feature["timestamp"] = and_then(result.timestamp, isoformat)
             feature["error_code"] = result.error_code
             feature["error_message"] = result.error_message
             addFeature(isolines, feature)
@@ -415,29 +441,16 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             if result.subid > 0:
                 continue
 
-            # HACK: The library should unify these output fields!
-            outgoing = (
-                result.departure_time is not None
-                or result.departure_placename is not None
-                or result.departure_position is not None
-            )
-
             feature = QgsFeature(navigations.props.fields)
-            and_then(
-                (result.departure_position if outgoing else result.arrival_position),
-                geometry_from_shapely,
-                feature.setGeometry,
-            )
+            if (geom := center(result, "position")) is not None:
+                feature.setGeometry(geometry_from_shapely(geom))
 
             feature["id"] = result.id
-            feature["localtime"] = and_then(
-                (result.departure_time if outgoing else result.arrival_time),
-                datetime.isoformat,
-            )
-            feature["placename"] = (
-                result.departure_placename if outgoing else result.arrival_placename
-            )
-            feature["timestamp"] = result.timestamp.isoformat()
+            feature["placename"] = center(result, "placename")
+            feature["longitude"] = center(result, "longitude")
+            feature["latitude"] = center(result, "latitude")
+            feature["datetime"] = and_then(center(result, "time"), isoformat)
+            feature["timestamp"] = and_then(result.timestamp, isoformat)
             feature["error_code"] = result.error_code
             feature["error_message"] = result.error_message
             addFeature(navigations, feature)
