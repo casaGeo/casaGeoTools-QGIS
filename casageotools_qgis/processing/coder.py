@@ -19,11 +19,9 @@ from typing import TYPE_CHECKING, Any, override
 from qgis.core import (
     Qgis,
     QgsCoordinateReferenceSystem,
-    QgsCoordinateTransform,
     QgsFeature,
     QgsFeatureSink,
     QgsField,
-    QgsFields,
     QgsProcessingAlgorithm,
     QgsProcessingContext,
     QgsProcessingException,  # pyright: ignore[reportAttributeAccessIssue]
@@ -221,7 +219,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterBoolean(
                 self.INPUT_USE_GEOMETRY,
-                self.__tr("Search around feature location"),
+                self.__tr("Search around feature point geometry"),
                 defaultValue=False,
             )
         )
