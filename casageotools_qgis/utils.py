@@ -124,8 +124,8 @@ class CasaGeoToolsSpatialTranslator:
             "short": self.__tr("Short", "Routing mode"),
         }
         self.direction_type_map = {
-            "outgoing": self.__tr("Outgoing", "Direction type"),
-            "incoming": self.__tr("Incoming", "Direction type"),
+            "outgoing": self.__tr("Outgoing (To)", "Direction type"),
+            "incoming": self.__tr("Incoming (From)", "Direction type"),
         }
         self.avoidable_feature_map = {
             "carShuttleTrain": self.__tr("Car shuttle trains", "Avoidable feature"),
