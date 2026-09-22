@@ -132,25 +132,15 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
 
     @override
     def initAlgorithm(self, configuration: dict[str, Any] | None = None) -> None:
-        from importlib import import_module
-        from importlib.metadata import version
+        from importlib.metadata import PackageNotFoundError, version
 
         try:
             version_s = version(LIBRARY_IDENTIFIER)
-            import_module("casageo.tools")
-            import_module("casageo.coder")
-            import_module("casageo.spatial")
-        except ModuleNotFoundError as err:
+        except PackageNotFoundError as err:
             self.status_ok = False
             self.status_message = self.__tr(
-                "The {module} module is not installed",
+                "The {module} Python module is not installed",
             ).format(module=err.name)
-            return
-        except ImportError as err:
-            self.status_ok = False
-            self.status_message = self.__tr(
-                "The {module} module could not be imported: {err}",
-            ).format(module=err.name, err=err)
             return
 
         try:
@@ -158,7 +148,7 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
         except ValueError:
             self.status_ok = False
             self.status_message = self.__tr(
-                "Failed to parse {module} version information",
+                "Failed to parse version information for the {module} Python module",
             ).format(module=LIBRARY_IDENTIFIER)
             return
 
@@ -176,6 +166,27 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
             self.status_ok = False
             self.status_message = self.__tr("Please input your API key in the settings")
             return
+
+        try:
+            self._initAlgorithm(configuration)
+        except ModuleNotFoundError as err:
+            self.status_ok = False
+            self.status_message = self.__tr(
+                "The {module} module is not installed",
+            ).format(module=err.name)
+        except ImportError as err:
+            self.status_ok = False
+            self.status_message = self.__tr(
+                "The {module} module could not be imported: {err}",
+            ).format(module=err.name, err=err)
+        except Exception as err:
+            self.status_ok = False
+            self.status_message = self.__tr(
+                "An error occurred while initializing the algorithm: {err}",
+            ).format(err=err)
+
+    def _initAlgorithm(self, configuration: dict[str, Any] | None) -> None:
+        pass
 
     def _getSource(
         self,

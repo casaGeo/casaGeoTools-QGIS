@@ -94,25 +94,16 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         return self.__tr("Geocodes addresses.")
 
     @override
-    def initAlgorithm(self, configuration: dict[str, Any] | None = None) -> None:
-        super().initAlgorithm(configuration)
-        if not self.status_ok:
-            return
-
-        try:
-            from casageo.coder import (
-                DEFAULT_ADDRESS_NAMES_MODE,
-                DEFAULT_LIMIT,
-                DEFAULT_POSTAL_CODE_MODE,
-                MAX_LIMIT,
-                MIN_LIMIT,
-                AddressNamesMode,
-                PostalCodeMode,
-            )
-        except ImportError as err:
-            self.status_ok = False
-            self.status_message = str(err)
-            return
+    def _initAlgorithm(self, configuration: dict[str, Any] | None) -> None:
+        from casageo.coder import (
+            DEFAULT_ADDRESS_NAMES_MODE,
+            DEFAULT_LIMIT,
+            DEFAULT_POSTAL_CODE_MODE,
+            MAX_LIMIT,
+            MIN_LIMIT,
+            AddressNamesMode,
+            PostalCodeMode,
+        )
 
         translator = self.plugin.coderTranslator
         trAddressNamesMode = translator.translateAddressNamesMode
@@ -685,25 +676,16 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         return "poisearch"
 
     @override
-    def initAlgorithm(self, configuration: dict[str, Any] | None = None) -> None:
-        super().initAlgorithm(configuration)
-        if not self.status_ok:
-            return
-
-        try:
-            from casageo.coder import (
-                DEFAULT_ADDRESS_NAMES_MODE,
-                DEFAULT_LIMIT,
-                DEFAULT_POSTAL_CODE_MODE,
-                MAX_LIMIT,
-                MIN_LIMIT,
-                AddressNamesMode,
-                PostalCodeMode,
-            )
-        except ImportError as err:
-            self.status_ok = False
-            self.status_message = str(err)
-            return
+    def _initAlgorithm(self, configuration: dict[str, Any] | None) -> None:
+        from casageo.coder import (
+            DEFAULT_ADDRESS_NAMES_MODE,
+            DEFAULT_LIMIT,
+            DEFAULT_POSTAL_CODE_MODE,
+            MAX_LIMIT,
+            MIN_LIMIT,
+            AddressNamesMode,
+            PostalCodeMode,
+        )
 
         translator = self.plugin.coderTranslator
         trAddressNamesMode = translator.translateAddressNamesMode

@@ -96,27 +96,18 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         """)
 
     @override
-    def initAlgorithm(self, configuration: dict[str, Any] | None = None) -> None:
-        super().initAlgorithm(configuration)
-        if not self.status_ok:
-            return
-
-        try:
-            from casageo.spatial import (
-                DEFAULT_DIRECTION,
-                DEFAULT_RANGE_UNIT,
-                DEFAULT_ROUTING_MODE,
-                DEFAULT_TRANSPORT_MODE,
-                AvoidableFeature,
-                DirectionType,
-                RangeUnit,
-                RoutingMode,
-                TransportMode,
-            )
-        except ImportError as err:
-            self.status_ok = False
-            self.status_message = str(err)
-            return
+    def _initAlgorithm(self, configuration: dict[str, Any] | None) -> None:
+        from casageo.spatial import (
+            DEFAULT_DIRECTION,
+            DEFAULT_RANGE_UNIT,
+            DEFAULT_ROUTING_MODE,
+            DEFAULT_TRANSPORT_MODE,
+            AvoidableFeature,
+            DirectionType,
+            RangeUnit,
+            RoutingMode,
+            TransportMode,
+        )
 
         translator = self.plugin.spatialTranslator
         trRangeUnit = translator.translateRangeUnit
@@ -494,26 +485,17 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         return self.__tr("Calculate routes between two locations.")
 
     @override
-    def initAlgorithm(self, configuration: dict[str, Any] | None = None) -> None:
-        super().initAlgorithm(configuration)
-        if not self.status_ok:
-            return
-
-        try:
-            from casageo.spatial import (
-                DEFAULT_ALTERNATIVES,
-                DEFAULT_ROUTING_MODE,
-                DEFAULT_TRANSPORT_MODE,
-                MAX_ALTERNATIVES,
-                MIN_ALTERNATIVES,
-                AvoidableFeature,
-                RoutingMode,
-                TransportMode,
-            )
-        except ImportError as err:
-            self.status_ok = False
-            self.status_message = str(err)
-            return
+    def _initAlgorithm(self, configuration: dict[str, Any] | None) -> None:
+        from casageo.spatial import (
+            DEFAULT_ALTERNATIVES,
+            DEFAULT_ROUTING_MODE,
+            DEFAULT_TRANSPORT_MODE,
+            MAX_ALTERNATIVES,
+            MIN_ALTERNATIVES,
+            AvoidableFeature,
+            RoutingMode,
+            TransportMode,
+        )
 
         translator = self.plugin.spatialTranslator
         trTransportMode = translator.translateTransportMode
@@ -873,14 +855,7 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
         return self.__tr("Calculate routes passing through a list of points.")
 
     @override
-    def initAlgorithm(self, configuration: dict[str, Any] | None = None) -> None:
-        super().initAlgorithm(configuration)
-        if not self.status_ok:
-            return
-
-        if configuration is None:
-            configuration = {}
-
+    def _initAlgorithm(self, configuration: dict[str, Any] | None) -> None:
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
