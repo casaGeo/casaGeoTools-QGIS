@@ -436,8 +436,6 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
 class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
     __tr = TrMethod()
 
-    ORIGIN = "ORIGIN"
-    DESTINATION = "DESTINATION"
     ALTERNATIVES = "ALTERNATIVES"
     TRANSPORT_MODE = "TRANSPORT_MODE"
     ROUTING_MODE = "ROUTING_MODE"
@@ -452,18 +450,6 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
     @override
     def groupId(self) -> str:
         return self.GROUP_ID_SPATIAL
-
-    @override
-    def displayName(self) -> str:
-        return self.__tr("Routes", "Algorithm")
-
-    @override
-    def name(self) -> str:
-        return "routes"
-
-    @override
-    def shortDescription(self) -> str:
-        return self.__tr("Calculate routes between two locations.")
 
     @override
     def _initAlgorithm(self, configuration: dict[str, Any] | None) -> None:
@@ -482,20 +468,6 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         trTransportMode = translator.translateTransportMode
         trRoutingMode = translator.translateRoutingMode
         trAvoidableFeature = translator.translateAvoidableFeature
-
-        self.addParameter(
-            QgsProcessingParameterPoint(
-                self.ORIGIN,
-                self.__tr("Origin", "Parameter"),
-            )
-        )
-
-        self.addParameter(
-            QgsProcessingParameterPoint(
-                self.DESTINATION,
-                self.__tr("Destination", "Parameter"),
-            )
-        )
 
         self.addParameter(
             QgsProcessingParameterNumber(
@@ -624,60 +596,6 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         return super().sinkProperties(sink, parameters, context, sourceProperties)
 
     @override
-    def validateInputCrs(
-        self, parameters: dict[str, Any], context: QgsProcessingContext
-    ) -> bool:
-        return (
-            super().validateInputCrs(parameters, context)
-            and self._validatePointCrsCompatible(self.ORIGIN, parameters, context)
-            and self._validatePointCrsCompatible(self.DESTINATION, parameters, context)
-        )
-
-    @override
-    def _convertInputGeometries(
-        self,
-        parameters: dict[str, Any],
-        context: QgsProcessingContext,
-        feedback: QgsProcessingFeedback,
-    ) -> "DataFrame":
-        from pandas import DataFrame
-
-        EPSG4326 = QgsCoordinateReferenceSystem.fromEpsgId(4326)
-
-        origin = QgsCoordinateTransform(
-            self.parameterAsPointCrs(parameters, self.ORIGIN, context),
-            EPSG4326,
-            context.transformContext(),
-        ).transform(self.parameterAsPoint(parameters, self.ORIGIN, context))
-
-        if origin.isEmpty():
-            msg = self.__tr("Origin point is invalid in {crs}").format(
-                crs=EPSG4326.authid()
-            )
-            raise QgsProcessingException(msg)
-
-        destination = QgsCoordinateTransform(
-            self.parameterAsPointCrs(parameters, self.DESTINATION, context),
-            EPSG4326,
-            context.transformContext(),
-        ).transform(self.parameterAsPoint(parameters, self.DESTINATION, context))
-
-        if destination.isEmpty():
-            msg = self.__tr("Destination point is invalid in {crs}").format(
-                crs=EPSG4326.authid()
-            )
-            raise QgsProcessingException(msg)
-
-        return DataFrame([
-            {
-                "origin_longitude": origin.x(),
-                "origin_latitude": origin.y(),
-                "destination_longitude": destination.x(),
-                "destination_latitude": destination.y(),
-            }
-        ])
-
-    @override
     def _calculateResultsMessage(self) -> str:
         return self.__tr("Calculating routes")
 
@@ -796,6 +714,97 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             routes.name: routes.dest,
             navigations.name: navigations.dest,
         }
+
+
+class CasaGeoToolsRoutesSingleAlgorithm(CasaGeoToolsRoutesAlgorithm):
+    __tr = TrMethod()
+
+    ORIGIN = "ORIGIN"
+    DESTINATION = "DESTINATION"
+
+    @override
+    def displayName(self) -> str:
+        return self.__tr("Routes (single)", "Algorithm")
+
+    @override
+    def name(self) -> str:
+        return "routes_single"
+
+    @override
+    def shortDescription(self) -> str:
+        return self.__tr("Calculate routes between two locations.")
+
+    @override
+    def _initAlgorithm(self, configuration: dict[str, Any] | None) -> None:
+        self.addParameter(
+            QgsProcessingParameterPoint(
+                self.ORIGIN,
+                self.__tr("Origin", "Parameter"),
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterPoint(
+                self.DESTINATION,
+                self.__tr("Destination", "Parameter"),
+            )
+        )
+
+        super()._initAlgorithm(configuration)
+
+    @override
+    def validateInputCrs(
+        self, parameters: dict[str, Any], context: QgsProcessingContext
+    ) -> bool:
+        return (
+            super().validateInputCrs(parameters, context)
+            and self._validatePointCrsCompatible(self.ORIGIN, parameters, context)
+            and self._validatePointCrsCompatible(self.DESTINATION, parameters, context)
+        )
+
+    @override
+    def _convertInputGeometries(
+        self,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback,
+    ) -> "DataFrame":
+        from pandas import DataFrame
+
+        EPSG4326 = QgsCoordinateReferenceSystem.fromEpsgId(4326)
+
+        origin = QgsCoordinateTransform(
+            self.parameterAsPointCrs(parameters, self.ORIGIN, context),
+            EPSG4326,
+            context.transformContext(),
+        ).transform(self.parameterAsPoint(parameters, self.ORIGIN, context))
+
+        if origin.isEmpty():
+            msg = self.__tr("Origin point is invalid in {crs}").format(
+                crs=EPSG4326.authid()
+            )
+            raise QgsProcessingException(msg)
+
+        destination = QgsCoordinateTransform(
+            self.parameterAsPointCrs(parameters, self.DESTINATION, context),
+            EPSG4326,
+            context.transformContext(),
+        ).transform(self.parameterAsPoint(parameters, self.DESTINATION, context))
+
+        if destination.isEmpty():
+            msg = self.__tr("Destination point is invalid in {crs}").format(
+                crs=EPSG4326.authid()
+            )
+            raise QgsProcessingException(msg)
+
+        return DataFrame([
+            {
+                "origin_longitude": origin.x(),
+                "origin_latitude": origin.y(),
+                "destination_longitude": destination.x(),
+                "destination_latitude": destination.y(),
+            }
+        ])
 
 
 class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
