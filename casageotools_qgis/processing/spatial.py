@@ -271,30 +271,6 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         )
 
     @override
-    def processAlgorithm(
-        self,
-        parameters: dict[str, Any],
-        context: QgsProcessingContext,
-        feedback: QgsProcessingFeedback | None,
-    ) -> dict[str, Any]:
-        from geopandas import GeoDataFrame
-
-        if feedback is None:
-            feedback = QgsProcessingFeedback(logFeedback=False)
-
-        feedback.setProgressText(self.__tr("Converting input geometries"))
-        queries = self._convertInputGeometries(parameters, context, feedback)
-
-        if queries.empty:
-            feedback.pushInfo(self.__tr("No valid features in input layer"))
-            results = GeoDataFrame()
-        else:
-            feedback.setProgressText(self.__tr("Calculating isolines"))
-            results = self._calculateIsolines(parameters, context, feedback, queries)
-
-        feedback.setProgressText(self.__tr("Converting results"))
-        return self._writeOutputGeometries(parameters, context, feedback, results)
-
     def _convertInputGeometries(
         self,
         parameters: dict[str, Any],
@@ -315,7 +291,12 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         return DataFrame(data)
 
-    def _calculateIsolines(
+    @override
+    def _calculateResultsMessage(self) -> str:
+        return self.__tr("Calculating isolines")
+
+    @override
+    def _calculateResults(
         self,
         parameters: dict[str, Any],
         context: QgsProcessingContext,
@@ -324,7 +305,6 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
     ) -> "GeoDataFrame":
         """Calculate isolines using the casaGeoTools library."""
         import casageo.spatial
-        import casageo.tools
         from casageo.spatial import (
             AvoidableFeature,
             DirectionType,
@@ -379,12 +359,13 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         except Exception as err:
             raise QgsProcessingException(str(err)) from err
 
+    @override
     def _writeOutputGeometries(
         self,
         parameters: dict[str, Any],
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
-        results: "GeoDataFrame",
+        results: "DataFrame",
     ) -> dict[str, str]:
         """Convert results to features and write them to the feature sink."""
 
@@ -653,24 +634,6 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         )
 
     @override
-    def processAlgorithm(
-        self,
-        parameters: dict[str, Any],
-        context: QgsProcessingContext,
-        feedback: QgsProcessingFeedback | None,
-    ) -> dict[str, Any]:
-        if feedback is None:
-            feedback = QgsProcessingFeedback(logFeedback=False)
-
-        feedback.setProgressText(self.__tr("Converting input geometries"))
-        queries = self._convertInputGeometries(parameters, context, feedback)
-
-        feedback.setProgressText(self.__tr("Calculating routes"))
-        results = self._calculateRoutes(parameters, context, feedback, queries)
-
-        feedback.setProgressText(self.__tr("Converting results"))
-        return self._writeOutputGeometries(parameters, context, feedback, results)
-
     def _convertInputGeometries(
         self,
         parameters: dict[str, Any],
@@ -714,7 +677,12 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             }
         ])
 
-    def _calculateRoutes(
+    @override
+    def _calculateResultsMessage(self) -> str:
+        return self.__tr("Calculating routes")
+
+    @override
+    def _calculateResults(
         self,
         parameters: dict[str, Any],
         context: QgsProcessingContext,
@@ -722,7 +690,6 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         queries: "DataFrame",
     ) -> "GeoDataFrame":
         import casageo.spatial
-        import casageo.tools
         from casageo.spatial import (
             AvoidableFeature,
             RoutingMode,
@@ -772,12 +739,13 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         except Exception as err:
             raise QgsProcessingException(str(err)) from err
 
+    @override
     def _writeOutputGeometries(
         self,
         parameters: dict[str, Any],
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
-        results: "GeoDataFrame",
+        results: "DataFrame",
     ) -> dict[str, str]:
         """Convert results to features and write them to the feature sink."""
 
@@ -891,30 +859,6 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
         )
 
     @override
-    def processAlgorithm(
-        self,
-        parameters: dict[str, Any],
-        context: QgsProcessingContext,
-        feedback: QgsProcessingFeedback | None,
-    ) -> dict[str, Any]:
-        from geopandas import GeoDataFrame
-
-        if feedback is None:
-            feedback = QgsProcessingFeedback(logFeedback=False)
-
-        feedback.setProgressText(self.__tr("Converting input geometries"))
-        queries = self._convertInputGeometries(parameters, context, feedback)
-
-        if queries.empty:
-            feedback.pushInfo(self.__tr("No valid features in input layer"))
-            results = GeoDataFrame()
-        else:
-            feedback.setProgressText(self.__tr("Calculating routes"))
-            results = self._calculateRoutes(parameters, context, feedback, queries)
-
-        feedback.setProgressText(self.__tr("Converting results"))
-        return self._writeOutputGeometries(parameters, context, feedback, results)
-
     def _convertInputGeometries(
         self,
         parameters: dict[str, Any],
@@ -950,7 +894,12 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         return DataFrame(data)
 
-    def _calculateRoutes(
+    @override
+    def _calculateResultsMessage(self) -> str:
+        return self.__tr("Calculating routes")
+
+    @override
+    def _calculateResults(
         self,
         parameters: dict[str, Any],
         context: QgsProcessingContext,
@@ -958,7 +907,6 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
         queries: "DataFrame",
     ) -> "GeoDataFrame":
         import casageo.spatial
-        import casageo.tools
 
         client = self.plugin.casaGeoClient(feedback)
         defaults = {}
@@ -968,12 +916,13 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
         except Exception as err:
             raise QgsProcessingException(str(err)) from err
 
+    @override
     def _writeOutputGeometries(
         self,
         parameters: dict[str, Any],
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
-        results: "GeoDataFrame",
+        results: "DataFrame",
     ) -> dict[str, str]:
         """Convert results to features and write them to the feature sink."""
 

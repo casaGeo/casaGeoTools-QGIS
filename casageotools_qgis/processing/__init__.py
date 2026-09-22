@@ -188,6 +188,68 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
     def _initAlgorithm(self, configuration: dict[str, Any] | None) -> None:
         pass
 
+    @override
+    def processAlgorithm(
+        self,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback | None,
+    ) -> dict[str, Any]:
+        from pandas import DataFrame
+
+        if feedback is None:
+            feedback = QgsProcessingFeedback(logFeedback=False)
+
+        feedback.setProgressText(self._convertInputGeometriesMessage())
+        queries = self._convertInputGeometries(parameters, context, feedback)
+
+        if queries.empty:
+            feedback.pushInfo(self.__tr("No valid features in input layer"))
+            results = DataFrame()
+        else:
+            feedback.setProgressText(self._calculateResultsMessage())
+            results = self._calculateResults(parameters, context, feedback, queries)
+
+        feedback.setProgressText(self._writeOutputGeometriesMessage())
+        return self._writeOutputGeometries(parameters, context, feedback, results)
+
+    def _convertInputGeometriesMessage(self) -> str:
+        return self.__tr("Converting input geometries")
+
+    def _convertInputGeometries(
+        self,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback,
+    ) -> "DataFrame":
+        raise NotImplementedError
+
+    def _calculateResultsMessage(self) -> str:
+        return self.__tr("Calculating results")
+
+    def _calculateResults(
+        self,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback,
+        queries: "DataFrame",
+    ) -> "DataFrame":
+        raise NotImplementedError
+
+    def _writeOutputGeometriesMessage(self) -> str:
+        return self.__tr("Converting results")
+
+    def _writeOutputGeometries(
+        self,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback,
+        results: "DataFrame",
+    ) -> dict[str, str]:
+        raise NotImplementedError
+
+    # Helper methods
+
     def _getSource(
         self,
         name: str,

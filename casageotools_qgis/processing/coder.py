@@ -417,30 +417,6 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         return super().checkParameterValues(parameters, context)
 
     @override
-    def processAlgorithm(
-        self,
-        parameters: dict[str, Any],
-        context: QgsProcessingContext,
-        feedback: QgsProcessingFeedback | None,
-    ) -> dict[str, Any]:
-        from geopandas import GeoDataFrame
-
-        if feedback is None:
-            feedback = QgsProcessingFeedback(logFeedback=False)
-
-        feedback.setProgressText(self.__tr("Converting input geometries"))
-        queries = self._convertInputGeometries(parameters, context, feedback)
-
-        if queries.empty:
-            feedback.pushInfo(self.__tr("No valid features in input layer"))
-            results = GeoDataFrame()
-        else:
-            feedback.setProgressText(self.__tr("Geocoding addresses"))
-            results = self._geocodeAddresses(parameters, context, feedback, queries)
-
-        feedback.setProgressText(self.__tr("Converting results"))
-        return self._writeOutputGeometries(parameters, context, feedback, results)
-
     def _convertInputGeometries(
         self,
         parameters: dict[str, Any],
@@ -497,7 +473,12 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         return DataFrame(data)
 
-    def _geocodeAddresses(
+    @override
+    def _calculateResultsMessage(self) -> str:
+        return self.__tr("Geocoding addresses")
+
+    @override
+    def _calculateResults(
         self,
         parameters: dict[str, Any],
         context: QgsProcessingContext,
@@ -505,7 +486,6 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         queries: "DataFrame",
     ) -> "GeoDataFrame":
         import casageo.coder
-        import casageo.tools
         from casageo.coder import AddressNamesMode, PostalCodeMode
 
         ADDRESS_NAMES_MODES = list(AddressNamesMode)
@@ -549,12 +529,13 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         except Exception as err:
             raise QgsProcessingException(str(err)) from err
 
+    @override
     def _writeOutputGeometries(
         self,
         parameters: dict[str, Any],
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
-        results: "GeoDataFrame",
+        results: "DataFrame",
     ) -> dict[str, str]:
         """Convert results to features and write them to the feature sink."""
 
@@ -843,70 +824,6 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         )
 
     @override
-    def processAlgorithm(
-        self,
-        parameters: dict[str, Any],
-        context: QgsProcessingContext,
-        feedback: QgsProcessingFeedback | None,
-    ) -> dict[str, Any]:
-        from geopandas import GeoDataFrame
-
-        if feedback is None:
-            feedback = QgsProcessingFeedback(logFeedback=False)
-
-        feedback.setProgressText(self.__tr("Converting input geometries"))
-        queries = self._convertInputGeometries(parameters, context, feedback)
-
-        if queries.empty:
-            feedback.pushInfo(self.__tr("No valid features in input layer"))
-            results = GeoDataFrame()
-        else:
-            feedback.setProgressText(self.__tr("Searching for POIs"))
-            results = self._searchForPOIs(parameters, context, feedback, queries)
-
-        feedback.setProgressText(self.__tr("Converting results"))
-        return self._writeOutputGeometries(parameters, context, feedback, results)
-
-        # """
-        # Here is where the processing itself takes place.
-        # """
-        #
-        # # Retrieve the feature source and sink. The 'dest_id' variable is used
-        # # to uniquely identify the feature sink, and must be included in the
-        # # dictionary returned by the processAlgorithm function.
-        # source = self.parameterAsSource(parameters, self.INPUT, context)
-        # (sink, dest_id) = self.parameterAsSink(
-        #     parameters,
-        #     self.OUTPUT,
-        #     context,
-        #     source.fields(),
-        #     source.wkbType(),
-        #     source.sourceCrs(),
-        # )
-        #
-        # # Compute the number of steps to display within the progress bar and
-        # # get features from source
-        # total = 100.0 / source.featureCount() if source.featureCount() else 0
-        # features = source.getFeatures()
-        #
-        # for current, feature in enumerate(features):
-        #     # Stop the algorithm if cancel button has been clicked
-        #     if feedback.isCanceled():
-        #         break
-        #
-        #     # Add a feature in the sink
-        #     sink.addFeature(feature, QgsFeatureSink.FastInsert)
-        #
-        #     # Update the progress bar
-        #     feedback.setProgress(int(current * total))
-        #
-        # # Return the results of the algorithm. In this case our only result is
-        # # the feature sink which contains the processed features, but some
-        # # algorithms may return multiple feature sinks, calculated numeric
-        # # statistics, etc. These should all be included in the returned
-        # # dictionary, with keys matching the feature corresponding parameter
-        # # or output names.
-
     def _convertInputGeometries(
         self,
         parameters: dict[str, Any],
@@ -927,7 +844,12 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         return DataFrame(data)
 
-    def _searchForPOIs(
+    @override
+    def _calculateResultsMessage(self) -> str:
+        return self.__tr("Searching for POIs")
+
+    @override
+    def _calculateResults(
         self,
         parameters: dict[str, Any],
         context: QgsProcessingContext,
@@ -935,7 +857,6 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         queries: "DataFrame",
     ) -> "GeoDataFrame":
         import casageo.coder
-        import casageo.tools
         from casageo.coder import AddressNamesMode, PostalCodeMode
 
         ADDRESS_NAMES_MODES = list(AddressNamesMode)
@@ -976,12 +897,13 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         except Exception as err:
             raise QgsProcessingException(str(err)) from err
 
+    @override
     def _writeOutputGeometries(
         self,
         parameters: dict[str, Any],
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
-        results: "GeoDataFrame",
+        results: "DataFrame",
     ) -> dict[str, str]:
         """Convert results to features and write them to the feature sink."""
 
