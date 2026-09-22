@@ -23,6 +23,7 @@ from qgis.core import (
     QgsFeatureSink,
     QgsField,
     QgsFields,
+    QgsPointXY,
     QgsProcessingAlgorithm,
     QgsProcessingContext,
     QgsProcessingException,  # pyright: ignore[reportAttributeAccessIssue]
@@ -786,6 +787,86 @@ class CasaGeoToolsRoutesSingleAlgorithm(CasaGeoToolsRoutesAlgorithm):
                 "destination_latitude": destination.y(),
             }
         ])
+
+
+class CasaGeoToolsRoutesLineSegmentAlgorithm(CasaGeoToolsRoutesAlgorithm):
+    __tr = TrMethod()
+
+    LINE_SEGMENT_LAYER = "LINE_SEGMENT_LAYER"
+
+    @override
+    def displayName(self) -> str:
+        return self.__tr("Routes (line segments)", "Algorithm")
+
+    @override
+    def name(self) -> str:
+        return "routes_linesegment"
+
+    @override
+    def shortDescription(self) -> str:
+        return self.__tr(
+            "Calculate routes between two points where the origin and destination are given as a line segment."
+        )
+
+    @override
+    def _initAlgorithm(self, configuration: dict[str, Any] | None) -> None:
+        self.addParameter(
+            QgsProcessingParameterFeatureSource(
+                self.LINE_SEGMENT_LAYER,
+                self.__tr("Layer of line segments defining origin and destination"),
+                [Qgis.ProcessingSourceType.VectorLine],
+            )
+        )
+
+        super()._initAlgorithm(configuration)
+
+    @override
+    def validateInputCrs(
+        self, parameters: dict[str, Any], context: QgsProcessingContext
+    ) -> bool:
+        return (
+            super().validateInputCrs(parameters, context)
+            and self._validateSourceCrsCompatible(
+                self.LINE_SEGMENT_LAYER, parameters, context
+            )
+            and True
+        )
+
+    @override
+    def _convertInputGeometries(
+        self,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback,
+    ) -> "DataFrame":
+        from pandas import DataFrame
+
+        def toEndpoints(feature: QgsFeature) -> tuple[QgsPointXY, QgsPointXY]:
+            # FIXME: Better error messages.
+            try:
+                origin, destination = feature.geometry().asPolyline()
+            except (TypeError, ValueError) as err:
+                msg = self.__tr(
+                    "Invalid geometry on feature {featureid}: {error}"
+                ).format(featureid=feature.id(), error=err)
+                raise QgsProcessingException(msg) from err
+            return (origin, destination)
+
+        source = self._getSource(self.LINE_SEGMENT_LAYER, parameters, context)
+        request = self._geometryFeatureRequest(context, feedback)
+        request.setSubsetOfAttributes([])
+
+        data = [
+            {
+                "origin_longitude": origin.x(),
+                "origin_latitude": origin.y(),
+                "destination_longitude": destination.x(),
+                "destination_latitude": destination.y(),
+            }
+            for origin, destination in map(toEndpoints, features_of(source, request))
+        ]
+
+        return DataFrame(data)
 
 
 class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):

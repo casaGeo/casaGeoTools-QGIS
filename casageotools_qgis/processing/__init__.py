@@ -76,6 +76,7 @@ class CasaGeoToolsProcessingProvider(QgsProcessingProvider):
         )
         from .spatial import (
             CasaGeoToolsIsolinesAlgorithm,
+            CasaGeoToolsRoutesLineSegmentAlgorithm,
             CasaGeoToolsRoutesSingleAlgorithm,
         )
 
@@ -83,6 +84,7 @@ class CasaGeoToolsProcessingProvider(QgsProcessingProvider):
         self.addAlgorithm(CasaGeoToolsPOISearchAlgorithm(self.plugin))
         self.addAlgorithm(CasaGeoToolsIsolinesAlgorithm(self.plugin))
         self.addAlgorithm(CasaGeoToolsRoutesSingleAlgorithm(self.plugin))
+        self.addAlgorithm(CasaGeoToolsRoutesLineSegmentAlgorithm(self.plugin))
 
     # @override
     # def longName(self):
