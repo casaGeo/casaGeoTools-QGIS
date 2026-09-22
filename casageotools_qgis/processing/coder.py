@@ -833,6 +833,8 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         source = self._getSource(self.INPUT, parameters, context)
         request = self._geometryFeatureRequest(context, feedback)
+        request.setSubsetOfAttributes([])
+
         data = [
             {
                 "id": feature.id(),
