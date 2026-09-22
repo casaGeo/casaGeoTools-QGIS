@@ -771,31 +771,12 @@ class CasaGeoToolsRoutesSingleAlgorithm(CasaGeoToolsRoutesAlgorithm):
     ) -> "DataFrame":
         from pandas import DataFrame
 
-        EPSG4326 = QgsCoordinateReferenceSystem.fromEpsgId(4326)
-
-        origin = QgsCoordinateTransform(
-            self.parameterAsPointCrs(parameters, self.ORIGIN, context),
-            EPSG4326,
-            context.transformContext(),
-        ).transform(self.parameterAsPoint(parameters, self.ORIGIN, context))
-
-        if origin.isEmpty():
-            msg = self.__tr("Origin point is invalid in {crs}").format(
-                crs=EPSG4326.authid()
-            )
-            raise QgsProcessingException(msg)
-
-        destination = QgsCoordinateTransform(
-            self.parameterAsPointCrs(parameters, self.DESTINATION, context),
-            EPSG4326,
-            context.transformContext(),
-        ).transform(self.parameterAsPoint(parameters, self.DESTINATION, context))
-
-        if destination.isEmpty():
-            msg = self.__tr("Destination point is invalid in {crs}").format(
-                crs=EPSG4326.authid()
-            )
-            raise QgsProcessingException(msg)
+        origin = self._parameterAsTransformedPoint(
+            self.ORIGIN, self.HERE_CRS, parameters, context
+        )
+        destination = self._parameterAsTransformedPoint(
+            self.DESTINATION, self.HERE_CRS, parameters, context
+        )
 
         return DataFrame([
             {

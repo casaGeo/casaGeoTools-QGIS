@@ -22,8 +22,10 @@ from qgis.core import (
     Qgis,
     QgsCoordinateReferenceSystem,
     QgsCoordinateTransform,
+    QgsCsException,  # pyright: ignore[reportAttributeAccessIssue]
     QgsFeature,
     QgsFeatureRequest,
+    QgsPointXY,
     QgsProcessingAlgorithm,
     QgsProcessingContext,
     QgsProcessingException,  # pyright: ignore[reportAttributeAccessIssue]
@@ -314,6 +316,38 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
         if crs is None or not crs.isValid():
             return True
         return QgsCoordinateTransform.isTransformationPossible(crs, self.HERE_CRS)
+
+    def _parameterAsTransformedPoint(
+        self,
+        name: str,
+        crs: QgsCoordinateReferenceSystem,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+    ) -> QgsPointXY:
+        point = self.parameterAsPoint(parameters, name, context)
+        if point.isEmpty():
+            return point
+
+        sourcecrs = self.parameterAsPointCrs(parameters, name, context)
+        destcrs = crs
+        xform = QgsCoordinateTransform(sourcecrs, destcrs, context.transformContext())
+        if not xform.isValid():
+            msg = self.__tr(
+                "Unable to construct a coordinate transformation from {sourcecrs} to {destcrs} for parameter {parameter}"
+            ).format(
+                sourcecrs=sourcecrs.authid(),
+                destcrs=destcrs.authid(),
+                parameter=name,
+            )
+            raise QgsProcessingException(msg)
+
+        try:
+            return xform.transform(point)
+        except QgsCsException as err:
+            msg = self.__tr(
+                "Coordinate transformation failed for parameter {parameter}: {error}"
+            ).format(parameter=name, error=err)
+            raise QgsProcessingException(msg) from err
 
     def _simpleFeatureRequest(
         self,
