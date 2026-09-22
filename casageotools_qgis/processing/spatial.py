@@ -647,8 +647,10 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                     QgsField("id", QMetaType.Type.Int),
                     QgsField("subid", QMetaType.Type.Int),
                     QgsField("navid", QMetaType.Type.Int),
-                    QgsField("localtime", QMetaType.Type.QDateTime),
                     QgsField("placename", QMetaType.Type.QString),
+                    QgsField("longitude", QMetaType.Type.Double),
+                    QgsField("latitude", QMetaType.Type.Double),
+                    QgsField("datetime", QMetaType.Type.QDateTime),
                     QgsField("timestamp", QMetaType.Type.QDateTime),
                     QgsField("error_code", QMetaType.Type.QString),
                     QgsField("error_message", QMetaType.Type.QString),
@@ -783,6 +785,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 defaults,
                 departure_info=True,
                 arrival_info=True,
+                coordinates=True,
             )
         except Exception as err:
             raise QgsProcessingException(str(err)) from err
@@ -807,40 +810,49 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 feedback.reportError(error)
 
         for result in self._resultsOf(results, feedback):
+            # Route Geometry
             feature = QgsFeature(routes.props.fields)
-            and_then(result.geometry, geometry_from_shapely, feature.setGeometry)
+            if (geom := result.geometry) is not None:
+                feature.setGeometry(geometry_from_shapely(geom))
+
             feature["id"] = result.id
             feature["subid"] = result.subid
             feature["length"] = result.length
             feature["duration"] = result.duration
-            feature["timestamp"] = result.timestamp.isoformat()
+            feature["timestamp"] = and_then(result.timestamp, datetime.isoformat)
             feature["error_code"] = result.error_code
             feature["error_message"] = result.error_message
             addFeature(routes, feature)
 
+            # Origin Navigation Point
             feature = QgsFeature(navigations.props.fields)
-            and_then(
-                result.departure_position, geometry_from_shapely, feature.setGeometry
-            )
+            if (geom := result.departure_position) is not None:
+                feature.setGeometry(geometry_from_shapely(geom))
+
             feature["id"] = result.id
             feature["subid"] = result.subid
             feature["navid"] = 0
-            feature["localtime"] = and_then(result.departure_time, datetime.isoformat)
             feature["placename"] = result.departure_placename
+            feature["longitude"] = result.departure_longitude
+            feature["latitude"] = result.departure_latitude
+            feature["datetime"] = and_then(result.departure_time, datetime.isoformat)
             feature["timestamp"] = and_then(result.timestamp, datetime.isoformat)
             feature["error_code"] = result.error_code
             feature["error_message"] = result.error_message
             addFeature(navigations, feature)
 
+            # Destination Navigation Point
             feature = QgsFeature(navigations.props.fields)
-            and_then(
-                result.arrival_position, geometry_from_shapely, feature.setGeometry
-            )
+            if (geom := result.arrival_position) is not None:
+                feature.setGeometry(geometry_from_shapely(geom))
+
             feature["id"] = result.id
             feature["subid"] = result.subid
             feature["navid"] = 1
-            feature["localtime"] = and_then(result.arrival_time, datetime.isoformat)
             feature["placename"] = result.arrival_placename
+            feature["longitude"] = result.arrival_longitude
+            feature["latitude"] = result.arrival_latitude
+            feature["datetime"] = and_then(result.arrival_time, datetime.isoformat)
             feature["timestamp"] = and_then(result.timestamp, datetime.isoformat)
             feature["error_code"] = result.error_code
             feature["error_message"] = result.error_message
