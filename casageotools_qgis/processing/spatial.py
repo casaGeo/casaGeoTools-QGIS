@@ -223,7 +223,8 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 props = QgsProcessingAlgorithm.VectorProperties()
                 props.availability = Qgis.ProcessingPropertyAvailability.Available
                 props.crs = self.HERE_CRS
-                props.fields = QgsFields([
+                props.wkbType = Qgis.WkbType.MultiPolygon
+                props.fields.append([
                     QgsField("id", QMetaType.Type.Int),
                     QgsField("subid", QMetaType.Type.Int),
                     QgsField("rangetype", QMetaType.Type.QString),
@@ -238,14 +239,14 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                     QgsField("error_code", QMetaType.Type.QString),
                     QgsField("error_message", QMetaType.Type.QString),
                 ])
-                props.wkbType = Qgis.WkbType.MultiPolygon
                 return props
 
             case self.OUTPUT_NAVIGATIONS:
                 props = QgsProcessingAlgorithm.VectorProperties()
                 props.availability = Qgis.ProcessingPropertyAvailability.Available
                 props.crs = self.HERE_CRS
-                props.fields = QgsFields([
+                props.wkbType = Qgis.WkbType.Point
+                props.fields.append([
                     QgsField("id", QMetaType.Type.Int),
                     QgsField("placename", QMetaType.Type.QString),
                     QgsField("longitude", QMetaType.Type.Double),
@@ -255,7 +256,6 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                     QgsField("error_code", QMetaType.Type.QString),
                     QgsField("error_message", QMetaType.Type.QString),
                 ])
-                props.wkbType = Qgis.WkbType.Point
                 return props
 
         return super().sinkProperties(sink, parameters, context, sourceProperties)
@@ -561,7 +561,9 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 props = QgsProcessingAlgorithm.VectorProperties()
                 props.availability = Qgis.ProcessingPropertyAvailability.Available
                 props.crs = self.HERE_CRS
-                props.fields = QgsFields([
+                # TODO: Make this a MultiLineStringZM with elevation and time datapoints.
+                props.wkbType = Qgis.WkbType.MultiLineString
+                props.fields.append([
                     QgsField("id", QMetaType.Type.Int),
                     QgsField("subid", QMetaType.Type.Int),
                     QgsField("length", QMetaType.Type.Double),
@@ -570,15 +572,14 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                     QgsField("error_code", QMetaType.Type.QString),
                     QgsField("error_message", QMetaType.Type.QString),
                 ])
-                # TODO: Make this a MultiLineStringZM with elevation and time datapoints.
-                props.wkbType = Qgis.WkbType.MultiLineString
                 return props
 
             case self.OUTPUT_NAVIGATIONS:
                 props = QgsProcessingAlgorithm.VectorProperties()
                 props.availability = Qgis.ProcessingPropertyAvailability.Available
                 props.crs = self.HERE_CRS
-                props.fields = QgsFields([
+                props.wkbType = Qgis.WkbType.Point
+                props.fields.append([
                     QgsField("id", QMetaType.Type.Int),
                     QgsField("subid", QMetaType.Type.Int),
                     QgsField("navid", QMetaType.Type.Int),
@@ -590,7 +591,6 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                     QgsField("error_code", QMetaType.Type.QString),
                     QgsField("error_message", QMetaType.Type.QString),
                 ])
-                props.wkbType = Qgis.WkbType.Point
                 return props
 
         return super().sinkProperties(sink, parameters, context, sourceProperties)
