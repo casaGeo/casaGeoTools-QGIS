@@ -98,8 +98,8 @@ class CasaGeoToolsProcessingProvider(QgsProcessingProvider):
 class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
     __tr = TrMethod()
 
-    GROUP_ID_CODER = "coder"
-    GROUP_ID_SPATIAL = "spatial"
+    GROUP_ID_CODER = ""
+    GROUP_ID_SPATIAL = ""
 
     def __init__(self, plugin: "CasaGeoToolsPlugin") -> None:
         super().__init__()
