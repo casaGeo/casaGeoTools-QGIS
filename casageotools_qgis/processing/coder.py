@@ -18,7 +18,6 @@ from typing import TYPE_CHECKING, Any, override
 
 from qgis.core import (
     Qgis,
-    QgsCoordinateReferenceSystem,
     QgsFeature,
     QgsFeatureSink,
     QgsField,
