@@ -15,6 +15,7 @@
 #  SPDX-License-Identifier: Apache-2.0
 
 from collections.abc import Generator
+from functools import cached_property
 from typing import TYPE_CHECKING, Any, Never, Self, override
 
 from qgis.core import (
@@ -44,9 +45,6 @@ if TYPE_CHECKING:
     from qgis.PyQt.QtGui import QIcon
 
     from ..plugin import CasaGeoToolsPlugin
-
-
-EPSG4326 = QgsCoordinateReferenceSystem.fromEpsgId(4326)
 
 
 class CasaGeoToolsProcessingProvider(QgsProcessingProvider):
@@ -101,12 +99,15 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
     GROUP_ID_CODER = "coder"
     GROUP_ID_SPATIAL = "spatial"
 
-    @override
     def __init__(self, plugin: "CasaGeoToolsPlugin") -> None:
         super().__init__()
         self.plugin = plugin
         self.status_ok = True
         self.status_message = ""
+
+    @cached_property
+    def HERE_CRS(self) -> QgsCoordinateReferenceSystem:
+        return QgsCoordinateReferenceSystem.fromEpsgId(4326)
 
     @override
     def createInstance(self) -> Self:
@@ -301,7 +302,7 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
         )
         if crs is None or not crs.isValid():
             return True
-        return QgsCoordinateTransform.isTransformationPossible(crs, EPSG4326)
+        return QgsCoordinateTransform.isTransformationPossible(crs, self.HERE_CRS)
 
     def _validatePointCrsCompatible(
         self,
@@ -312,7 +313,7 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
         crs = self.parameterAsPointCrs(parameters, name, context)
         if crs is None or not crs.isValid():
             return True
-        return QgsCoordinateTransform.isTransformationPossible(crs, EPSG4326)
+        return QgsCoordinateTransform.isTransformationPossible(crs, self.HERE_CRS)
 
     def _simpleFeatureRequest(
         self,
@@ -325,13 +326,13 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
         request.setTransformErrorCallback(self._onTransformError)
         return request
 
-    def _epsg4326FeatureRequest(
+    def _geometryFeatureRequest(
         self,
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
     ) -> QgsFeatureRequest:
         request = self._simpleFeatureRequest(context, feedback)
-        request.setDestinationCrs(EPSG4326, context.transformContext())
+        request.setDestinationCrs(self.HERE_CRS, context.transformContext())
         return request
 
     def _resultsOf(

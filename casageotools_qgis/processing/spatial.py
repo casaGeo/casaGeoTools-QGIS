@@ -222,7 +222,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             case self.OUTPUT_ISOLINES:
                 props = QgsProcessingAlgorithm.VectorProperties()
                 props.availability = Qgis.ProcessingPropertyAvailability.Available
-                props.crs = QgsCoordinateReferenceSystem.fromEpsgId(4326)
+                props.crs = self.HERE_CRS
                 props.fields = QgsFields([
                     QgsField("id", QMetaType.Type.Int),
                     QgsField("subid", QMetaType.Type.Int),
@@ -244,7 +244,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             case self.OUTPUT_NAVIGATIONS:
                 props = QgsProcessingAlgorithm.VectorProperties()
                 props.availability = Qgis.ProcessingPropertyAvailability.Available
-                props.crs = QgsCoordinateReferenceSystem.fromEpsgId(4326)
+                props.crs = self.HERE_CRS
                 props.fields = QgsFields([
                     QgsField("id", QMetaType.Type.Int),
                     QgsField("placename", QMetaType.Type.QString),
@@ -280,7 +280,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         from pandas import DataFrame
 
         source = self._getSource(self.INPUT, parameters, context)
-        request = self._epsg4326FeatureRequest(context, feedback)
+        request = self._geometryFeatureRequest(context, feedback)
         data = [
             {
                 "id": feature.id(),
@@ -560,7 +560,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             case self.OUTPUT_ROUTES:
                 props = QgsProcessingAlgorithm.VectorProperties()
                 props.availability = Qgis.ProcessingPropertyAvailability.Available
-                props.crs = QgsCoordinateReferenceSystem.fromEpsgId(4326)
+                props.crs = self.HERE_CRS
                 props.fields = QgsFields([
                     QgsField("id", QMetaType.Type.Int),
                     QgsField("subid", QMetaType.Type.Int),
@@ -577,7 +577,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             case self.OUTPUT_NAVIGATIONS:
                 props = QgsProcessingAlgorithm.VectorProperties()
                 props.availability = Qgis.ProcessingPropertyAvailability.Available
-                props.crs = QgsCoordinateReferenceSystem.fromEpsgId(4326)
+                props.crs = self.HERE_CRS
                 props.fields = QgsFields([
                     QgsField("id", QMetaType.Type.Int),
                     QgsField("subid", QMetaType.Type.Int),
@@ -883,7 +883,7 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
             context,
         )
 
-        request = self._epsg4326FeatureRequest(context, feedback)
+        request = self._geometryFeatureRequest(context, feedback)
         request.addOrderBy(sequence_expression)
 
         data = [
@@ -952,7 +952,7 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
             fields,
             # TODO: Make this a MultiLineStringZM with elevation and time datapoints.
             Qgis.WkbType.MultiLineString,
-            QgsCoordinateReferenceSystem.fromEpsgId(4326),
+            self.HERE_CRS,
         )
         if sink is None:
             raise QgsProcessingException(

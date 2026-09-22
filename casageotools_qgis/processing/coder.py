@@ -314,7 +314,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             case self.OUTPUT_LOCATIONS | self.OUTPUT_NAVIGATIONS:
                 props = QgsProcessingAlgorithm.VectorProperties()
                 props.availability = Qgis.ProcessingPropertyAvailability.Available
-                props.crs = QgsCoordinateReferenceSystem.fromEpsgId(4326)
+                props.crs = self.HERE_CRS
                 props.wkbType = Qgis.WkbType.Point
                 props.fields.append([
                     QgsField("id", QMetaType.Type.Int),
@@ -445,7 +445,7 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         )
 
         if use_geometry:
-            request = self._epsg4326FeatureRequest(context, feedback)
+            request = self._geometryFeatureRequest(context, feedback)
         else:
             request = self._simpleFeatureRequest(context, feedback)
             request.setFlags(Qgis.FeatureRequestFlag.NoGeometry)
@@ -768,7 +768,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             case self.OUTPUT_LOCATIONS | self.OUTPUT_NAVIGATIONS:
                 props = QgsProcessingAlgorithm.VectorProperties()
                 props.availability = Qgis.ProcessingPropertyAvailability.Available
-                props.crs = QgsCoordinateReferenceSystem.fromEpsgId(4326)
+                props.crs = self.HERE_CRS
                 props.wkbType = Qgis.WkbType.Point
                 props.fields.append([
                     QgsField("id", QMetaType.Type.Int),
@@ -833,7 +833,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         from pandas import DataFrame
 
         source = self._getSource(self.INPUT, parameters, context)
-        request = self._epsg4326FeatureRequest(context, feedback)
+        request = self._geometryFeatureRequest(context, feedback)
         data = [
             {
                 "id": feature.id(),
