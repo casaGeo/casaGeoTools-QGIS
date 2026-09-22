@@ -810,7 +810,6 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 feedback.reportError(error)
 
         for result in self._resultsOf(results, feedback):
-            # Route Geometry
             feature = QgsFeature(routes.props.fields)
             if (geom := result.geometry) is not None:
                 feature.setGeometry(geometry_from_shapely(geom))
@@ -824,39 +823,24 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature["error_message"] = result.error_message
             addFeature(routes, feature)
 
-            # Origin Navigation Point
-            feature = QgsFeature(navigations.props.fields)
-            if (geom := result.departure_position) is not None:
-                feature.setGeometry(geometry_from_shapely(geom))
+            for navid, prefix in enumerate(("departure", "arrival")):
+                feature = QgsFeature(navigations.props.fields)
+                if (geom := getattr(result, f"{prefix}_position")) is not None:
+                    feature.setGeometry(geometry_from_shapely(geom))
 
-            feature["id"] = result.id
-            feature["subid"] = result.subid
-            feature["navid"] = 0
-            feature["placename"] = result.departure_placename
-            feature["longitude"] = result.departure_longitude
-            feature["latitude"] = result.departure_latitude
-            feature["datetime"] = and_then(result.departure_time, datetime.isoformat)
-            feature["timestamp"] = and_then(result.timestamp, datetime.isoformat)
-            feature["error_code"] = result.error_code
-            feature["error_message"] = result.error_message
-            addFeature(navigations, feature)
-
-            # Destination Navigation Point
-            feature = QgsFeature(navigations.props.fields)
-            if (geom := result.arrival_position) is not None:
-                feature.setGeometry(geometry_from_shapely(geom))
-
-            feature["id"] = result.id
-            feature["subid"] = result.subid
-            feature["navid"] = 1
-            feature["placename"] = result.arrival_placename
-            feature["longitude"] = result.arrival_longitude
-            feature["latitude"] = result.arrival_latitude
-            feature["datetime"] = and_then(result.arrival_time, datetime.isoformat)
-            feature["timestamp"] = and_then(result.timestamp, datetime.isoformat)
-            feature["error_code"] = result.error_code
-            feature["error_message"] = result.error_message
-            addFeature(navigations, feature)
+                feature["id"] = result.id
+                feature["subid"] = result.subid
+                feature["navid"] = navid
+                feature["placename"] = getattr(result, f"{prefix}_placename")
+                feature["longitude"] = getattr(result, f"{prefix}_longitude")
+                feature["latitude"] = getattr(result, f"{prefix}_latitude")
+                feature["datetime"] = and_then(
+                    getattr(result, f"{prefix}_time"), datetime.isoformat
+                )
+                feature["timestamp"] = and_then(result.timestamp, datetime.isoformat)
+                feature["error_code"] = result.error_code
+                feature["error_message"] = result.error_message
+                addFeature(navigations, feature)
 
         return {
             routes.name: routes.dest,
