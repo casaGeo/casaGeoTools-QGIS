@@ -419,7 +419,7 @@ class CasaGeoToolsRoutesSingleAlgorithm(CasaGeoToolsRoutesAlgorithm):
 
     @override
     def displayName(self) -> str:
-        return self.__tr("Routes (single)", "Algorithm")
+        return self.__tr("Routes", "Algorithm")
 
     @override
     def name(self) -> str:
