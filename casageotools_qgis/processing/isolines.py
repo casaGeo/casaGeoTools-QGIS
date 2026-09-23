@@ -30,6 +30,7 @@ from qgis.core import (
     QgsProcessingParameterEnum,
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterFeatureSource,
+    QgsProcessingParameterPoint,
     QgsProcessingParameterString,
 )
 from qgis.PyQt.QtCore import QMetaType
@@ -71,14 +72,6 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         return self.GROUP_ID_SPATIAL
 
     @override
-    def displayName(self) -> str:
-        return self.__tr("Isolines", "Algorithm")
-
-    @override
-    def name(self) -> str:
-        return "isolines"
-
-    @override
     def shortDescription(self) -> str:
         return self.__tr("Calculates isolines around locations.")
 
@@ -109,14 +102,6 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         trRoutingMode = translator.translateRoutingMode
         trDirectionType = translator.translateDirectionType
         trAvoidableFeature = translator.translateAvoidableFeature
-
-        self.addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.INPUT,
-                self.__tr("Input layer"),
-                [Qgis.ProcessingSourceType.VectorPoint],
-            )
-        )
 
         # This could be converted into a QgsProcessingParameterMatrix.
         self.addParameter(
@@ -250,29 +235,6 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 return props
 
         return super().sinkProperties(sink, parameters, context, sourceProperties)
-
-    @override
-    def _convertInputGeometries(
-        self,
-        parameters: dict[str, Any],
-        context: QgsProcessingContext,
-        feedback: QgsProcessingFeedback,
-    ) -> "DataFrame":
-        from pandas import DataFrame
-
-        source = self._getSource(self.INPUT, parameters, context)
-        request = self._geometryFeatureRequest(context, feedback)
-        request.setSubsetOfAttributes([])
-
-        data = [
-            {
-                "id": feature.id(),
-                "position": geometry_as_shapely(feature.geometry()),
-            }
-            for feature in features_of(source, request)
-        ]
-
-        return DataFrame(data)
 
     @override
     def _calculateResultsMessage(self) -> str:
@@ -411,3 +373,95 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             isolines.name: isolines.dest,
             navigations.name: navigations.dest,
         }
+
+
+class CasaGeoToolsIsolinesSingleAlgorithm(CasaGeoToolsIsolinesAlgorithm):
+    __tr = TrMethod()
+
+    LOCATION = "LOCATION"
+
+    @override
+    def displayName(self) -> str:
+        return self.__tr("Isolines", "Algorithm")
+
+    @override
+    def name(self) -> str:
+        return "isolines_single"
+
+    @override
+    def _initAlgorithm(self, configuration: dict[str, Any] | None) -> None:
+        self.addParameter(
+            QgsProcessingParameterPoint(
+                self.LOCATION,
+                self.__tr("Location"),
+            )
+        )
+
+        super()._initAlgorithm(configuration)
+
+    @override
+    def _convertInputGeometries(
+        self,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback,
+    ) -> "DataFrame":
+        from pandas import DataFrame
+
+        position = self._parameterAsTransformedPoint(
+            self.LOCATION, self.HERE_CRS, parameters, context
+        )
+
+        return DataFrame([
+            {
+                "position_longitude": position.x(),
+                "position_latitude": position.y(),
+            }
+        ])
+
+
+class CasaGeoToolsIsolinesBatchAlgorithm(CasaGeoToolsIsolinesAlgorithm):
+    __tr = TrMethod()
+
+    @override
+    def displayName(self) -> str:
+        return self.__tr("Isolines (batch)", "Algorithm")
+
+    @override
+    def name(self) -> str:
+        return "isolines_batch"
+
+    @override
+    def _initAlgorithm(self, configuration: dict[str, Any] | None) -> None:
+        self.batch_mode = True
+
+        self.addParameter(
+            QgsProcessingParameterFeatureSource(
+                self.INPUT,
+                self.__tr("Input layer"),
+                [Qgis.ProcessingSourceType.VectorPoint],
+            )
+        )
+
+        super()._initAlgorithm(configuration)
+
+    @override
+    def _convertInputGeometries(
+        self,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback,
+    ) -> "DataFrame":
+        from pandas import DataFrame
+
+        source = self._getSource(self.INPUT, parameters, context)
+        request = self._geometryFeatureRequest(context, feedback)
+        request.setSubsetOfAttributes([])
+
+        return DataFrame([
+            {
+                "id": feature.id(),
+                "position": geometry_as_shapely(feature.geometry()),
+            }
+            for feature in features_of(source, request)
+        ])
