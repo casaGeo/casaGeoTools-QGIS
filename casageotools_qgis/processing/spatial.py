@@ -233,7 +233,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                     QgsField("location_placename", QMetaType.Type.QString),
                     QgsField("location_longitude", QMetaType.Type.Double),
                     QgsField("location_latitude", QMetaType.Type.Double),
-                    QgsField("location_datetime", QMetaType.Type.QDateTime),
+                    # QgsField("location_datetime", QMetaType.Type.QDateTime),
                     QgsField("timestamp", QMetaType.Type.QDateTime),
                     QgsField("error_code", QMetaType.Type.QString),
                     QgsField("error_message", QMetaType.Type.QString),
@@ -250,10 +250,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                     QgsField("placename", QMetaType.Type.QString),
                     QgsField("longitude", QMetaType.Type.Double),
                     QgsField("latitude", QMetaType.Type.Double),
-                    QgsField("datetime", QMetaType.Type.QDateTime),
-                    QgsField("timestamp", QMetaType.Type.QDateTime),
-                    QgsField("error_code", QMetaType.Type.QString),
-                    QgsField("error_message", QMetaType.Type.QString),
+                    # QgsField("datetime", QMetaType.Type.QDateTime),
                 ])
                 return props
 
@@ -405,7 +402,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature["location_placename"] = center(result, "placename")
             feature["location_longitude"] = center(result, "longitude")
             feature["location_latitude"] = center(result, "latitude")
-            feature["location_datetime"] = and_then(center(result, "time"), isoformat)
+            # feature["location_datetime"] = and_then(center(result, "time"), isoformat)
             feature["timestamp"] = and_then(result.timestamp, isoformat)
             feature["error_code"] = result.error_code
             feature["error_message"] = result.error_message
@@ -422,10 +419,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature["placename"] = center(result, "placename")
             feature["longitude"] = center(result, "longitude")
             feature["latitude"] = center(result, "latitude")
-            feature["datetime"] = and_then(center(result, "time"), isoformat)
-            feature["timestamp"] = and_then(result.timestamp, isoformat)
-            feature["error_code"] = result.error_code
-            feature["error_message"] = result.error_message
+            # feature["datetime"] = and_then(center(result, "time"), isoformat)
             addFeature(navigations, feature)
 
         return {
@@ -587,10 +581,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                     QgsField("placename", QMetaType.Type.QString),
                     QgsField("longitude", QMetaType.Type.Double),
                     QgsField("latitude", QMetaType.Type.Double),
-                    QgsField("datetime", QMetaType.Type.QDateTime),
-                    QgsField("timestamp", QMetaType.Type.QDateTime),
-                    QgsField("error_code", QMetaType.Type.QString),
-                    QgsField("error_message", QMetaType.Type.QString),
+                    # QgsField("datetime", QMetaType.Type.QDateTime),
                 ])
                 return props
 
@@ -703,12 +694,9 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 feature["placename"] = getattr(result, f"{prefix}_placename")
                 feature["longitude"] = getattr(result, f"{prefix}_longitude")
                 feature["latitude"] = getattr(result, f"{prefix}_latitude")
-                feature["datetime"] = and_then(
-                    getattr(result, f"{prefix}_time"), datetime.isoformat
-                )
-                feature["timestamp"] = and_then(result.timestamp, datetime.isoformat)
-                feature["error_code"] = result.error_code
-                feature["error_message"] = result.error_message
+                # feature["datetime"] = and_then(
+                #     getattr(result, f"{prefix}_time"), datetime.isoformat
+                # )
                 addFeature(navigations, feature)
 
         return {
