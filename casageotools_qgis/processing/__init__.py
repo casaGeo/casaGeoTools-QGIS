@@ -31,6 +31,7 @@ from qgis.core import (
     QgsProcessingException,  # pyright: ignore[reportAttributeAccessIssue]
     QgsProcessingFeatureSource,
     QgsProcessingFeedback,
+    QgsProcessingParameterDefinition,
     QgsProcessingProvider,
 )
 
@@ -38,7 +39,6 @@ from ..resources import LIBRARY_IDENTIFIER, MINIMUM_REQUIRED_LIBRARY_VERSION
 from ..utils import (
     ProcessingFeatureSinkDefinition,
     TrMethod,
-    and_then,
     parameter_crs_pairs,
     version_tuple,
 )
@@ -107,6 +107,7 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
         self.plugin = plugin
         self.status_ok = True
         self.status_message = ""
+        self.batch_mode = False
 
     @cached_property
     def HERE_CRS(self) -> QgsCoordinateReferenceSystem:
@@ -191,6 +192,27 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
 
     def _initAlgorithm(self, configuration: dict[str, Any] | None) -> None:
         pass
+
+    def _addParameter(
+        self,
+        parameterDefinition: QgsProcessingParameterDefinition,
+        /,
+        *,
+        createOutput: bool = True,
+    ) -> None:
+        self.addParameter(parameterDefinition, createOutput)
+
+    def _addBatchParameter(
+        self,
+        parameterDefinition: QgsProcessingParameterDefinition,
+        /,
+        *,
+        createOutput: bool = True,
+    ) -> None:
+        if not self.batch_mode:
+            return
+
+        self.addParameter(parameterDefinition, createOutput)
 
     @override
     def validateInputCrs(
