@@ -39,6 +39,7 @@ from ..utils import (
     ProcessingFeatureSinkDefinition,
     TrMethod,
     and_then,
+    parameter_crs_pairs,
     version_tuple,
 )
 
@@ -192,6 +193,17 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
         pass
 
     @override
+    def validateInputCrs(
+        self, parameters: dict[str, Any], context: QgsProcessingContext
+    ) -> bool:
+        return super().validateInputCrs(parameters, context) and all(
+            QgsCoordinateTransform.isTransformationPossible(crs, self.HERE_CRS)
+            for _, crs in parameter_crs_pairs(
+                self.parameterDefinitions(), parameters, context
+            )
+        )
+
+    @override
     def processAlgorithm(
         self,
         parameters: dict[str, Any],
@@ -291,31 +303,6 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
             dest=dest,
             sink=sink,
         )
-
-    def _validateSourceCrsCompatible(
-        self,
-        name: str,
-        parameters: dict[str, Any],
-        context: QgsProcessingContext,
-    ) -> bool:
-        crs = and_then(
-            self.parameterAsSource(parameters, name, context),
-            QgsProcessingFeatureSource.sourceCrs,
-        )
-        if crs is None or not crs.isValid():
-            return True
-        return QgsCoordinateTransform.isTransformationPossible(crs, self.HERE_CRS)
-
-    def _validatePointCrsCompatible(
-        self,
-        name: str,
-        parameters: dict[str, Any],
-        context: QgsProcessingContext,
-    ) -> bool:
-        crs = self.parameterAsPointCrs(parameters, name, context)
-        if crs is None or not crs.isValid():
-            return True
-        return QgsCoordinateTransform.isTransformationPossible(crs, self.HERE_CRS)
 
     def _parameterAsTransformedPoint(
         self,

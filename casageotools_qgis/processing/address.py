@@ -382,16 +382,6 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         return super().sinkProperties(sink, parameters, context, sourceProperties)
 
     @override
-    def validateInputCrs(
-        self, parameters: dict[str, Any], context: QgsProcessingContext
-    ) -> bool:
-        return (
-            super().validateInputCrs(parameters, context)
-            and self._validateSourceCrsCompatible(self.INPUT, parameters, context)
-            and True
-        )
-
-    @override
     def checkParameterValues(
         self,
         parameters: dict[str, Any],

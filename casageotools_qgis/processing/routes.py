@@ -369,16 +369,6 @@ class CasaGeoToolsRoutesSingleAlgorithm(CasaGeoToolsRoutesAlgorithm):
         super()._initAlgorithm(configuration)
 
     @override
-    def validateInputCrs(
-        self, parameters: dict[str, Any], context: QgsProcessingContext
-    ) -> bool:
-        return (
-            super().validateInputCrs(parameters, context)
-            and self._validatePointCrsCompatible(self.ORIGIN, parameters, context)
-            and self._validatePointCrsCompatible(self.DESTINATION, parameters, context)
-        )
-
-    @override
     def _convertInputGeometries(
         self,
         parameters: dict[str, Any],
@@ -434,18 +424,6 @@ class CasaGeoToolsRoutesLineSegmentAlgorithm(CasaGeoToolsRoutesAlgorithm):
         )
 
         super()._initAlgorithm(configuration)
-
-    @override
-    def validateInputCrs(
-        self, parameters: dict[str, Any], context: QgsProcessingContext
-    ) -> bool:
-        return (
-            super().validateInputCrs(parameters, context)
-            and self._validateSourceCrsCompatible(
-                self.LINE_SEGMENT_LAYER, parameters, context
-            )
-            and True
-        )
 
     @override
     def _convertInputGeometries(
@@ -532,16 +510,6 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 self.__tr("Calculated routes"),
                 Qgis.ProcessingSourceType.VectorLine,
             )
-        )
-
-    @override
-    def validateInputCrs(
-        self, parameters: dict[str, Any], context: QgsProcessingContext
-    ) -> bool:
-        return (
-            super().validateInputCrs(parameters, context)
-            and self._validateSourceCrsCompatible(self.INPUT, parameters, context)
-            and True
         )
 
     @override

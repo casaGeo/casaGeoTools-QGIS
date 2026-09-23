@@ -14,7 +14,7 @@
 #
 #  SPDX-License-Identifier: Apache-2.0
 
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Generator, Iterable, Iterator
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, LiteralString, cast, overload
 
@@ -25,12 +25,15 @@ if TYPE_CHECKING:
 
     from qgis.core import (
         Qgis,
+        QgsCoordinateReferenceSystem,
         QgsFeature,
         QgsFeatureRequest,
         QgsFeatureSink,
         QgsGeometry,
         QgsProcessingAlgorithm,
+        QgsProcessingContext,
         QgsProcessingFeatureSource,
+        QgsProcessingParameterDefinition,
     )
     from qgis.PyQt.QtCore import QDateTime
     from shapely.geometry.base import BaseGeometry as ShapelyBaseGeometry
@@ -248,6 +251,79 @@ def geometry_from_shapely(geometry: "ShapelyBaseGeometry", /) -> "QgsGeometry":
 
     # See https://qgis.org/pyqgis/master/core/QgsGeometry.html#qgis.core.QgsGeometry.from_shapely
     return QgsGeometry.from_shapely(geometry)  # pyright: ignore[reportAttributeAccessIssue]
+
+
+def parameter_crs_pairs(
+    definitions: Iterable["QgsProcessingParameterDefinition"],
+    parameters: dict[str, Any],
+    context: "QgsProcessingContext",
+) -> Generator[
+    tuple["QgsProcessingParameterDefinition", "QgsCoordinateReferenceSystem"]
+]:
+    # QGIS should really supply a helper function or virtual function interface for this.
+    # Adapted from https://github.com/qgis/QGIS/blob/96532a00a606b430bd510e89d243dad799e7cd76/src/core/processing/qgsprocessingalgorithm.cpp#L257
+
+    from qgis.core import (
+        QgsProcessingParameterExtent,
+        QgsProcessingParameterFeatureSource,
+        QgsProcessingParameterGeometry,
+        QgsProcessingParameterMapLayer,
+        QgsProcessingParameterMultipleLayers,
+        QgsProcessingParameterPoint,
+        QgsProcessingParameterRasterLayer,
+        QgsProcessingParameters,
+    )
+
+    for definition in definitions:
+        paramtype = definition.type()
+
+        if (
+            paramtype == QgsProcessingParameterMapLayer.typeName()
+            or paramtype == QgsProcessingParameterRasterLayer.typeName()
+        ):
+            layer = QgsProcessingParameters.parameterAsLayer(
+                definition, parameters, context
+            )
+            if layer is not None:
+                yield definition, layer.crs()
+
+        elif paramtype == QgsProcessingParameterFeatureSource.typeName():
+            source = QgsProcessingParameters.parameterAsSource(
+                definition, parameters, context
+            )
+            if source is not None:
+                yield definition, source.sourceCrs()
+
+        elif paramtype == QgsProcessingParameterMultipleLayers.typeName():
+            layers = QgsProcessingParameters.parameterAsLayerList(
+                definition, parameters, context
+            )
+            for layer in layers:
+                yield definition, layer.crs()
+
+        elif paramtype == QgsProcessingParameterExtent.typeName():
+            yield (
+                definition,
+                QgsProcessingParameters.parameterAsExtentCrs(
+                    definition, parameters, context
+                ),
+            )
+
+        elif paramtype == QgsProcessingParameterPoint.typeName():
+            yield (
+                definition,
+                QgsProcessingParameters.parameterAsPointCrs(
+                    definition, parameters, context
+                ),
+            )
+
+        elif paramtype == QgsProcessingParameterGeometry.typeName():
+            yield (
+                definition,
+                QgsProcessingParameters.parameterAsGeometryCrs(
+                    definition, parameters, context
+                ),
+            )
 
 
 def pydatetime(dt: "QDateTime", /) -> "datetime.datetime | None":

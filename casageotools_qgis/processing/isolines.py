@@ -252,16 +252,6 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         return super().sinkProperties(sink, parameters, context, sourceProperties)
 
     @override
-    def validateInputCrs(
-        self, parameters: dict[str, Any], context: QgsProcessingContext
-    ) -> bool:
-        return (
-            super().validateInputCrs(parameters, context)
-            and self._validateSourceCrsCompatible(self.INPUT, parameters, context)
-            and True
-        )
-
-    @override
     def _convertInputGeometries(
         self,
         parameters: dict[str, Any],
