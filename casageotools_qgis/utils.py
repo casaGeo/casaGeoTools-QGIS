@@ -86,10 +86,10 @@ class CasaGeoToolsCoderTranslator:
             "districtLookup": self.__tr("District lookup", "Postal code mode"),
         }
 
-    def translateAddressNamesMode(self, mode: str) -> str:
+    def translateAddressNamesMode(self, mode: str, /) -> str:
         return self.address_names_mode_map.get(mode, mode)
 
-    def translatePostalCodeMode(self, mode: str) -> str:
+    def translatePostalCodeMode(self, mode: str, /) -> str:
         return self.postal_code_mode_map.get(mode, mode)
 
 
@@ -143,22 +143,22 @@ class CasaGeoToolsSpatialTranslator:
             "uTurns": self.__tr("U-turns", "Avoidable feature"),
         }
 
-    def translateRangeType(self, range_type: str) -> str:
+    def translateRangeType(self, range_type: str, /) -> str:
         return self.range_type_map.get(range_type, range_type)
 
-    def translateRangeUnit(self, range_unit: str) -> str:
+    def translateRangeUnit(self, range_unit: str, /) -> str:
         return self.range_unit_map.get(range_unit, range_unit)
 
-    def translateTransportMode(self, transport_mode: str) -> str:
+    def translateTransportMode(self, transport_mode: str, /) -> str:
         return self.transport_mode_map.get(transport_mode, transport_mode)
 
-    def translateRoutingMode(self, routing_mode: str) -> str:
+    def translateRoutingMode(self, routing_mode: str, /) -> str:
         return self.routing_mode_map.get(routing_mode, routing_mode)
 
-    def translateDirectionType(self, direction_type: str) -> str:
+    def translateDirectionType(self, direction_type: str, /) -> str:
         return self.direction_type_map.get(direction_type, direction_type)
 
-    def translateAvoidableFeature(self, avoidable_feature: str) -> str:
+    def translateAvoidableFeature(self, avoidable_feature: str, /) -> str:
         return self.avoidable_feature_map.get(avoidable_feature, avoidable_feature)
 
 
