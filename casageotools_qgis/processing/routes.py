@@ -33,6 +33,7 @@ from qgis.core import (
     QgsProcessingParameterExpression,
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterFeatureSource,
+    QgsProcessingParameterField,
     QgsProcessingParameterNumber,
     QgsProcessingParameterPoint,
     QgsProcessingParameterString,
@@ -58,13 +59,28 @@ if TYPE_CHECKING:
 class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
     __tr = TrMethod()
 
+    INPUT_LAYER = "INPUT_LAYER"
+
     ALTERNATIVES = "ALTERNATIVES"
+    ALTERNATIVES_FIELD = "ALTERNATIVES_FIELD"
+
     TRANSPORT_MODE = "TRANSPORT_MODE"
+    TRANSPORT_MODE_FIELD = "TRANSPORT_MODE_FIELD"
+
     ROUTING_MODE = "ROUTING_MODE"
+    ROUTING_MODE_FIELD = "ROUTING_MODE_FIELD"
+
     DEPARTURE_TIME = "DEPARTURE_TIME"
+    DEPARTURE_TIME_FIELD = "DEPARTURE_TIME_FIELD"
+
     ARRIVAL_TIME = "ARRIVAL_TIME"
+    ARRIVAL_TIME_FIELD = "ARRIVAL_TIME_FIELD"
+
     AVOID_FEATURES = "AVOID_FEATURES"
+    AVOID_FEATURES_FIELD = "AVOID_FEATURES_FIELD"
+
     EXCLUDE_COUNTRIES = "EXCLUDE_COUNTRIES"
+    EXCLUDE_COUNTRIES_FIELD = "EXCLUDE_COUNTRIES_FIELD"
 
     OUTPUT_ROUTES = "OUTPUT_ROUTES"
     OUTPUT_NAVIGATIONS = "OUTPUT_NAVIGATIONS"
@@ -91,7 +107,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         trRoutingMode = translator.translateRoutingMode
         trAvoidableFeature = translator.translateAvoidableFeature
 
-        self.addParameter(
+        self._addParameter(
             QgsProcessingParameterNumber(
                 self.ALTERNATIVES,
                 self.__tr("Number of alternative routes", "Parameter"),
@@ -101,60 +117,123 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 defaultValue=DEFAULT_ALTERNATIVES,
             )
         )
+        self._addBatchParameter(
+            QgsProcessingParameterField(
+                self.ALTERNATIVES_FIELD,
+                self.__tr("Number of alternative routes (field)", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
+                type=Qgis.ProcessingFieldParameterDataType.Numeric,
+                optional=True,
+            )
+        )
 
-        self.addParameter(
+        self._addParameter(
             QgsProcessingParameterEnum(
                 self.TRANSPORT_MODE,
-                self.__tr("Transport mode"),
+                self.__tr("Transport mode", "Parameter"),
                 options=map(trTransportMode, TransportMode),
                 defaultValue=trTransportMode(DEFAULT_TRANSPORT_MODE),
             )
         )
+        self._addBatchParameter(
+            QgsProcessingParameterField(
+                self.TRANSPORT_MODE_FIELD,
+                self.__tr("Transport mode (field)", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
+                type=Qgis.ProcessingFieldParameterDataType.String,
+                optional=True,
+            )
+        )
 
-        self.addParameter(
+        self._addParameter(
             QgsProcessingParameterEnum(
                 self.ROUTING_MODE,
-                self.__tr("Routing mode"),
+                self.__tr("Routing mode", "Parameter"),
                 options=map(trRoutingMode, RoutingMode),
                 defaultValue=trRoutingMode(DEFAULT_ROUTING_MODE),
             )
         )
+        self._addBatchParameter(
+            QgsProcessingParameterField(
+                self.ROUTING_MODE_FIELD,
+                self.__tr("Routing mode (field)", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
+                type=Qgis.ProcessingFieldParameterDataType.String,
+                optional=True,
+            )
+        )
 
-        self.addParameter(
+        self._addParameter(
             QgsProcessingParameterDateTime(
                 self.DEPARTURE_TIME,
                 self.__tr("Departure time", "Parameter"),
                 optional=True,
             )
         )
+        self._addBatchParameter(
+            QgsProcessingParameterField(
+                self.DEPARTURE_TIME_FIELD,
+                self.__tr("Departure time (field)", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
+                type=Qgis.ProcessingFieldParameterDataType.DateTime,
+                optional=True,
+            )
+        )
 
-        self.addParameter(
+        self._addParameter(
             QgsProcessingParameterDateTime(
                 self.ARRIVAL_TIME,
                 self.__tr("Arrival time", "Parameter"),
                 optional=True,
             )
         )
+        self._addBatchParameter(
+            QgsProcessingParameterField(
+                self.ARRIVAL_TIME_FIELD,
+                self.__tr("Arrival time (field)", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
+                type=Qgis.ProcessingFieldParameterDataType.DateTime,
+                optional=True,
+            )
+        )
 
-        self.addParameter(
+        self._addParameter(
             QgsProcessingParameterEnum(
                 self.AVOID_FEATURES,
-                self.__tr("Avoid features"),
+                self.__tr("Avoid features", "Parameter"),
                 options=map(trAvoidableFeature, AvoidableFeature),
                 allowMultiple=True,
                 optional=True,
             )
         )
-
-        self.addParameter(
-            QgsProcessingParameterString(
-                self.EXCLUDE_COUNTRIES,
-                self.__tr("Exclude countries (separated by commas)"),
+        self._addBatchParameter(
+            QgsProcessingParameterField(
+                self.AVOID_FEATURES_FIELD,
+                self.__tr("Avoid features (field)", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
+                type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
             )
         )
 
-        self.addParameter(
+        self._addParameter(
+            QgsProcessingParameterString(
+                self.EXCLUDE_COUNTRIES,
+                self.__tr("Exclude countries (separated by commas)", "Parameter"),
+                optional=True,
+            )
+        )
+        self._addBatchParameter(
+            QgsProcessingParameterField(
+                self.EXCLUDE_COUNTRIES_FIELD,
+                self.__tr("Exclude countries (field)", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
+                type=Qgis.ProcessingFieldParameterDataType.String,
+                optional=True,
+            )
+        )
+
+        self._addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT_ROUTES,
                 self.__tr("Calculated routes", "Parameter"),
@@ -162,10 +241,10 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             )
         )
 
-        self.addParameter(
+        self._addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT_NAVIGATIONS,
-                self.__tr("Routing navigation points"),
+                self.__tr("Routing navigation points", "Parameter"),
                 Qgis.ProcessingSourceType.VectorPoint,
             )
         )
@@ -397,8 +476,6 @@ class CasaGeoToolsRoutesSingleAlgorithm(CasaGeoToolsRoutesAlgorithm):
 class CasaGeoToolsRoutesLineSegmentAlgorithm(CasaGeoToolsRoutesAlgorithm):
     __tr = TrMethod()
 
-    LINE_SEGMENT_LAYER = "LINE_SEGMENT_LAYER"
-
     @override
     def displayName(self) -> str:
         return self.__tr("Routes (line segments)", "Algorithm")
@@ -415,9 +492,11 @@ class CasaGeoToolsRoutesLineSegmentAlgorithm(CasaGeoToolsRoutesAlgorithm):
 
     @override
     def _initAlgorithm(self, configuration: dict[str, Any] | None) -> None:
-        self.addParameter(
+        self.batch_mode = True
+
+        self._addParameter(
             QgsProcessingParameterFeatureSource(
-                self.LINE_SEGMENT_LAYER,
+                self.INPUT_LAYER,
                 self.__tr("Layer of line segments defining origin and destination"),
                 [Qgis.ProcessingSourceType.VectorLine],
             )
@@ -434,6 +513,9 @@ class CasaGeoToolsRoutesLineSegmentAlgorithm(CasaGeoToolsRoutesAlgorithm):
     ) -> "DataFrame":
         from pandas import DataFrame
 
+        def getString(name: str, /) -> str:
+            return self.parameterAsString(parameters, name, context)
+
         def toEndpoints(feature: QgsFeature) -> tuple[QgsPointXY, QgsPointXY]:
             # FIXME: Better error messages.
             try:
@@ -445,19 +527,42 @@ class CasaGeoToolsRoutesLineSegmentAlgorithm(CasaGeoToolsRoutesAlgorithm):
                 raise QgsProcessingException(msg) from err
             return (origin, destination)
 
-        source = self._getSource(self.LINE_SEGMENT_LAYER, parameters, context)
-        request = self._geometryFeatureRequest(context, feedback)
-        request.setSubsetOfAttributes([])
-
-        data = [
-            {
-                "origin_longitude": origin.x(),
-                "origin_latitude": origin.y(),
-                "destination_longitude": destination.x(),
-                "destination_latitude": destination.y(),
-            }
-            for origin, destination in map(toEndpoints, features_of(source, request))
+        source = self._getSource(self.INPUT_LAYER, parameters, context)
+        fields = [
+            alternatives_field := getString(self.ALTERNATIVES_FIELD),
+            transport_mode_field := getString(self.TRANSPORT_MODE_FIELD),
+            routing_mode_field := getString(self.ROUTING_MODE_FIELD),
+            departure_time_field := getString(self.DEPARTURE_TIME_FIELD),
+            arrival_time_field := getString(self.ARRIVAL_TIME_FIELD),
+            avoid_features_field := getString(self.AVOID_FEATURES_FIELD),
+            exclude_countries_field := getString(self.EXCLUDE_COUNTRIES_FIELD),
         ]
+
+        request = self._geometryFeatureRequest(context, feedback)
+        request.setSubsetOfAttributes((f for f in fields if f), source.fields())
+
+        data = []
+        for feature in features_of(source, request):
+            data.append(row := {})
+            origin, destination = toEndpoints(feature)
+            row["origin_longitude"] = origin.x()
+            row["origin_latitude"] = origin.y()
+            row["destination_longitude"] = destination.x()
+            row["destination_latitude"] = destination.y()
+            if f := alternatives_field:
+                row["alternatives"] = feature[f]
+            if f := transport_mode_field:
+                row["transport_mode"] = feature[f]
+            if f := routing_mode_field:
+                row["routing_mode"] = feature[f]
+            if f := departure_time_field:
+                row["departure_time"] = pydatetime(feature[f])
+            if f := arrival_time_field:
+                row["arrival_time"] = pydatetime(feature[f])
+            if f := avoid_features_field:
+                row["avoid_features"] = feature[f]
+            if f := exclude_countries_field:
+                row["exclude_countries"] = feature[f]
 
         return DataFrame(data)
 
