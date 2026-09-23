@@ -541,30 +541,30 @@ class CasaGeoToolsRoutesLineSegmentAlgorithm(CasaGeoToolsRoutesAlgorithm):
         request = self._geometryFeatureRequest(context, feedback)
         request.setSubsetOfAttributes((f for f in fields if f), source.fields())
 
-        data = []
-        for feature in features_of(source, request):
-            data.append(row := {})
-            origin, destination = toEndpoints(feature)
-            row["origin_longitude"] = origin.x()
-            row["origin_latitude"] = origin.y()
-            row["destination_longitude"] = destination.x()
-            row["destination_latitude"] = destination.y()
-            if f := alternatives_field:
-                row["alternatives"] = feature[f]
-            if f := transport_mode_field:
-                row["transport_mode"] = feature[f]
-            if f := routing_mode_field:
-                row["routing_mode"] = feature[f]
-            if f := departure_time_field:
-                row["departure_time"] = pydatetime(feature[f])
-            if f := arrival_time_field:
-                row["arrival_time"] = pydatetime(feature[f])
-            if f := avoid_features_field:
-                row["avoid_features"] = feature[f]
-            if f := exclude_countries_field:
-                row["exclude_countries"] = feature[f]
-
-        return DataFrame(data)
+        return DataFrame([
+            {
+                "id": feature.id(),
+                "origin_longitude": origin.x(),
+                "origin_latitude": origin.y(),
+                "destination_longitude": destination.x(),
+                "destination_latitude": destination.y(),
+                "alternatives": feature[f] if (f := alternatives_field) else None,
+                "transport_mode": feature[f] if (f := transport_mode_field) else None,
+                "routing_mode": feature[f] if (f := routing_mode_field) else None,
+                "departure_time": (
+                    pydatetime(feature[f]) if (f := departure_time_field) else None
+                ),
+                "arrival_time": (
+                    pydatetime(feature[f]) if (f := arrival_time_field) else None
+                ),
+                "avoid_features": feature[f] if (f := avoid_features_field) else None,
+                "exclude_countries": (
+                    feature[f] if (f := exclude_countries_field) else None
+                ),
+            }
+            for feature in features_of(source, request)
+            for origin, destination in [toEndpoints(feature)]
+        ])
 
 
 class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
