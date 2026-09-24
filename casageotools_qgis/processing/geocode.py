@@ -14,6 +14,7 @@
 #
 #  SPDX-License-Identifier: Apache-2.0
 
+from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any, override
 
 from qgis.core import (
@@ -52,22 +53,49 @@ if TYPE_CHECKING:
 class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
     __tr = TrMethod()
 
-    INPUT = "INPUT"
-    INPUT_ADDRESS_FIELD = "INPUT_ADDRESS_FIELD"
-    INPUT_COUNTRY_FIELD = "INPUT_COUNTRY_FIELD"
-    INPUT_STATE_FIELD = "INPUT_STATE_FIELD"
-    INPUT_COUNTY_FIELD = "INPUT_COUNTY_FIELD"
-    INPUT_CITY_FIELD = "INPUT_CITY_FIELD"
-    INPUT_DISTRICT_FIELD = "INPUT_DISTRICT_FIELD"
-    INPUT_STREET_FIELD = "INPUT_STREET_FIELD"
-    INPUT_HOUSENUMBER_FIELD = "INPUT_HOUSENUMBER_FIELD"
-    INPUT_POSTALCODE_FIELD = "INPUT_POSTALCODE_FIELD"
-    INPUT_USE_GEOMETRY = "INPUT_USE_GEOMETRY"
+    INPUT_LAYER = "INPUT_LAYER"
+
+    ADDRESS = "ADDRESS"
+    ADDRESS_FIELD = "ADDRESS_FIELD"
+
+    COUNTRY = "COUNTRY"
+    COUNTRY_FIELD = "COUNTRY_FIELD"
+
+    STATE = "STATE"
+    STATE_FIELD = "STATE_FIELD"
+
+    COUNTY = "COUNTY"
+    COUNTY_FIELD = "COUNTY_FIELD"
+
+    CITY = "CITY"
+    CITY_FIELD = "CITY_FIELD"
+
+    DISTRICT = "DISTRICT"
+    DISTRICT_FIELD = "DISTRICT_FIELD"
+
+    STREET = "STREET"
+    STREET_FIELD = "STREET_FIELD"
+
+    HOUSENUMBER = "HOUSENUMBER"
+    HOUSENUMBER_FIELD = "HOUSENUMBER_FIELD"
+
+    POSTALCODE = "POSTALCODE"
+    POSTALCODE_FIELD = "POSTALCODE_FIELD"
+
+    USE_GEOMETRY = "USE_GEOMETRY"
+    USE_GEOMETRY_FIELD = "USE_GEOMETRY_FIELD"
 
     LIMIT = "LIMIT"
-    ADDRESS_NAMES_MODE = "ADDRESS_NAMES_MODE"
-    POSTAL_CODE_MODE = "POSTAL_CODE_MODE"
+    LIMIT_FIELD = "LIMIT_FIELD"
+
     COUNTRIES = "COUNTRIES"
+    COUNTRIES_FIELD = "COUNTRIES_FIELD"
+
+    ADDRESS_NAMES_MODE = "ADDRESS_NAMES_MODE"
+    ADDRESS_NAMES_MODE_FIELD = "ADDRESS_NAMES_MODE_FIELD"
+
+    POSTAL_CODE_MODE = "POSTAL_CODE_MODE"
+    POSTAL_CODE_MODE_FIELD = "POSTAL_CODE_MODE_FIELD"
 
     WITH_ADDRESS_DETAILS = "WITH_ADDRESS_DETAILS"
     WITH_COORDINATES = "WITH_COORDINATES"
@@ -108,113 +136,187 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
         trAddressNamesMode = translator.translateAddressNamesMode
         trPostalCodeMode = translator.translatePostalCodeMode
 
-        self.addParameter(
+        self.batch_mode = True
+
+        self._addBatchParameter(
             QgsProcessingParameterFeatureSource(
-                self.INPUT,
+                self.INPUT_LAYER,
                 self.__tr("Input layer"),
                 [Qgis.ProcessingSourceType.Vector],
             )
         )
 
-        self.addParameter(
+        self._addParameter(
+            QgsProcessingParameterString(
+                self.ADDRESS,
+                self.__tr("Free-form address", "Parameter"),
+                optional=True,
+            )
+        )
+        self._addBatchParameter(
             QgsProcessingParameterField(
-                self.INPUT_ADDRESS_FIELD,
-                self.__tr("Free-form address field"),
-                parentLayerParameterName=self.INPUT,
+                self.ADDRESS_FIELD,
+                self.__tr("Free-form address (field)", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
             )
         )
 
-        self.addParameter(
+        self._addParameter(
+            QgsProcessingParameterString(
+                self.COUNTRY,
+                self.__tr("Country", "Parameter"),
+                optional=True,
+            )
+        )
+        self._addBatchParameter(
             QgsProcessingParameterField(
-                self.INPUT_COUNTRY_FIELD,
-                self.__tr("Country field"),
-                parentLayerParameterName=self.INPUT,
+                self.COUNTRY_FIELD,
+                self.__tr("Country (field)", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
             )
         )
 
-        self.addParameter(
+        self._addParameter(
+            QgsProcessingParameterString(
+                self.STATE,
+                self.__tr("State", "Parameter"),
+                optional=True,
+            )
+        )
+        self._addBatchParameter(
             QgsProcessingParameterField(
-                self.INPUT_STATE_FIELD,
-                self.__tr("State field"),
-                parentLayerParameterName=self.INPUT,
+                self.STATE_FIELD,
+                self.__tr("State (field)", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
             )
         )
 
-        self.addParameter(
+        self._addParameter(
+            QgsProcessingParameterString(
+                self.COUNTY,
+                self.__tr("County", "Parameter"),
+                optional=True,
+            )
+        )
+        self._addBatchParameter(
             QgsProcessingParameterField(
-                self.INPUT_COUNTY_FIELD,
-                self.__tr("County field"),
-                parentLayerParameterName=self.INPUT,
+                self.COUNTY_FIELD,
+                self.__tr("County (field)", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
             )
         )
 
-        self.addParameter(
+        self._addParameter(
+            QgsProcessingParameterString(
+                self.CITY,
+                self.__tr("City", "Parameter"),
+                optional=True,
+            )
+        )
+        self._addBatchParameter(
             QgsProcessingParameterField(
-                self.INPUT_CITY_FIELD,
-                self.__tr("City field"),
-                parentLayerParameterName=self.INPUT,
+                self.CITY_FIELD,
+                self.__tr("City (field)", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
             )
         )
 
-        self.addParameter(
+        self._addParameter(
+            QgsProcessingParameterString(
+                self.DISTRICT,
+                self.__tr("District", "Parameter"),
+                optional=True,
+            )
+        )
+        self._addBatchParameter(
             QgsProcessingParameterField(
-                self.INPUT_DISTRICT_FIELD,
-                self.__tr("District field"),
-                parentLayerParameterName=self.INPUT,
+                self.DISTRICT_FIELD,
+                self.__tr("District (field)", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
             )
         )
 
-        self.addParameter(
+        self._addParameter(
+            QgsProcessingParameterString(
+                self.STREET,
+                self.__tr("Street (and optionally house number)", "Parameter"),
+                optional=True,
+            )
+        )
+        self._addBatchParameter(
             QgsProcessingParameterField(
-                self.INPUT_STREET_FIELD,
-                self.__tr("Street field"),
-                parentLayerParameterName=self.INPUT,
+                self.STREET_FIELD,
+                self.__tr("Street (field)", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
             )
         )
 
-        self.addParameter(
+        self._addParameter(
+            QgsProcessingParameterString(
+                self.HOUSENUMBER,
+                self.__tr("House number", "Parameter"),
+                optional=True,
+            )
+        )
+        self._addBatchParameter(
             QgsProcessingParameterField(
-                self.INPUT_HOUSENUMBER_FIELD,
-                self.__tr("House number field"),
-                parentLayerParameterName=self.INPUT,
+                self.HOUSENUMBER_FIELD,
+                self.__tr("House number (field)", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
             )
         )
 
-        self.addParameter(
+        self._addParameter(
+            QgsProcessingParameterString(
+                self.POSTALCODE,
+                self.__tr("Postal code", "Parameter"),
+                optional=True,
+            )
+        )
+        self._addBatchParameter(
             QgsProcessingParameterField(
-                self.INPUT_POSTALCODE_FIELD,
-                self.__tr("Postal code field"),
-                parentLayerParameterName=self.INPUT,
+                self.POSTALCODE_FIELD,
+                self.__tr("Postal code (field)", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
             )
         )
 
-        self.addParameter(
+        self._addParameter(
             QgsProcessingParameterBoolean(
-                self.INPUT_USE_GEOMETRY,
-                self.__tr("Search around feature point geometry"),
+                self.USE_GEOMETRY,
+                self.__tr("Search around feature point geometry", "Parameter"),
                 defaultValue=False,
             )
         )
+        self._addBatchParameter(
+            QgsProcessingParameterField(
+                self.USE_GEOMETRY_FIELD,
+                self.__tr("Search around feature point geometry (field)", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
+                type=Qgis.ProcessingFieldParameterDataType.Boolean,
+                optional=True,
+            )
+        )
 
-        self.addParameter(
+        self._addParameter(
             QgsProcessingParameterNumber(
                 self.LIMIT,
                 self.__tr("Limit"),
@@ -224,16 +326,34 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 maxValue=MAX_LIMIT,
             )
         )
+        self._addBatchParameter(
+            QgsProcessingParameterField(
+                self.LIMIT_FIELD,
+                self.__tr("Limit (field)", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
+                type=Qgis.ProcessingFieldParameterDataType.Numeric,
+                optional=True,
+            )
+        )
 
-        self.addParameter(
+        self._addParameter(
             QgsProcessingParameterString(
                 self.COUNTRIES,
                 self.__tr("Search countries (separated by commas)"),
                 optional=True,
             )
         )
+        self._addBatchParameter(
+            QgsProcessingParameterField(
+                self.COUNTRIES_FIELD,
+                self.__tr("Search countries (field)", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
+                type=Qgis.ProcessingFieldParameterDataType.String,
+                optional=True,
+            )
+        )
 
-        self.addParameter(
+        self._addParameter(
             QgsProcessingParameterEnum(
                 self.ADDRESS_NAMES_MODE,
                 self.__tr("Address names mode"),
@@ -241,8 +361,17 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 defaultValue=trAddressNamesMode(DEFAULT_ADDRESS_NAMES_MODE),
             )
         )
+        self._addBatchParameter(
+            QgsProcessingParameterField(
+                self.ADDRESS_NAMES_MODE_FIELD,
+                self.__tr("Address names mode (field)", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
+                type=Qgis.ProcessingFieldParameterDataType.String,
+                optional=True,
+            )
+        )
 
-        self.addParameter(
+        self._addParameter(
             QgsProcessingParameterEnum(
                 self.POSTAL_CODE_MODE,
                 self.__tr("Postal code mode"),
@@ -250,8 +379,17 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 defaultValue=trPostalCodeMode(DEFAULT_POSTAL_CODE_MODE),
             )
         )
+        self._addBatchParameter(
+            QgsProcessingParameterField(
+                self.POSTAL_CODE_MODE_FIELD,
+                self.__tr("Postal code mode (field)", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
+                type=Qgis.ProcessingFieldParameterDataType.String,
+                optional=True,
+            )
+        )
 
-        self.addParameter(
+        self._addParameter(
             QgsProcessingParameterBoolean(
                 self.WITH_ADDRESS_DETAILS,
                 self.__tr("Include address details"),
@@ -259,7 +397,7 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
             )
         )
 
-        self.addParameter(
+        self._addParameter(
             QgsProcessingParameterBoolean(
                 self.WITH_COORDINATES,
                 self.__tr("Include coordinates"),
@@ -267,7 +405,7 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
             )
         )
 
-        self.addParameter(
+        self._addParameter(
             QgsProcessingParameterBoolean(
                 self.WITH_MATCH_QUALITY,
                 self.__tr("Include match quality"),
@@ -275,7 +413,7 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
             )
         )
 
-        self.addParameter(
+        self._addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT_LOCATIONS,
                 self.__tr("Geocoded locations"),
@@ -283,7 +421,7 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
             )
         )
 
-        self.addParameter(
+        self._addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT_NAVIGATIONS,
                 self.__tr("Geocoded navigation points"),
@@ -390,15 +528,24 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
         if not any(
             self.parameterAsString(parameters, name, context)
             for name in (
-                self.INPUT_ADDRESS_FIELD,
-                self.INPUT_COUNTRY_FIELD,
-                self.INPUT_STATE_FIELD,
-                self.INPUT_COUNTY_FIELD,
-                self.INPUT_CITY_FIELD,
-                self.INPUT_DISTRICT_FIELD,
-                self.INPUT_STREET_FIELD,
-                self.INPUT_HOUSENUMBER_FIELD,
-                self.INPUT_POSTALCODE_FIELD,
+                self.ADDRESS,
+                self.ADDRESS_FIELD,
+                self.COUNTRY,
+                self.COUNTRY_FIELD,
+                self.STATE,
+                self.STATE_FIELD,
+                self.COUNTY,
+                self.COUNTY_FIELD,
+                self.CITY,
+                self.CITY_FIELD,
+                self.DISTRICT,
+                self.DISTRICT_FIELD,
+                self.STREET,
+                self.STREET_FIELD,
+                self.HOUSENUMBER,
+                self.HOUSENUMBER_FIELD,
+                self.POSTALCODE,
+                self.POSTALCODE_FIELD,
             )
         ):
             return False, self.__tr("At least one input field must be specified")
@@ -417,50 +564,66 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
         def getString(name: str, /) -> str:
             return self.parameterAsString(parameters, name, context)
 
-        source = self._getSource(self.INPUT, parameters, context)
-        param_fields = {
-            "address": getString(self.INPUT_ADDRESS_FIELD),
-            "country": getString(self.INPUT_COUNTRY_FIELD),
-            "state": getString(self.INPUT_STATE_FIELD),
-            "county": getString(self.INPUT_COUNTY_FIELD),
-            "city": getString(self.INPUT_CITY_FIELD),
-            "district": getString(self.INPUT_DISTRICT_FIELD),
-            "street": getString(self.INPUT_STREET_FIELD),
-            "housenumber": getString(self.INPUT_HOUSENUMBER_FIELD),
-            "postalcode": getString(self.INPUT_POSTALCODE_FIELD),
-        }
-        use_geometry = self.parameterAsBoolean(
-            parameters, self.INPUT_USE_GEOMETRY, context
-        )
+        source = self._getSource(self.INPUT_LAYER, parameters, context)
+        fields = [
+            address_field := getString(self.ADDRESS_FIELD),
+            country_field := getString(self.COUNTRY_FIELD),
+            state_field := getString(self.STATE_FIELD),
+            county_field := getString(self.COUNTY_FIELD),
+            city_field := getString(self.CITY_FIELD),
+            district_field := getString(self.DISTRICT_FIELD),
+            street_field := getString(self.STREET_FIELD),
+            housenumber_field := getString(self.HOUSENUMBER_FIELD),
+            postalcode_field := getString(self.POSTALCODE_FIELD),
+            use_geometry_field := getString(self.USE_GEOMETRY_FIELD),
+            limit_field := getString(self.LIMIT_FIELD),
+            countries_field := getString(self.COUNTRIES_FIELD),
+            address_names_mode_field := getString(self.ADDRESS_NAMES_MODE_FIELD),
+            postal_code_mode_field := getString(self.POSTAL_CODE_MODE_FIELD),
+        ]
+        use_geometry = self.parameterAsBoolean(parameters, self.USE_GEOMETRY, context)
 
-        if use_geometry:
+        if use_geometry or use_geometry_field:
             request = self._geometryFeatureRequest(context, feedback)
         else:
             request = self._simpleFeatureRequest(context, feedback)
             request.setFlags(Qgis.FeatureRequestFlag.NoGeometry)
 
-        request.setSubsetOfAttributes(
-            (f for f in param_fields.values() if f),
-            source.fields(),
-        )
+        request.setSubsetOfAttributes((f for f in fields if f), source.fields())
 
-        data = [
+        def shouldUseGeometry(feature):
+            if f := use_geometry_field:
+                return feature[f]
+            return use_geometry
+
+        return DataFrame([
             {
                 "id": feature.id(),
-                **{
-                    param: feature[field] if field else None
-                    for param, field in param_fields.items()
-                },
                 "position": (
                     geometry_as_shapely(feature.geometry())
-                    if feature.hasGeometry()
+                    if shouldUseGeometry(feature)
                     else None
+                ),
+                "address": feature[f] if (f := address_field) else None,
+                "country": feature[f] if (f := country_field) else None,
+                "state": feature[f] if (f := state_field) else None,
+                "county": feature[f] if (f := county_field) else None,
+                "city": feature[f] if (f := city_field) else None,
+                "district": feature[f] if (f := district_field) else None,
+                "street": feature[f] if (f := street_field) else None,
+                "housenumber": feature[f] if (f := housenumber_field) else None,
+                "postalcode": feature[f] if (f := postalcode_field) else None,
+                "limit": feature[f] if (f := limit_field) else None,
+                "countries": feature[f] if (f := countries_field) else None,
+                "address_names_mode": (
+                    feature[f] if (f := address_names_mode_field) else None
+                ),
+                "postal_code_mode": (
+                    feature[f] if (f := postal_code_mode_field) else None
                 ),
             }
             for feature in features_of(source, request)
-        ]
-
-        return DataFrame(data)
+        ])
 
     @override
     def _calculateResultsMessage(self) -> str:
@@ -477,34 +640,40 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
         import casageo.coder
         from casageo.coder import AddressNamesMode, PostalCodeMode
 
-        ADDRESS_NAMES_MODES = list(AddressNamesMode)
-        POSTAL_CODE_MODES = list(PostalCodeMode)
+        def getBool(name: str, /) -> bool:
+            return self.parameterAsBool(parameters, name, context)
 
-        limit = self.parameterAsInt(parameters, self.LIMIT, context)
-        address_names_mode_index = self.parameterAsEnum(
-            parameters, self.ADDRESS_NAMES_MODE, context
-        )
-        postal_code_mode_index = self.parameterAsEnum(
-            parameters, self.POSTAL_CODE_MODE, context
-        )
-        countries = self.parameterAsString(parameters, self.COUNTRIES, context)
-        with_address_details = self.parameterAsBool(
-            parameters, self.WITH_ADDRESS_DETAILS, context
-        )
-        with_coordinates = self.parameterAsBool(
-            parameters, self.WITH_COORDINATES, context
-        )
-        with_match_quality = self.parameterAsBool(
-            parameters, self.WITH_MATCH_QUALITY, context
-        )
+        def getInt(name: str, /) -> int:
+            return self.parameterAsInt(parameters, name, context)
+
+        def getString(name: str, /) -> str:
+            return self.parameterAsString(parameters, name, context)
+
+        def getEnum[T](name: str, mapping: Sequence[T], /) -> T:
+            return mapping[self.parameterAsEnum(parameters, name, context)]
 
         client = self.plugin.casaGeoClient(feedback)
         defaults = {
-            "limit": limit,
-            "countries": countries,
-            "address_names_mode": ADDRESS_NAMES_MODES[address_names_mode_index],
-            "postal_code_mode": POSTAL_CODE_MODES[postal_code_mode_index],
+            "address": getString(self.ADDRESS) or None,
+            "country": getString(self.COUNTRY) or None,
+            "state": getString(self.STATE) or None,
+            "county": getString(self.COUNTY) or None,
+            "city": getString(self.CITY) or None,
+            "district": getString(self.DISTRICT) or None,
+            "street": getString(self.STREET) or None,
+            "housenumber": getString(self.HOUSENUMBER) or None,
+            "postalcode": getString(self.POSTALCODE) or None,
+            "limit": getInt(self.LIMIT),
+            "countries": getString(self.COUNTRIES),
+            "address_names_mode": getEnum(
+                self.ADDRESS_NAMES_MODE, list(AddressNamesMode)
+            ),
+            "postal_code_mode": getEnum(self.POSTAL_CODE_MODE, list(PostalCodeMode)),
         }
+
+        with_address_details = getBool(self.WITH_ADDRESS_DETAILS)
+        with_coordinates = getBool(self.WITH_COORDINATES)
+        with_match_quality = getBool(self.WITH_MATCH_QUALITY)
 
         try:
             return casageo.coder.address(
