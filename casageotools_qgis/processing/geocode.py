@@ -32,6 +32,7 @@ from qgis.core import (
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterField,
     QgsProcessingParameterNumber,
+    QgsProcessingParameterPoint,
     QgsProcessingParameterString,
 )
 from qgis.PyQt.QtCore import QMetaType
@@ -82,8 +83,8 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
     POSTALCODE = "POSTALCODE"
     POSTALCODE_FIELD = "POSTALCODE_FIELD"
 
-    USE_GEOMETRY = "USE_GEOMETRY"
-    USE_GEOMETRY_FIELD = "USE_GEOMETRY_FIELD"
+    POSITION = "POSITION"
+    POSITION_USE_GEOMETRY = "POSITION_USE_GEOMETRY"
 
     LIMIT = "LIMIT"
     LIMIT_FIELD = "LIMIT_FIELD"
@@ -300,19 +301,17 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
         )
 
         self._addParameter(
-            QgsProcessingParameterBoolean(
-                self.USE_GEOMETRY,
-                self.__tr("Search around feature point geometry", "Parameter"),
-                defaultValue=False,
+            QgsProcessingParameterPoint(
+                self.POSITION,
+                self.__tr("Search center", "Parameter"),
+                optional=True,
             )
         )
         self._addBatchParameter(
-            QgsProcessingParameterField(
-                self.USE_GEOMETRY_FIELD,
-                self.__tr("Search around feature point geometry (field)", "Parameter"),
-                parentLayerParameterName=self.INPUT_LAYER,
-                type=Qgis.ProcessingFieldParameterDataType.Boolean,
-                optional=True,
+            QgsProcessingParameterBoolean(
+                self.POSITION_USE_GEOMETRY,
+                self.__tr("Use feature geometry as search center", "Parameter"),
+                defaultValue=False,
             )
         )
 
@@ -575,15 +574,17 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
             street_field := getString(self.STREET_FIELD),
             housenumber_field := getString(self.HOUSENUMBER_FIELD),
             postalcode_field := getString(self.POSTALCODE_FIELD),
-            use_geometry_field := getString(self.USE_GEOMETRY_FIELD),
             limit_field := getString(self.LIMIT_FIELD),
             countries_field := getString(self.COUNTRIES_FIELD),
             address_names_mode_field := getString(self.ADDRESS_NAMES_MODE_FIELD),
             postal_code_mode_field := getString(self.POSTAL_CODE_MODE_FIELD),
         ]
-        use_geometry = self.parameterAsBoolean(parameters, self.USE_GEOMETRY, context)
 
-        if use_geometry or use_geometry_field:
+        position_use_geometry = self.parameterAsBoolean(
+            parameters, self.POSITION_USE_GEOMETRY, context
+        )
+
+        if position_use_geometry:
             request = self._geometryFeatureRequest(context, feedback)
         else:
             request = self._simpleFeatureRequest(context, feedback)
@@ -591,20 +592,12 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         request.setSubsetOfAttributes((f for f in fields if f), source.fields())
 
-        def shouldUseGeometry(feature):
-            if f := use_geometry_field:
-                return feature[f]
-            return use_geometry
-
         data = []
         for feature in features_of(source, request):
             data.append(row := {})
             row["id"] = feature.id()
-            row["position"] = (
-                geometry_as_shapely(feature.geometry())
-                if shouldUseGeometry(feature)
-                else None
-            )
+            if position_use_geometry:
+                row["position"] = geometry_as_shapely(feature.geometry())
             if f := address_field:
                 row["address"] = feature[f]
             if f := country_field:
@@ -662,6 +655,10 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
             return mapping[self.parameterAsEnum(parameters, name, context)]
 
         client = self.plugin.casaGeoClient(feedback)
+        position = self._parameterAsTransformedPoint(
+            self.POSITION, self.HERE_CRS, parameters, context
+        )
+
         defaults = {
             "address": getString(self.ADDRESS) or None,
             "country": getString(self.COUNTRY) or None,
@@ -672,6 +669,8 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
             "street": getString(self.STREET) or None,
             "housenumber": getString(self.HOUSENUMBER) or None,
             "postalcode": getString(self.POSTALCODE) or None,
+            "position_longitude": position.x() if not position.isEmpty() else None,
+            "position_latitude": position.y() if not position.isEmpty() else None,
             "limit": getInt(self.LIMIT),
             "countries": getString(self.COUNTRIES),
             "address_names_mode": getEnum(
