@@ -31,6 +31,7 @@ dev = [
 typeCheckingMode = "standard"
 allowedUntypedLibraries = ["qgis"]
 ignore = ["casageotools_qgis/ui/*.py"]
+reportImplicitOverride = "warning"
 
 # See https://docs.qgis.org/3.44/en/docs/pyqgis_developer_cookbook/plugins/plugins.html#metadata-txt
 [tool.qgis.metadata.general]
