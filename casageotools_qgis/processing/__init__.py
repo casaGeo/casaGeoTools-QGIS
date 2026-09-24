@@ -202,9 +202,15 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
         parameterDefinition: QgsProcessingParameterDefinition,
         /,
         *,
+        batchModeOnly: bool = False,
         createOutput: bool = True,
     ) -> None:
-        self.addParameter(parameterDefinition, createOutput)
+        if batchModeOnly and not self.batch_mode:
+            return
+
+        if not self.addParameter(parameterDefinition, createOutput):
+            msg = f"Could not add parameter {parameterDefinition.name()!r}"
+            raise ValueError(msg)
 
     def _addBatchParameter(
         self,
@@ -213,10 +219,11 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
         *,
         createOutput: bool = True,
     ) -> None:
-        if not self.batch_mode:
-            return
-
-        self.addParameter(parameterDefinition, createOutput)
+        self._addParameter(
+            parameterDefinition,
+            batchModeOnly=True,
+            createOutput=createOutput,
+        )
 
     @override
     def validateInputCrs(
