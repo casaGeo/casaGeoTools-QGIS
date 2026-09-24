@@ -227,6 +227,7 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
             for _, crs in parameter_crs_pairs(
                 self.parameterDefinitions(), parameters, context
             )
+            if crs.isValid()
         )
 
     @override
