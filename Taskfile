@@ -23,7 +23,7 @@ set -Ceuo pipefail
 
 PLUGIN_ID=$(uv version --output-format=json | jq -er '.package_name | sub("-"; "_")')
 
-PLUGINDIR="./$PLUGIN_ID"
+PLUGINDIR="$PLUGIN_ID"
 
 # Requires:
 # - QGIS 3 or 4 for the PyQGIS API
@@ -45,6 +45,10 @@ PATH+=":/usr/lib64/qt6/libexec"
 setup-venv() {
 	uv venv --python="$QGIS_PYTHON" --system-site-packages
 	uv sync
+}
+
+update-qtproject() {
+	project-file-definition >| casageotools_qgis.pro
 }
 
 translate() {
@@ -220,6 +224,23 @@ plugin-metadata() {
 	METADATA
 	sed -e '1c about ='     -e '/^\s*<!--.*-->\s*$/d' -e '/./,$!d' -e 's/^/\t/' README.md
 	sed -e '1c changelog =' -e '/^\s*<!--.*-->\s*$/d' -e '/./,$!d' -e 's/^/\t/' CHANGELOG.md
+}
+
+project-file-definition() {
+	{
+		echo 'FORMS ='
+		find "$PLUGINDIR/ui" -name '*.ui' | LC_COLLATE=C sort
+	} | sed '1!s/^/    /;$!s/$/ \\/'
+	echo
+	{
+		echo 'SOURCES ='
+		find "$PLUGINDIR" -not \( -path "$PLUGINDIR/ui" -prune \) -name '*.py' | LC_COLLATE=C sort
+	} | sed '1!s/^/    /;$!s/$/ \\/'
+	echo
+	{
+		echo 'TRANSLATIONS ='
+		find "$PLUGINDIR/i18n" -name '*.ts' | LC_COLLATE=C sort
+	} | sed '1!s/^/    /;$!s/$/ \\/'
 }
 
 while [[ ${1-} == +([[:word:]])=* ]]; do declare -- "$1"; shift; done
