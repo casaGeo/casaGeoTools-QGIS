@@ -49,7 +49,7 @@ if TYPE_CHECKING:
     from pandas import DataFrame
 
 
-class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
+class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
     __tr = TrMethod()
 
     INPUT = "INPUT"
@@ -82,11 +82,11 @@ class CasaGeoToolsAddressSearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
     @override
     def displayName(self) -> str:
-        return self.__tr("Address search", "Algorithm")
+        return self.__tr("Geocode", "Algorithm")
 
     @override
     def name(self) -> str:
-        return "address"
+        return "geocode"
 
     @override
     def shortDescription(self) -> str:

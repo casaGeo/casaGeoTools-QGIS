@@ -7,7 +7,7 @@ SOURCES = \
     casageotools_qgis/plugin.py \
     casageotools_qgis/options.py \
     casageotools_qgis/processing/__init__.py \
-    casageotools_qgis/processing/address.py \
+    casageotools_qgis/processing/geocode.py \
     casageotools_qgis/processing/isolines.py \
     casageotools_qgis/processing/poi.py \
     casageotools_qgis/processing/routes.py \

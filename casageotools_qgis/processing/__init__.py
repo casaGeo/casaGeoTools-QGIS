@@ -71,7 +71,7 @@ class CasaGeoToolsProcessingProvider(QgsProcessingProvider):
 
     @override
     def loadAlgorithms(self) -> None:
-        from .address import CasaGeoToolsAddressSearchAlgorithm
+        from .geocode import CasaGeoToolsGeocodeAlgorithm
         from .isolines import (
             CasaGeoToolsIsolinesBatchAlgorithm,
             CasaGeoToolsIsolinesSingleAlgorithm,
@@ -82,7 +82,7 @@ class CasaGeoToolsProcessingProvider(QgsProcessingProvider):
             CasaGeoToolsRoutesSingleAlgorithm,
         )
 
-        self.addAlgorithm(CasaGeoToolsAddressSearchAlgorithm(self.plugin))
+        self.addAlgorithm(CasaGeoToolsGeocodeAlgorithm(self.plugin))
         self.addAlgorithm(CasaGeoToolsPOISearchAlgorithm(self.plugin))
         self.addAlgorithm(CasaGeoToolsIsolinesSingleAlgorithm(self.plugin))
         self.addAlgorithm(CasaGeoToolsIsolinesBatchAlgorithm(self.plugin))
