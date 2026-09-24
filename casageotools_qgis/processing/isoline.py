@@ -561,32 +561,29 @@ class CasaGeoToolsIsolineBatchAlgorithm(CasaGeoToolsIsolineAlgorithm):
         request = self._geometryFeatureRequest(context, feedback)
         request.setSubsetOfAttributes((f for f in fields if f), source.fields())
 
-        return DataFrame([
-            {
-                "id": feature.id(),
-                "position": geometry_as_shapely(feature.geometry()),
-                "ranges": (
-                    [float(r) for r in feature[f].split(";")]
-                    if (f := ranges_field)
-                    else None
-                ),
-                "ranges_unit": feature[f] if (f := ranges_unit_field) else None,
-                "transport_mode": feature[f] if (f := transport_mode_field) else None,
-                "routing_mode": feature[f] if (f := routing_mode_field) else None,
-                "direction": feature[f] if (f := direction_field) else None,
-                "departure_time": (
-                    pydatetime(feature[f]) if (f := datetime_field) else None
-                ),
-                "arrival_time": (
-                    pydatetime(feature[f]) if (f := datetime_field) else None
-                ),
-                "traffic": (
-                    QDateTime.isValid(feature[f]) if (f := datetime_field) else None
-                ),
-                "avoid_features": feature[f] if (f := avoid_features_field) else None,
-                "exclude_countries": (
-                    feature[f] if (f := exclude_countries_field) else None
-                ),
-            }
-            for feature in features_of(source, request)
-        ])
+        data = []
+        for feature in features_of(source, request):
+            data.append(row := {})
+            row["id"] = feature.id()
+            row["position"] = geometry_as_shapely(feature.geometry())
+            if f := ranges_field:
+                row["ranges"] = [float(r) for r in feature[f].split(";")]
+            if f := ranges_unit_field:
+                row["ranges_unit"] = feature[f]
+            if f := transport_mode_field:
+                row["transport_mode"] = feature[f]
+            if f := routing_mode_field:
+                row["routing_mode"] = feature[f]
+            if f := direction_field:
+                row["direction"] = feature[f]
+            if f := datetime_field:
+                time = pydatetime(feature[f])
+                row["departure_time"] = time
+                row["arrival_time"] = time
+                row["traffic"] = bool(time)
+            if f := avoid_features_field:
+                row["avoid_features"] = feature[f]
+            if f := exclude_countries_field:
+                row["exclude_countries"] = feature[f]
+
+        return DataFrame(data)

@@ -596,34 +596,43 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 return feature[f]
             return use_geometry
 
-        return DataFrame([
-            {
-                "id": feature.id(),
-                "position": (
-                    geometry_as_shapely(feature.geometry())
-                    if shouldUseGeometry(feature)
-                    else None
-                ),
-                "address": feature[f] if (f := address_field) else None,
-                "country": feature[f] if (f := country_field) else None,
-                "state": feature[f] if (f := state_field) else None,
-                "county": feature[f] if (f := county_field) else None,
-                "city": feature[f] if (f := city_field) else None,
-                "district": feature[f] if (f := district_field) else None,
-                "street": feature[f] if (f := street_field) else None,
-                "housenumber": feature[f] if (f := housenumber_field) else None,
-                "postalcode": feature[f] if (f := postalcode_field) else None,
-                "limit": feature[f] if (f := limit_field) else None,
-                "countries": feature[f] if (f := countries_field) else None,
-                "address_names_mode": (
-                    feature[f] if (f := address_names_mode_field) else None
-                ),
-                "postal_code_mode": (
-                    feature[f] if (f := postal_code_mode_field) else None
-                ),
-            }
-            for feature in features_of(source, request)
-        ])
+        data = []
+        for feature in features_of(source, request):
+            data.append(row := {})
+            row["id"] = feature.id()
+            row["position"] = (
+                geometry_as_shapely(feature.geometry())
+                if shouldUseGeometry(feature)
+                else None
+            )
+            if f := address_field:
+                row["address"] = feature[f]
+            if f := country_field:
+                row["country"] = feature[f]
+            if f := state_field:
+                row["state"] = feature[f]
+            if f := county_field:
+                row["county"] = feature[f]
+            if f := city_field:
+                row["city"] = feature[f]
+            if f := district_field:
+                row["district"] = feature[f]
+            if f := street_field:
+                row["street"] = feature[f]
+            if f := housenumber_field:
+                row["housenumber"] = feature[f]
+            if f := postalcode_field:
+                row["postalcode"] = feature[f]
+            if f := limit_field:
+                row["limit"] = feature[f]
+            if f := countries_field:
+                row["countries"] = feature[f]
+            if f := address_names_mode_field:
+                row["address_names_mode"] = feature[f]
+            if f := postal_code_mode_field:
+                row["postal_code_mode"] = feature[f]
+
+        return DataFrame(data)
 
     @override
     def _calculateResultsMessage(self) -> str:
