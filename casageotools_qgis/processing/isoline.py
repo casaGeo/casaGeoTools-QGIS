@@ -52,7 +52,7 @@ if TYPE_CHECKING:
     from pandas import DataFrame
 
 
-class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
+class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
     __tr = TrMethod()
 
     INPUT_LAYER = "INPUT_LAYER"
@@ -464,7 +464,7 @@ class CasaGeoToolsIsolinesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         }
 
 
-class CasaGeoToolsIsolinesSingleAlgorithm(CasaGeoToolsIsolinesAlgorithm):
+class CasaGeoToolsIsolineSingleAlgorithm(CasaGeoToolsIsolineAlgorithm):
     __tr = TrMethod()
 
     LOCATION = "LOCATION"
@@ -509,7 +509,7 @@ class CasaGeoToolsIsolinesSingleAlgorithm(CasaGeoToolsIsolinesAlgorithm):
         ])
 
 
-class CasaGeoToolsIsolinesBatchAlgorithm(CasaGeoToolsIsolinesAlgorithm):
+class CasaGeoToolsIsolineBatchAlgorithm(CasaGeoToolsIsolineAlgorithm):
     __tr = TrMethod()
 
     @override
