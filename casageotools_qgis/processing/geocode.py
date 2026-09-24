@@ -310,7 +310,7 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addBatchParameter(
             QgsProcessingParameterBoolean(
                 self.POSITION_USE_GEOMETRY,
-                self.__tr("Use feature geometry as search center", "Parameter"),
+                self.__tr("Use geometry centroid as search center", "Parameter"),
                 defaultValue=False,
             )
         )
@@ -597,7 +597,10 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
             data.append(row := {})
             row["id"] = feature.id()
             if position_use_geometry:
-                row["position"] = geometry_as_shapely(feature.geometry())
+                geom = feature.geometry().centroid()
+                row["position"] = (
+                    geometry_as_shapely(geom) if not geom.isEmpty() else None
+                )
             if f := address_field:
                 row["address"] = feature[f]
             if f := country_field:
