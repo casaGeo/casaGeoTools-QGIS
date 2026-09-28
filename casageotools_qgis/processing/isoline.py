@@ -576,7 +576,7 @@ class CasaGeoToolsIsolineBatchAlgorithm(CasaGeoToolsIsolineAlgorithm):
             exclude_countries_field := getString(self.EXCLUDE_COUNTRIES_FIELD),
         ]
 
-        request = self._geometryFeatureRequest(context, feedback)
+        request = self._featureRequest(context, feedback)
         request.setSubsetOfAttributes((f for f in fields if f), source.fields())
 
         data = []

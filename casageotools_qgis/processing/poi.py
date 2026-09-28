@@ -375,7 +375,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             postal_code_mode_field := getString(self.POSTAL_CODE_MODE_FIELD),
         ]
 
-        request = self._geometryFeatureRequest(context, feedback)
+        request = self._featureRequest(context, feedback)
         request.setSubsetOfAttributes((f for f in fields if f), source.fields())
 
         data = []

@@ -377,7 +377,7 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
             ).format(parameter=name, error=err)
             raise QgsProcessingException(msg) from err
 
-    def _simpleFeatureRequest(
+    def _featureRequest(
         self,
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
@@ -386,14 +386,6 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
         request.setExpressionContext(context.expressionContext())
         request.setFeedback(feedback)
         request.setTransformErrorCallback(self._onTransformError)
-        return request
-
-    def _geometryFeatureRequest(
-        self,
-        context: QgsProcessingContext,
-        feedback: QgsProcessingFeedback,
-    ) -> QgsFeatureRequest:
-        request = self._simpleFeatureRequest(context, feedback)
         request.setDestinationCrs(self.HERE_CRS, context.transformContext())
         return request
 

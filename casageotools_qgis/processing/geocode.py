@@ -167,7 +167,7 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT_LAYER,
-                self.__tr("Input layer"),
+                self.__tr("Input layer", "Parameter"),
                 [Qgis.ProcessingSourceType.Vector],
             ),
             modes={self.Mode.BATCH},
@@ -650,13 +650,11 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
             parameters, self.POSITION_USE_GEOMETRY, context
         )
 
-        if position_use_geometry:
-            request = self._geometryFeatureRequest(context, feedback)
-        else:
-            request = self._simpleFeatureRequest(context, feedback)
-            request.setFlags(Qgis.FeatureRequestFlag.NoGeometry)
-
+        request = self._featureRequest(context, feedback)
         request.setSubsetOfAttributes((f for f in fields if f), source.fields())
+
+        if not position_use_geometry:
+            request.setFlags(Qgis.FeatureRequestFlag.NoGeometry)
 
         data = []
         for feature in features_of(source, request):
