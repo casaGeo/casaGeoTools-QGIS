@@ -31,6 +31,7 @@ from qgis.core import (
     QgsProcessingParameterEnum,
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterFeatureSource,
+    QgsProcessingParameterField,
     QgsProcessingParameterNumber,
     QgsProcessingParameterPoint,
     QgsProcessingParameterString,
@@ -65,9 +66,16 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     INPUT_LAYER = "INPUT_LAYER"
 
     LIMIT = "LIMIT"
+    LIMIT_FIELD = "LIMIT_FIELD"
+
     COUNTRIES = "COUNTRIES"
+    COUNTRIES_FIELD = "COUNTRIES_FIELD"
+
     ADDRESS_NAMES_MODE = "ADDRESS_NAMES_MODE"
+    ADDRESS_NAMES_MODE_FIELD = "ADDRESS_NAMES_MODE_FIELD"
+
     POSTAL_CODE_MODE = "POSTAL_CODE_MODE"
+    POSTAL_CODE_MODE_FIELD = "POSTAL_CODE_MODE_FIELD"
 
     WITH_ADDRESS_DETAILS = "WITH_ADDRESS_DETAILS"
     WITH_COORDINATES = "WITH_COORDINATES"
@@ -142,38 +150,78 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addParameter(
             QgsProcessingParameterNumber(
                 self.LIMIT,
-                self.__tr("Limit", "Parameter"),
+                self.__tr("Limit"),
                 Qgis.ProcessingNumberParameterType.Integer,
                 defaultValue=DEFAULT_LIMIT,
                 minValue=MIN_LIMIT,
                 maxValue=MAX_LIMIT,
             )
         )
+        self._addParameter(
+            QgsProcessingParameterField(
+                self.LIMIT_FIELD,
+                self.__tr("Limit (field)", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
+                type=Qgis.ProcessingFieldParameterDataType.Numeric,
+                optional=True,
+            ),
+            modes={self.Mode.BATCH},
+        )
 
         self._addParameter(
             QgsProcessingParameterString(
                 self.COUNTRIES,
-                self.__tr("Search countries (separated by commas)", "Parameter"),
+                self.__tr("Search countries (separated by commas)"),
                 optional=True,
             )
+        )
+        self._addParameter(
+            QgsProcessingParameterField(
+                self.COUNTRIES_FIELD,
+                self.__tr("Search countries (field)", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
+                type=Qgis.ProcessingFieldParameterDataType.String,
+                optional=True,
+            ),
+            modes={self.Mode.BATCH},
         )
 
         self._addParameter(
             QgsProcessingParameterEnum(
                 self.ADDRESS_NAMES_MODE,
-                self.__tr("Address names mode", "Parameter"),
+                self.__tr("Address names mode"),
                 options=map(trAddressNamesMode, AddressNamesMode),
                 defaultValue=trAddressNamesMode(DEFAULT_ADDRESS_NAMES_MODE),
             )
+        )
+        self._addParameter(
+            QgsProcessingParameterField(
+                self.ADDRESS_NAMES_MODE_FIELD,
+                self.__tr("Address names mode (field)", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
+                type=Qgis.ProcessingFieldParameterDataType.String,
+                optional=True,
+            ),
+            modes={self.Mode.BATCH},
         )
 
         self._addParameter(
             QgsProcessingParameterEnum(
                 self.POSTAL_CODE_MODE,
-                self.__tr("Postal code mode", "Parameter"),
+                self.__tr("Postal code mode"),
                 options=map(trPostalCodeMode, PostalCodeMode),
                 defaultValue=trPostalCodeMode(DEFAULT_POSTAL_CODE_MODE),
             )
+        )
+        self._addParameter(
+            QgsProcessingParameterField(
+                self.POSTAL_CODE_MODE_FIELD,
+                self.__tr("Postal code mode (field)", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
+                type=Qgis.ProcessingFieldParameterDataType.String,
+                optional=True,
+            ),
+            modes={self.Mode.BATCH},
         )
 
         self._addParameter(
@@ -316,17 +364,33 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     ) -> "DataFrame":
         from pandas import DataFrame
 
-        source = self._getSource(self.INPUT_LAYER, parameters, context)
-        request = self._geometryFeatureRequest(context, feedback)
-        request.setSubsetOfAttributes([])
+        def getString(name: str, /) -> str:
+            return self.parameterAsString(parameters, name, context)
 
-        data = [
-            {
-                "id": feature.id(),
-                "position": geometry_as_shapely(feature.geometry()),
-            }
-            for feature in features_of(source, request)
+        source = self._getSource(self.INPUT_LAYER, parameters, context)
+        fields = [
+            limit_field := getString(self.LIMIT_FIELD),
+            countries_field := getString(self.COUNTRIES_FIELD),
+            address_names_mode_field := getString(self.ADDRESS_NAMES_MODE_FIELD),
+            postal_code_mode_field := getString(self.POSTAL_CODE_MODE_FIELD),
         ]
+
+        request = self._geometryFeatureRequest(context, feedback)
+        request.setSubsetOfAttributes((f for f in fields if f), source.fields())
+
+        data = []
+        for feature in features_of(source, request):
+            data.append(row := {})
+            row["id"] = feature.id()
+            row["position"] = geometry_as_shapely(feature.geometry())
+            if f := limit_field:
+                row["limit"] = feature[f]
+            if f := countries_field:
+                row["countries"] = feature[f]
+            if f := address_names_mode_field:
+                row["address_names_mode"] = feature[f]
+            if f := postal_code_mode_field:
+                row["postal_code_mode"] = feature[f]
 
         return DataFrame(data)
 
