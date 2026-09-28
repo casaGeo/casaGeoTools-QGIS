@@ -405,8 +405,6 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         from casageo.spatial import DirectionType
 
-        isoformat = datetime.isoformat
-
         isolines = self._getSink(self.OUTPUT_ISOLINES, parameters, context)
         navigations = self._getSink(self.OUTPUT_NAVIGATIONS, parameters, context)
 
@@ -438,8 +436,8 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature["location_placename"] = center(result, "placename")
             feature["location_longitude"] = center(result, "longitude")
             feature["location_latitude"] = center(result, "latitude")
-            # feature["location_datetime"] = and_then(center(result, "time"), isoformat)
-            feature["timestamp"] = and_then(result.timestamp, isoformat)
+            # feature["location_datetime"] = and_then(center(result, "time"), datetime.isoformat)
+            feature["timestamp"] = and_then(result.timestamp, datetime.isoformat)
             feature["error_code"] = result.error_code
             feature["error_message"] = result.error_message
             addFeature(isolines, feature)
@@ -455,7 +453,7 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature["placename"] = center(result, "placename")
             feature["longitude"] = center(result, "longitude")
             feature["latitude"] = center(result, "latitude")
-            # feature["datetime"] = and_then(center(result, "time"), isoformat)
+            # feature["datetime"] = and_then(center(result, "time"), datetime.isoformat)
             addFeature(navigations, feature)
 
         return {

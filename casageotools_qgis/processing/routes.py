@@ -717,7 +717,7 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature["subid"] = result.subid
             feature["length"] = result.length
             feature["duration"] = result.duration
-            feature["timestamp"] = result.timestamp.isoformat()
+            feature["timestamp"] = and_then(result.timestamp, datetime.isoformat)
             sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
 
         return {self.OUTPUT_ROUTES: dest_id}

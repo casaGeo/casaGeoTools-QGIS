@@ -14,6 +14,7 @@
 #
 #  SPDX-License-Identifier: Apache-2.0
 
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, override
 
 from qgis.core import (
@@ -37,6 +38,7 @@ from qgis.PyQt.QtCore import QMetaType
 from ..utils import (
     ProcessingFeatureSinkDefinition,
     TrMethod,
+    and_then,
     features_of,
     geometry_as_shapely,
     geometry_from_shapely,
@@ -342,7 +344,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature["title"] = result.title
             feature["resulttype"] = result.resulttype
             feature["distance"] = result.distance
-            feature["timestamp"] = result.timestamp.isoformat()
+            feature["timestamp"] = and_then(result.timestamp, datetime.isoformat)
             feature["error_code"] = result.error_code
             feature["error_message"] = result.error_message
 
