@@ -87,7 +87,8 @@ class CasaGeoToolsProcessingProvider(QgsProcessingProvider):
 
         self.addAlgorithm(CasaGeoToolsGeocodeAlgorithm(self.plugin, mode="single"))
         self.addAlgorithm(CasaGeoToolsGeocodeAlgorithm(self.plugin, mode="batch"))
-        self.addAlgorithm(CasaGeoToolsPOISearchAlgorithm(self.plugin))
+        self.addAlgorithm(CasaGeoToolsPOISearchAlgorithm(self.plugin, mode="single"))
+        self.addAlgorithm(CasaGeoToolsPOISearchAlgorithm(self.plugin, mode="batch"))
         self.addAlgorithm(CasaGeoToolsIsolineSingleAlgorithm(self.plugin))
         self.addAlgorithm(CasaGeoToolsIsolineBatchAlgorithm(self.plugin))
         self.addAlgorithm(CasaGeoToolsRoutesSingleAlgorithm(self.plugin))

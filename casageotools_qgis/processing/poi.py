@@ -15,6 +15,7 @@
 #  SPDX-License-Identifier: Apache-2.0
 
 from datetime import datetime
+from enum import StrEnum
 from typing import TYPE_CHECKING, Any, override
 
 from qgis.core import (
@@ -31,6 +32,7 @@ from qgis.core import (
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterNumber,
+    QgsProcessingParameterPoint,
     QgsProcessingParameterString,
 )
 from qgis.PyQt.QtCore import QMetaType
@@ -53,7 +55,15 @@ if TYPE_CHECKING:
 class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     __tr = TrMethod()
 
-    INPUT = "INPUT"
+    class Mode(StrEnum):
+        SINGLE = "single"
+        BATCH = "batch"
+
+    REQUEST_ID = "REQUEST_ID"
+    LOCATION = "LOCATION"
+
+    INPUT_LAYER = "INPUT_LAYER"
+
     LIMIT = "LIMIT"
     COUNTRIES = "COUNTRIES"
     ADDRESS_NAMES_MODE = "ADDRESS_NAMES_MODE"
@@ -71,11 +81,19 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
     @override
     def displayName(self) -> str:
-        return self.__tr("POI Search", "Algorithm")
+        match self.Mode(self.mode):
+            case self.Mode.SINGLE:
+                return self.__tr("POI Search", "Algorithm")
+            case self.Mode.BATCH:
+                return self.__tr("POI Search (batch)", "Algorithm")
 
     @override
     def name(self) -> str:
-        return "poisearch"
+        match self.Mode(self.mode):
+            case self.Mode.SINGLE:
+                return "poi_single"
+            case self.Mode.BATCH:
+                return "poi_batch"
 
     @override
     def _initAlgorithm(self, configuration: dict[str, Any] | None) -> None:
@@ -93,18 +111,38 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         trAddressNamesMode = translator.translateAddressNamesMode
         trPostalCodeMode = translator.translatePostalCodeMode
 
-        self.addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.INPUT,
-                self.__tr("Input layer"),
-                [Qgis.ProcessingSourceType.VectorPoint],
-            )
+        self._addParameter(
+            QgsProcessingParameterNumber(
+                self.REQUEST_ID,
+                self.__tr("Request ID", "Parameter"),
+                type=Qgis.ProcessingNumberParameterType.Integer,
+                defaultValue=self.request_counter.value + 1,
+                minValue=0,
+            ),
+            modes={self.Mode.SINGLE},
         )
 
-        self.addParameter(
+        self._addParameter(
+            QgsProcessingParameterPoint(
+                self.LOCATION,
+                self.__tr("Location", "Parameter"),
+            ),
+            modes={self.Mode.SINGLE},
+        )
+
+        self._addParameter(
+            QgsProcessingParameterFeatureSource(
+                self.INPUT_LAYER,
+                self.__tr("Input layer", "Parameter"),
+                [Qgis.ProcessingSourceType.VectorPoint],
+            ),
+            modes={self.Mode.BATCH},
+        )
+
+        self._addParameter(
             QgsProcessingParameterNumber(
                 self.LIMIT,
-                self.__tr("Limit"),
+                self.__tr("Limit", "Parameter"),
                 Qgis.ProcessingNumberParameterType.Integer,
                 defaultValue=DEFAULT_LIMIT,
                 minValue=MIN_LIMIT,
@@ -112,60 +150,60 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             )
         )
 
-        self.addParameter(
+        self._addParameter(
             QgsProcessingParameterString(
                 self.COUNTRIES,
-                self.__tr("Search countries (separated by commas)"),
+                self.__tr("Search countries (separated by commas)", "Parameter"),
                 optional=True,
             )
         )
 
-        self.addParameter(
+        self._addParameter(
             QgsProcessingParameterEnum(
                 self.ADDRESS_NAMES_MODE,
-                self.__tr("Address names mode"),
+                self.__tr("Address names mode", "Parameter"),
                 options=map(trAddressNamesMode, AddressNamesMode),
                 defaultValue=trAddressNamesMode(DEFAULT_ADDRESS_NAMES_MODE),
             )
         )
 
-        self.addParameter(
+        self._addParameter(
             QgsProcessingParameterEnum(
                 self.POSTAL_CODE_MODE,
-                self.__tr("Postal code mode"),
+                self.__tr("Postal code mode", "Parameter"),
                 options=map(trPostalCodeMode, PostalCodeMode),
                 defaultValue=trPostalCodeMode(DEFAULT_POSTAL_CODE_MODE),
             )
         )
 
-        self.addParameter(
+        self._addParameter(
             QgsProcessingParameterBoolean(
                 self.WITH_ADDRESS_DETAILS,
-                self.__tr("Include address details"),
+                self.__tr("Include address details", "Parameter"),
                 defaultValue=True,
             )
         )
 
-        self.addParameter(
+        self._addParameter(
             QgsProcessingParameterBoolean(
                 self.WITH_COORDINATES,
-                self.__tr("Include coordinates"),
+                self.__tr("Include coordinates", "Parameter"),
                 defaultValue=True,
             )
         )
 
-        self.addParameter(
+        self._addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT_LOCATIONS,
-                self.__tr("POI locations"),
+                self.__tr("POI locations", "Parameter"),
                 Qgis.ProcessingSourceType.VectorPoint,
             )
         )
 
-        self.addParameter(
+        self._addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT_NAVIGATIONS,
-                self.__tr("POI navigation points"),
+                self.__tr("POI navigation points", "Parameter"),
                 Qgis.ProcessingSourceType.VectorPoint,
             )
         )
@@ -241,9 +279,44 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
     ) -> "DataFrame":
+        match self.Mode(self.mode):
+            case self.Mode.SINGLE:
+                return self._convertInputGeometriesSingle(parameters, context, feedback)
+            case self.Mode.BATCH:
+                return self._convertInputGeometriesBatch(parameters, context, feedback)
+
+    def _convertInputGeometriesSingle(
+        self,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback,
+    ) -> "DataFrame":
         from pandas import DataFrame
 
-        source = self._getSource(self.INPUT, parameters, context)
+        request_id = self.parameterAsInt(parameters, self.REQUEST_ID, context)
+        position = self._parameterAsTransformedPoint(
+            self.LOCATION, self.HERE_CRS, parameters, context
+        )
+
+        data = [
+            {
+                "id": request_id,
+                "position_longitude": position.x() if not position.isEmpty() else None,
+                "position_latitude": position.y() if not position.isEmpty() else None,
+            }
+        ]
+
+        return DataFrame(data)
+
+    def _convertInputGeometriesBatch(
+        self,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback,
+    ) -> "DataFrame":
+        from pandas import DataFrame
+
+        source = self._getSource(self.INPUT_LAYER, parameters, context)
         request = self._geometryFeatureRequest(context, feedback)
         request.setSubsetOfAttributes([])
 
