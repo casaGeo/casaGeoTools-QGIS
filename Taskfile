@@ -47,15 +47,14 @@ setup-venv() {
 	uv sync
 }
 
-update-qtproject() {
-	project-file-definition >| casageotools_qgis.pro
-}
-
-translate() {
-	lupdate
+update() {
+	update-qtproject
+	update-translations
 }
 
 build() {
+	update
+
 	build-metadata
 	build-translations
 	build-forms-and-resources
@@ -102,6 +101,18 @@ clean() {
 		"$PLUGINDIR/ui"/*.py      \
 		# EOA
 	sphinx-make clean
+}
+
+################
+# Update Tasks #
+################
+
+update-qtproject() {
+	project-file-definition >| casageotools_qgis.pro
+}
+
+update-translations() {
+	lupdate
 }
 
 ###############
@@ -227,6 +238,8 @@ plugin-metadata() {
 }
 
 project-file-definition() {
+	local BASH_XTRACEFD
+	exec {BASH_XTRACEFD}>/dev/null
 	{
 		echo 'FORMS ='
 		find "$PLUGINDIR/ui" -name '*.ui' | LC_COLLATE=C sort

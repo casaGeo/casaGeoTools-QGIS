@@ -17,9 +17,9 @@ indent_style = tab
 indent_size = 4
 indent_style = space
 # See https://youtrack.jetbrains.com/issue/IJPL-235265
-# ij_formatter_off_tag = @formatter:off|# fmt: ?off
-# ij_formatter_on_tag = @formatter:on|# fmt: ?on
-# ij_formatter_tags_enabled = true
+ij_formatter_off_tag = \x23\x20?fmt:\x20?off
+ij_formatter_on_tag = \x23\x20?fmt:\x20?on
+ij_formatter_tags_enabled = true
 
 #################
 # Configuration #
