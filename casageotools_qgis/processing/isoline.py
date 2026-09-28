@@ -62,9 +62,9 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
         BATCH = "batch"
 
     REQUEST_ID = "REQUEST_ID"
-    LOCATION = "LOCATION"
-
     INPUT_LAYER = "INPUT_LAYER"
+
+    LOCATION = "LOCATION"
 
     RANGES = "RANGES"
     RANGES_FIELD = "RANGES_FIELD"
@@ -157,20 +157,20 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
         )
 
         self._addParameter(
-            QgsProcessingParameterPoint(
-                self.LOCATION,
-                self.__tr("Location", "Parameter"),
-            ),
-            modes={self.Mode.SINGLE},
-        )
-
-        self._addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT_LAYER,
                 self.__tr("Input layer", "Parameter"),
                 [Qgis.ProcessingSourceType.VectorPoint],
             ),
             modes={self.Mode.BATCH},
+        )
+
+        self._addParameter(
+            QgsProcessingParameterPoint(
+                self.LOCATION,
+                self.__tr("Location", "Parameter"),
+            ),
+            modes={self.Mode.SINGLE},
         )
 
         # This could be converted into a QgsProcessingParameterMatrix.
