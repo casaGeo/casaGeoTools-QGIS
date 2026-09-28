@@ -346,15 +346,13 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             self.LOCATION, self.HERE_CRS, parameters, context
         )
 
-        data = [
+        return DataFrame([
             {
                 "id": request_id,
                 "position_longitude": position.x() if not position.isEmpty() else None,
                 "position_latitude": position.y() if not position.isEmpty() else None,
             }
-        ]
-
-        return DataFrame(data)
+        ])
 
     def _convertInputGeometriesBatch(
         self,

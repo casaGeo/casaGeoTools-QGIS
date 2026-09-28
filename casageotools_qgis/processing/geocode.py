@@ -612,11 +612,11 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
     ) -> "DataFrame":
         from pandas import DataFrame
 
-        request = {
-            "id": self.parameterAsInt(parameters, self.REQUEST_ID, context),
-        }
-
-        return DataFrame([request])
+        return DataFrame([
+            {
+                "id": self.parameterAsInt(parameters, self.REQUEST_ID, context),
+            }
+        ])
 
     def _convertInputGeometriesBatch(
         self,
