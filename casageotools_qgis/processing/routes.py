@@ -66,10 +66,15 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         LINESEGMENT = "linesegment"
 
     REQUEST_ID = "REQUEST_ID"
-    ORIGIN = "ORIGIN"
-    DESTINATION = "DESTINATION"
-
     INPUT_LAYER = "INPUT_LAYER"
+
+    ORIGIN = "ORIGIN"
+    ORIGIN_LONGITUDE_FIELD = "ORIGIN_LONGITUDE_FIELD"
+    ORIGIN_LATITUDE_FIELD = "ORIGIN_LATITUDE_FIELD"
+
+    DESTINATION = "DESTINATION"
+    DESTINATION_LONGITUDE_FIELD = "DESTINATION_LONGITUDE_FIELD"
+    DESTINATION_LATITUDE_FIELD = "DESTINATION_LATITUDE_FIELD"
 
     ALTERNATIVES = "ALTERNATIVES"
     ALTERNATIVES_FIELD = "ALTERNATIVES_FIELD"
@@ -167,11 +172,46 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         )
 
         self._addParameter(
+            QgsProcessingParameterFeatureSource(
+                self.INPUT_LAYER,
+                self.__tr("Layer of origin and destination coordinates"),
+                [Qgis.ProcessingSourceType.Vector],
+            ),
+            modes={self.Mode.BATCH},
+        )
+        self._addParameter(
+            QgsProcessingParameterFeatureSource(
+                self.INPUT_LAYER,
+                self.__tr("Layer of line segments defining origin and destination"),
+                [Qgis.ProcessingSourceType.VectorLine],
+            ),
+            modes={self.Mode.LINESEGMENT},
+        )
+
+        self._addParameter(
             QgsProcessingParameterPoint(
                 self.ORIGIN,
                 self.__tr("Origin", "Parameter"),
             ),
             modes={self.Mode.SINGLE},
+        )
+        self._addParameter(
+            QgsProcessingParameterField(
+                self.ORIGIN_LONGITUDE_FIELD,
+                self.__tr("Origin longitude field", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
+                type=Qgis.ProcessingFieldParameterDataType.Numeric,
+            ),
+            modes={self.Mode.BATCH},
+        )
+        self._addParameter(
+            QgsProcessingParameterField(
+                self.ORIGIN_LATITUDE_FIELD,
+                self.__tr("Origin latitude field", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
+                type=Qgis.ProcessingFieldParameterDataType.Numeric,
+            ),
+            modes={self.Mode.BATCH},
         )
 
         self._addParameter(
@@ -181,14 +221,23 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             ),
             modes={self.Mode.SINGLE},
         )
-
         self._addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.INPUT_LAYER,
-                self.__tr("Layer of line segments defining origin and destination"),
-                [Qgis.ProcessingSourceType.VectorLine],
+            QgsProcessingParameterField(
+                self.DESTINATION_LONGITUDE_FIELD,
+                self.__tr("Destination longitude field", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
+                type=Qgis.ProcessingFieldParameterDataType.Numeric,
             ),
-            modes={self.Mode.LINESEGMENT},
+            modes={self.Mode.BATCH},
+        )
+        self._addParameter(
+            QgsProcessingParameterField(
+                self.DESTINATION_LATITUDE_FIELD,
+                self.__tr("Destination latitude field", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
+                type=Qgis.ProcessingFieldParameterDataType.Numeric,
+            ),
+            modes={self.Mode.BATCH},
         )
 
         self._addParameter(
@@ -431,7 +480,54 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
     ) -> "DataFrame":
-        raise NotImplementedError
+        from pandas import DataFrame
+
+        def getString(name: str, /) -> str:
+            return self.parameterAsString(parameters, name, context)
+
+        source = self._getSource(self.INPUT_LAYER, parameters, context)
+        fields = [
+            origin_longitude_field := getString(self.ORIGIN_LONGITUDE_FIELD),
+            origin_latitude_field := getString(self.ORIGIN_LATITUDE_FIELD),
+            destination_longitude_field := getString(self.DESTINATION_LONGITUDE_FIELD),
+            destination_latitude_field := getString(self.DESTINATION_LATITUDE_FIELD),
+            alternatives_field := getString(self.ALTERNATIVES_FIELD),
+            transport_mode_field := getString(self.TRANSPORT_MODE_FIELD),
+            routing_mode_field := getString(self.ROUTING_MODE_FIELD),
+            departure_time_field := getString(self.DEPARTURE_TIME_FIELD),
+            arrival_time_field := getString(self.ARRIVAL_TIME_FIELD),
+            avoid_features_field := getString(self.AVOID_FEATURES_FIELD),
+            exclude_countries_field := getString(self.EXCLUDE_COUNTRIES_FIELD),
+        ]
+
+        request = self._featureRequest(context, feedback)
+        request.setSubsetOfAttributes((f for f in fields if f), source.fields())
+        request.setFlags(Qgis.FeatureRequestFlag.NoGeometry)
+
+        data = []
+        for feature in features_of(source, request):
+            data.append(row := {})
+            row["id"] = feature.id()
+            row["origin_longitude"] = feature[origin_longitude_field]
+            row["origin_latitude"] = feature[origin_latitude_field]
+            row["destination_longitude"] = feature[destination_longitude_field]
+            row["destination_latitude"] = feature[destination_latitude_field]
+            if f := alternatives_field:
+                row["alternatives"] = feature[f]
+            if f := transport_mode_field:
+                row["transport_mode"] = feature[f]
+            if f := routing_mode_field:
+                row["routing_mode"] = feature[f]
+            if f := departure_time_field:
+                row["departure_time"] = pydatetime(feature[f])
+            if f := arrival_time_field:
+                row["arrival_time"] = pydatetime(feature[f])
+            if f := avoid_features_field:
+                row["avoid_features"] = feature[f]
+            if f := exclude_countries_field:
+                row["exclude_countries"] = feature[f]
+
+        return DataFrame(data)
 
     def _convertInputGeometriesLineSegment(
         self,

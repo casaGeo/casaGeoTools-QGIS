@@ -86,6 +86,7 @@ class CasaGeoToolsProcessingProvider(QgsProcessingProvider):
         self.addAlgorithm(Isoline(self.plugin, mode=Isoline.Mode.SINGLE))
         self.addAlgorithm(Isoline(self.plugin, mode=Isoline.Mode.BATCH))
         self.addAlgorithm(Routes(self.plugin, mode=Routes.Mode.SINGLE))
+        self.addAlgorithm(Routes(self.plugin, mode=Routes.Mode.BATCH))
         self.addAlgorithm(Routes(self.plugin, mode=Routes.Mode.LINESEGMENT))
 
     # @override
