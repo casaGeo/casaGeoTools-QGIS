@@ -58,8 +58,10 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
     __tr = TrMethod()
 
     class Mode(StrEnum):
+        SINGLE = "single"
         BATCH = "batch"
 
+    REQUEST_ID = "REQUEST_ID"
     INPUT_LAYER = "INPUT_LAYER"
 
     ADDRESS = "ADDRESS"
@@ -111,21 +113,25 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
     OUTPUT_LOCATIONS = "OUTPUT_LOCATIONS"
     OUTPUT_NAVIGATIONS = "OUTPUT_NAVIGATIONS"
 
-    def __init__(self, *args, **kwargs) -> None:
-        kwargs.setdefault("mode", self.Mode.BATCH)
-        super().__init__(*args, **kwargs)
-
     @override
     def groupId(self) -> str:
         return self.GROUP_ID_CODER
 
     @override
     def displayName(self) -> str:
-        return self.__tr("Geocode", "Algorithm")
+        match self.Mode(self.mode):
+            case self.Mode.SINGLE:
+                return self.__tr("Geocode", "Algorithm")
+            case self.Mode.BATCH:
+                return self.__tr("Geocode (batch)", "Algorithm")
 
     @override
     def name(self) -> str:
-        return "geocode"
+        match self.Mode(self.mode):
+            case self.Mode.SINGLE:
+                return "geocode_single"
+            case self.Mode.BATCH:
+                return "geocode_batch"
 
     @override
     def shortDescription(self) -> str:
@@ -146,6 +152,17 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
         translator = self.plugin.coderTranslator
         trAddressNamesMode = translator.translateAddressNamesMode
         trPostalCodeMode = translator.translatePostalCodeMode
+
+        self._addParameter(
+            QgsProcessingParameterNumber(
+                self.REQUEST_ID,
+                self.__tr("Request ID", "Parameter"),
+                type=Qgis.ProcessingNumberParameterType.Integer,
+                defaultValue=1,  # TODO: Add a counter
+                minValue=0,
+            ),
+            modes={self.Mode.SINGLE},
+        )
 
         self._addParameter(
             QgsProcessingParameterFeatureSource(
@@ -576,6 +593,32 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
     @override
     def _convertInputGeometries(
+        self,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback,
+    ) -> "DataFrame":
+        match self.Mode(self.mode):
+            case self.Mode.SINGLE:
+                return self._convertInputGeometriesSingle(parameters, context, feedback)
+            case self.Mode.BATCH:
+                return self._convertInputGeometriesBatch(parameters, context, feedback)
+
+    def _convertInputGeometriesSingle(
+        self,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback,
+    ) -> "DataFrame":
+        from pandas import DataFrame
+
+        request = {
+            "id": self.parameterAsInt(parameters, self.REQUEST_ID, context),
+        }
+
+        return DataFrame([request])
+
+    def _convertInputGeometriesBatch(
         self,
         parameters: dict[str, Any],
         context: QgsProcessingContext,
