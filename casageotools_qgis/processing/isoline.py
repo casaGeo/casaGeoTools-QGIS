@@ -359,6 +359,7 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
             RoutingMode,
             TransportMode,
         )
+        from casageo.tools import CasaGeoError
 
         AVOIDABLE_FEATURES = list(AvoidableFeature)
         DIRECTION_TYPES = list(DirectionType)
@@ -403,7 +404,7 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 arrival_info=True,
                 coordinates=True,
             )
-        except Exception as err:
+        except CasaGeoError as err:
             raise QgsProcessingException(str(err)) from err
 
     @override

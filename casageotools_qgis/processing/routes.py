@@ -324,6 +324,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             RoutingMode,
             TransportMode,
         )
+        from casageo.tools import CasaGeoError
 
         AVOIDABLE_FEATURES = list(AvoidableFeature)
         ROUTING_MODES = list(RoutingMode)
@@ -365,7 +366,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 arrival_info=True,
                 coordinates=True,
             )
-        except Exception as err:
+        except CasaGeoError as err:
             raise QgsProcessingException(str(err)) from err
 
     @override
@@ -686,13 +687,14 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
         queries: "DataFrame",
     ) -> "GeoDataFrame":
         import casageo.spatial
+        from casageo.tools import CasaGeoError
 
         client = self.plugin.casaGeoClient(feedback)
         defaults = {}
 
         try:
             return casageo.spatial.routes(client, queries, defaults)
-        except Exception as err:
+        except CasaGeoError as err:
             raise QgsProcessingException(str(err)) from err
 
     @override

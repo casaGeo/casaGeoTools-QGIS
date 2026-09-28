@@ -710,6 +710,7 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
     ) -> "GeoDataFrame":
         import casageo.coder
         from casageo.coder import AddressNamesMode, PostalCodeMode
+        from casageo.tools import CasaGeoError
 
         def getBool(name: str, /) -> bool:
             return self.parameterAsBool(parameters, name, context)
@@ -761,7 +762,7 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 coordinates=with_coordinates,
                 match_quality=with_match_quality,
             )
-        except Exception as err:
+        except CasaGeoError as err:
             raise QgsProcessingException(str(err)) from err
 
     @override

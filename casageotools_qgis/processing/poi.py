@@ -271,6 +271,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     ) -> "GeoDataFrame":
         import casageo.coder
         from casageo.coder import AddressNamesMode, PostalCodeMode
+        from casageo.tools import CasaGeoError
 
         ADDRESS_NAMES_MODES = list(AddressNamesMode)
         POSTAL_CODE_MODES = list(PostalCodeMode)
@@ -307,7 +308,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 address_details=with_address_details,
                 coordinates=with_coordinates,
             )
-        except Exception as err:
+        except CasaGeoError as err:
             raise QgsProcessingException(str(err)) from err
 
     @override
