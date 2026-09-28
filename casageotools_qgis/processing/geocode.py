@@ -61,8 +61,10 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
         SINGLE = "single"
         BATCH = "batch"
 
-    REQUEST_ID = "REQUEST_ID"
     INPUT_LAYER = "INPUT_LAYER"
+
+    REQUEST_ID = "REQUEST_ID"
+    REQUEST_ID_FIELD = "REQUEST_ID_FIELD"
 
     ADDRESS = "ADDRESS"
     ADDRESS_FIELD = "ADDRESS_FIELD"
@@ -153,6 +155,15 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
         trPostalCodeMode = translator.translatePostalCodeMode
 
         self._addParameter(
+            QgsProcessingParameterFeatureSource(
+                self.INPUT_LAYER,
+                self.__tr("Input layer", "Parameter"),
+                [Qgis.ProcessingSourceType.Vector],
+            ),
+            modes={self.Mode.BATCH},
+        )
+
+        self._addParameter(
             QgsProcessingParameterNumber(
                 self.REQUEST_ID,
                 self.__tr("Request ID", "Parameter"),
@@ -162,12 +173,13 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
             ),
             modes={self.Mode.SINGLE},
         )
-
         self._addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.INPUT_LAYER,
-                self.__tr("Input layer", "Parameter"),
-                [Qgis.ProcessingSourceType.Vector],
+            QgsProcessingParameterField(
+                self.REQUEST_ID_FIELD,
+                self.__tr("Request ID field", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
+                type=Qgis.ProcessingFieldParameterDataType.Numeric,
+                optional=True,
             ),
             modes={self.Mode.BATCH},
         )
@@ -615,6 +627,7 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         source = self._getSource(self.INPUT_LAYER, parameters, context)
         fields = [
+            request_id_field := getString(self.REQUEST_ID_FIELD),
             address_field := getString(self.ADDRESS_FIELD),
             country_field := getString(self.COUNTRY_FIELD),
             state_field := getString(self.STATE_FIELD),
@@ -643,7 +656,7 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
         data = []
         for feature in features_of(source, request):
             data.append(row := {})
-            row["id"] = feature.id()
+            row["id"] = feature[f] if (f := request_id_field) else feature.id()
             if position_use_geometry:
                 geom = feature.geometry().centroid()
                 row["position"] = (

@@ -60,8 +60,10 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         SINGLE = "single"
         BATCH = "batch"
 
-    REQUEST_ID = "REQUEST_ID"
     INPUT_LAYER = "INPUT_LAYER"
+
+    REQUEST_ID = "REQUEST_ID"
+    REQUEST_ID_FIELD = "REQUEST_ID_FIELD"
 
     LOCATION = "LOCATION"
 
@@ -119,6 +121,15 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         trPostalCodeMode = translator.translatePostalCodeMode
 
         self._addParameter(
+            QgsProcessingParameterFeatureSource(
+                self.INPUT_LAYER,
+                self.__tr("Input layer", "Parameter"),
+                [Qgis.ProcessingSourceType.VectorPoint],
+            ),
+            modes={self.Mode.BATCH},
+        )
+
+        self._addParameter(
             QgsProcessingParameterNumber(
                 self.REQUEST_ID,
                 self.__tr("Request ID", "Parameter"),
@@ -128,12 +139,13 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             ),
             modes={self.Mode.SINGLE},
         )
-
         self._addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.INPUT_LAYER,
-                self.__tr("Input layer", "Parameter"),
-                [Qgis.ProcessingSourceType.VectorPoint],
+            QgsProcessingParameterField(
+                self.REQUEST_ID_FIELD,
+                self.__tr("Request ID field", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
+                type=Qgis.ProcessingFieldParameterDataType.Numeric,
+                optional=True,
             ),
             modes={self.Mode.BATCH},
         )
@@ -351,6 +363,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         source = self._getSource(self.INPUT_LAYER, parameters, context)
         fields = [
+            request_id_field := getString(self.REQUEST_ID_FIELD),
             limit_field := getString(self.LIMIT_FIELD),
             countries_field := getString(self.COUNTRIES_FIELD),
             address_names_mode_field := getString(self.ADDRESS_NAMES_MODE_FIELD),
@@ -363,7 +376,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         data = []
         for feature in features_of(source, request):
             data.append(row := {})
-            row["id"] = feature.id()
+            row["id"] = feature[f] if (f := request_id_field) else feature.id()
             row["position"] = geometry_as_shapely(feature.geometry())
             if f := limit_field:
                 row["limit"] = feature[f]

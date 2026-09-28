@@ -65,8 +65,10 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         BATCH = "batch"
         LINESEGMENT = "linesegment"
 
-    REQUEST_ID = "REQUEST_ID"
     INPUT_LAYER = "INPUT_LAYER"
+
+    REQUEST_ID = "REQUEST_ID"
+    REQUEST_ID_FIELD = "REQUEST_ID_FIELD"
 
     ORIGIN = "ORIGIN"
     ORIGIN_LONGITUDE_FIELD = "ORIGIN_LONGITUDE_FIELD"
@@ -161,17 +163,6 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         trAvoidableFeature = translator.translateAvoidableFeature
 
         self._addParameter(
-            QgsProcessingParameterNumber(
-                self.REQUEST_ID,
-                self.__tr("Request ID", "Parameter"),
-                type=Qgis.ProcessingNumberParameterType.Integer,
-                defaultValue=self.request_counter.value + 1,
-                minValue=0,
-            ),
-            modes={self.Mode.SINGLE},
-        )
-
-        self._addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT_LAYER,
                 self.__tr("Layer of origin and destination coordinates"),
@@ -186,6 +177,27 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 [Qgis.ProcessingSourceType.VectorLine],
             ),
             modes={self.Mode.LINESEGMENT},
+        )
+
+        self._addParameter(
+            QgsProcessingParameterNumber(
+                self.REQUEST_ID,
+                self.__tr("Request ID", "Parameter"),
+                type=Qgis.ProcessingNumberParameterType.Integer,
+                defaultValue=self.request_counter.value + 1,
+                minValue=0,
+            ),
+            modes={self.Mode.SINGLE},
+        )
+        self._addParameter(
+            QgsProcessingParameterField(
+                self.REQUEST_ID_FIELD,
+                self.__tr("Request ID field", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
+                type=Qgis.ProcessingFieldParameterDataType.Numeric,
+                optional=True,
+            ),
+            modes={self.Mode.BATCH, self.Mode.LINESEGMENT},
         )
 
         self._addParameter(
@@ -487,6 +499,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         source = self._getSource(self.INPUT_LAYER, parameters, context)
         fields = [
+            request_id_field := getString(self.REQUEST_ID_FIELD),
             origin_longitude_field := getString(self.ORIGIN_LONGITUDE_FIELD),
             origin_latitude_field := getString(self.ORIGIN_LATITUDE_FIELD),
             destination_longitude_field := getString(self.DESTINATION_LONGITUDE_FIELD),
@@ -507,7 +520,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         data = []
         for feature in features_of(source, request):
             data.append(row := {})
-            row["id"] = feature.id()
+            row["id"] = feature[f] if (f := request_id_field) else feature.id()
             row["origin_longitude"] = feature[origin_longitude_field]
             row["origin_latitude"] = feature[origin_latitude_field]
             row["destination_longitude"] = feature[destination_longitude_field]
@@ -553,6 +566,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         source = self._getSource(self.INPUT_LAYER, parameters, context)
         fields = [
+            request_id_field := getString(self.REQUEST_ID_FIELD),
             alternatives_field := getString(self.ALTERNATIVES_FIELD),
             transport_mode_field := getString(self.TRANSPORT_MODE_FIELD),
             routing_mode_field := getString(self.ROUTING_MODE_FIELD),
@@ -569,7 +583,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         for feature in features_of(source, request):
             data.append(row := {})
             origin, destination = toEndpoints(feature)
-            row["id"] = feature.id()
+            row["id"] = feature[f] if (f := request_id_field) else feature.id()
             row["origin_longitude"] = origin.x()
             row["origin_latitude"] = origin.y()
             row["destination_longitude"] = destination.x()

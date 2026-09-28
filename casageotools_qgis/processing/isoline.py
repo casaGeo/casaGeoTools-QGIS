@@ -61,8 +61,10 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
         SINGLE = "single"
         BATCH = "batch"
 
-    REQUEST_ID = "REQUEST_ID"
     INPUT_LAYER = "INPUT_LAYER"
+
+    REQUEST_ID = "REQUEST_ID"
+    REQUEST_ID_FIELD = "REQUEST_ID_FIELD"
 
     LOCATION = "LOCATION"
 
@@ -146,6 +148,15 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
         trAvoidableFeature = translator.translateAvoidableFeature
 
         self._addParameter(
+            QgsProcessingParameterFeatureSource(
+                self.INPUT_LAYER,
+                self.__tr("Input layer", "Parameter"),
+                [Qgis.ProcessingSourceType.VectorPoint],
+            ),
+            modes={self.Mode.BATCH},
+        )
+
+        self._addParameter(
             QgsProcessingParameterNumber(
                 self.REQUEST_ID,
                 self.__tr("Request ID", "Parameter"),
@@ -155,12 +166,13 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
             ),
             modes={self.Mode.SINGLE},
         )
-
         self._addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.INPUT_LAYER,
-                self.__tr("Input layer", "Parameter"),
-                [Qgis.ProcessingSourceType.VectorPoint],
+            QgsProcessingParameterField(
+                self.REQUEST_ID_FIELD,
+                self.__tr("Request ID field", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
+                type=Qgis.ProcessingFieldParameterDataType.Numeric,
+                optional=True,
             ),
             modes={self.Mode.BATCH},
         )
@@ -431,6 +443,7 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         source = self._getSource(self.INPUT_LAYER, parameters, context)
         fields = [
+            request_id_field := getString(self.REQUEST_ID_FIELD),
             ranges_field := getString(self.RANGES_FIELD),
             ranges_unit_field := getString(self.RANGES_UNIT_FIELD),
             transport_mode_field := getString(self.TRANSPORT_MODE_FIELD),
@@ -447,7 +460,7 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
         data = []
         for feature in features_of(source, request):
             data.append(row := {})
-            row["id"] = feature.id()
+            row["id"] = feature[f] if (f := request_id_field) else feature.id()
             row["position"] = geometry_as_shapely(feature.geometry())
             if f := ranges_field:
                 row["ranges"] = [float(r) for r in feature[f].split(";")]
