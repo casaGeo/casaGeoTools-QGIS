@@ -107,7 +107,6 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
     POSTAL_CODE_MODE_FIELD = "POSTAL_CODE_MODE_FIELD"
 
     WITH_ADDRESS_DETAILS = "WITH_ADDRESS_DETAILS"
-    WITH_COORDINATES = "WITH_COORDINATES"
     WITH_MATCH_QUALITY = "WITH_MATCH_QUALITY"
 
     OUTPUT_LOCATIONS = "OUTPUT_LOCATIONS"
@@ -438,14 +437,6 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         self._addParameter(
             QgsProcessingParameterBoolean(
-                self.WITH_COORDINATES,
-                self.__tr("Include coordinates"),
-                defaultValue=True,
-            )
-        )
-
-        self._addParameter(
-            QgsProcessingParameterBoolean(
                 self.WITH_MATCH_QUALITY,
                 self.__tr("Include match quality"),
                 defaultValue=True,
@@ -479,9 +470,6 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
         with_address_details = self.parameterAsBool(
             parameters, self.WITH_ADDRESS_DETAILS, context
         )
-        with_coordinates = self.parameterAsBool(
-            parameters, self.WITH_COORDINATES, context
-        )
         with_match_quality = self.parameterAsBool(
             parameters, self.WITH_MATCH_QUALITY, context
         )
@@ -498,6 +486,8 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
                     QgsField("navid", QMetaType.Type.Int),
                     QgsField("address", QMetaType.Type.QString),
                     QgsField("resulttype", QMetaType.Type.QString),
+                    QgsField("longitude", QMetaType.Type.Double),
+                    QgsField("latitude", QMetaType.Type.Double),
                     QgsField("distance", QMetaType.Type.Double),
                     QgsField("relevance", QMetaType.Type.Double),
                     QgsField("timestamp", QMetaType.Type.QDateTime),
@@ -524,12 +514,6 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
                         QgsField("housenumber", QMetaType.Type.QString),
                         QgsField("building", QMetaType.Type.QString),
                         QgsField("unit", QMetaType.Type.QString),
-                    ])
-
-                if with_coordinates:
-                    props.fields.append([
-                        QgsField("longitude", QMetaType.Type.Double),
-                        QgsField("latitude", QMetaType.Type.Double),
                     ])
 
                 if with_match_quality:
@@ -748,7 +732,6 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
         }
 
         with_address_details = getBool(self.WITH_ADDRESS_DETAILS)
-        with_coordinates = getBool(self.WITH_COORDINATES)
         with_match_quality = getBool(self.WITH_MATCH_QUALITY)
 
         try:
@@ -757,7 +740,7 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 queries,
                 defaults,
                 address_details=with_address_details,
-                coordinates=with_coordinates,
+                coordinates=True,
                 match_quality=with_match_quality,
             )
         except CasaGeoError as err:
@@ -778,9 +761,6 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
         with_address_details = self.parameterAsBool(
             parameters, self.WITH_ADDRESS_DETAILS, context
         )
-        with_coordinates = self.parameterAsBool(
-            parameters, self.WITH_COORDINATES, context
-        )
         with_match_quality = self.parameterAsBool(
             parameters, self.WITH_MATCH_QUALITY, context
         )
@@ -799,6 +779,8 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature["navid"] = result.navid
             feature["address"] = result.address
             feature["resulttype"] = result.resulttype
+            feature["longitude"] = getattr(result, f"{geometryfield}_longitude")
+            feature["latitude"] = getattr(result, f"{geometryfield}_latitude")
             feature["distance"] = result.distance
             feature["relevance"] = result.relevance
             feature["timestamp"] = and_then(result.timestamp, datetime.isoformat)
@@ -823,10 +805,6 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 feature["housenumber"] = result.housenumber
                 feature["building"] = result.building
                 feature["unit"] = result.unit
-
-            if with_coordinates:
-                feature["longitude"] = getattr(result, f"{geometryfield}_longitude")
-                feature["latitude"] = getattr(result, f"{geometryfield}_latitude")
 
             if with_match_quality:
                 feature["mq_country"] = result.mq_country

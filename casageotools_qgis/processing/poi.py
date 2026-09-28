@@ -78,7 +78,6 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
     POSTAL_CODE_MODE_FIELD = "POSTAL_CODE_MODE_FIELD"
 
     WITH_ADDRESS_DETAILS = "WITH_ADDRESS_DETAILS"
-    WITH_COORDINATES = "WITH_COORDINATES"
 
     OUTPUT_LOCATIONS = "OUTPUT_LOCATIONS"
     OUTPUT_NAVIGATIONS = "OUTPUT_NAVIGATIONS"
@@ -233,14 +232,6 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         )
 
         self._addParameter(
-            QgsProcessingParameterBoolean(
-                self.WITH_COORDINATES,
-                self.__tr("Include coordinates", "Parameter"),
-                defaultValue=True,
-            )
-        )
-
-        self._addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT_LOCATIONS,
                 self.__tr("POI locations", "Parameter"),
@@ -267,9 +258,6 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         with_address_details = self.parameterAsBool(
             parameters, self.WITH_ADDRESS_DETAILS, context
         )
-        with_coordinates = self.parameterAsBool(
-            parameters, self.WITH_COORDINATES, context
-        )
 
         match sink:
             case self.OUTPUT_LOCATIONS | self.OUTPUT_NAVIGATIONS:
@@ -283,6 +271,8 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                     QgsField("navid", QMetaType.Type.Int),
                     QgsField("title", QMetaType.Type.QString),
                     QgsField("resulttype", QMetaType.Type.QString),
+                    QgsField("longitude", QMetaType.Type.Double),
+                    QgsField("latitude", QMetaType.Type.Double),
                     QgsField("distance", QMetaType.Type.Double),
                     QgsField("timestamp", QMetaType.Type.QDateTime),
                     QgsField("error_code", QMetaType.Type.QString),
@@ -308,12 +298,6 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                         QgsField("housenumber", QMetaType.Type.QString),
                         QgsField("building", QMetaType.Type.QString),
                         QgsField("unit", QMetaType.Type.QString),
-                    ])
-
-                if with_coordinates:
-                    props.fields.append([
-                        QgsField("longitude", QMetaType.Type.Double),
-                        QgsField("latitude", QMetaType.Type.Double),
                     ])
 
                 return props
@@ -424,9 +408,6 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         with_address_details = self.parameterAsBool(
             parameters, self.WITH_ADDRESS_DETAILS, context
         )
-        with_coordinates = self.parameterAsBool(
-            parameters, self.WITH_COORDINATES, context
-        )
 
         defaults = {
             "limit": limit,
@@ -441,7 +422,7 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 queries,
                 defaults,
                 address_details=with_address_details,
-                coordinates=with_coordinates,
+                coordinates=True,
             )
         except CasaGeoError as err:
             raise QgsProcessingException(str(err)) from err
@@ -461,9 +442,6 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
         with_address_details = self.parameterAsBool(
             parameters, self.WITH_ADDRESS_DETAILS, context
         )
-        with_coordinates = self.parameterAsBool(
-            parameters, self.WITH_COORDINATES, context
-        )
 
         def addFeature(
             output: ProcessingFeatureSinkDefinition,
@@ -479,6 +457,8 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
             feature["navid"] = result.navid
             feature["title"] = result.title
             feature["resulttype"] = result.resulttype
+            feature["longitude"] = getattr(result, f"{geometryfield}_longitude")
+            feature["latitude"] = getattr(result, f"{geometryfield}_latitude")
             feature["distance"] = result.distance
             feature["timestamp"] = and_then(result.timestamp, datetime.isoformat)
             feature["error_code"] = result.error_code
@@ -502,10 +482,6 @@ class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 feature["housenumber"] = result.housenumber
                 feature["building"] = result.building
                 feature["unit"] = result.unit
-
-            if with_coordinates:
-                feature["longitude"] = getattr(result, f"{geometryfield}_longitude")
-                feature["latitude"] = getattr(result, f"{geometryfield}_latitude")
 
             if not output.sink.addFeature(feature, QgsFeatureSink.Flag.FastInsert):
                 error = self.writeFeatureError(output.sink, parameters, output.name)
