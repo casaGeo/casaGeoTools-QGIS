@@ -15,6 +15,7 @@
 #  SPDX-License-Identifier: Apache-2.0
 
 from datetime import datetime
+from enum import StrEnum
 from typing import TYPE_CHECKING, Any, override
 
 from qgis.core import (
@@ -58,6 +59,11 @@ if TYPE_CHECKING:
 
 class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
     __tr = TrMethod()
+
+    class Mode(StrEnum):
+        SINGLE = "single"
+        BATCH = "batch"
+        LINESEGMENT = "linesegment"
 
     INPUT_LAYER = "INPUT_LAYER"
 
@@ -117,14 +123,15 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 defaultValue=DEFAULT_ALTERNATIVES,
             )
         )
-        self._addBatchParameter(
+        self._addParameter(
             QgsProcessingParameterField(
                 self.ALTERNATIVES_FIELD,
                 self.__tr("Number of alternative routes (field)", "Parameter"),
                 parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.Numeric,
                 optional=True,
-            )
+            ),
+            modes={self.Mode.BATCH, self.Mode.LINESEGMENT},
         )
 
         self._addParameter(
@@ -135,14 +142,15 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 defaultValue=trTransportMode(DEFAULT_TRANSPORT_MODE),
             )
         )
-        self._addBatchParameter(
+        self._addParameter(
             QgsProcessingParameterField(
                 self.TRANSPORT_MODE_FIELD,
                 self.__tr("Transport mode (field)", "Parameter"),
                 parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
-            )
+            ),
+            modes={self.Mode.BATCH, self.Mode.LINESEGMENT},
         )
 
         self._addParameter(
@@ -153,14 +161,15 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 defaultValue=trRoutingMode(DEFAULT_ROUTING_MODE),
             )
         )
-        self._addBatchParameter(
+        self._addParameter(
             QgsProcessingParameterField(
                 self.ROUTING_MODE_FIELD,
                 self.__tr("Routing mode (field)", "Parameter"),
                 parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
-            )
+            ),
+            modes={self.Mode.BATCH, self.Mode.LINESEGMENT},
         )
 
         self._addParameter(
@@ -170,14 +179,15 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 optional=True,
             )
         )
-        self._addBatchParameter(
+        self._addParameter(
             QgsProcessingParameterField(
                 self.DEPARTURE_TIME_FIELD,
                 self.__tr("Departure time (field)", "Parameter"),
                 parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.DateTime,
                 optional=True,
-            )
+            ),
+            modes={self.Mode.BATCH, self.Mode.LINESEGMENT},
         )
 
         self._addParameter(
@@ -187,14 +197,15 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 optional=True,
             )
         )
-        self._addBatchParameter(
+        self._addParameter(
             QgsProcessingParameterField(
                 self.ARRIVAL_TIME_FIELD,
                 self.__tr("Arrival time (field)", "Parameter"),
                 parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.DateTime,
                 optional=True,
-            )
+            ),
+            modes={self.Mode.BATCH, self.Mode.LINESEGMENT},
         )
 
         self._addParameter(
@@ -206,14 +217,15 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 optional=True,
             )
         )
-        self._addBatchParameter(
+        self._addParameter(
             QgsProcessingParameterField(
                 self.AVOID_FEATURES_FIELD,
                 self.__tr("Avoid features (field)", "Parameter"),
                 parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
-            )
+            ),
+            modes={self.Mode.BATCH, self.Mode.LINESEGMENT},
         )
 
         self._addParameter(
@@ -223,14 +235,15 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 optional=True,
             )
         )
-        self._addBatchParameter(
+        self._addParameter(
             QgsProcessingParameterField(
                 self.EXCLUDE_COUNTRIES_FIELD,
                 self.__tr("Exclude countries (field)", "Parameter"),
                 parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
-            )
+            ),
+            modes={self.Mode.BATCH, self.Mode.LINESEGMENT},
         )
 
         self._addParameter(
@@ -417,6 +430,10 @@ class CasaGeoToolsRoutesSingleAlgorithm(CasaGeoToolsRoutesAlgorithm):
     ORIGIN = "ORIGIN"
     DESTINATION = "DESTINATION"
 
+    def __init__(self, *args, **kwargs) -> None:
+        kwargs.setdefault("mode", self.Mode.SINGLE)
+        super().__init__(*args, **kwargs)
+
     @override
     def displayName(self) -> str:
         return self.__tr("Routes", "Algorithm")
@@ -476,6 +493,10 @@ class CasaGeoToolsRoutesSingleAlgorithm(CasaGeoToolsRoutesAlgorithm):
 class CasaGeoToolsRoutesLineSegmentAlgorithm(CasaGeoToolsRoutesAlgorithm):
     __tr = TrMethod()
 
+    def __init__(self, *args, **kwargs) -> None:
+        kwargs.setdefault("mode", self.Mode.LINESEGMENT)
+        super().__init__(*args, **kwargs)
+
     @override
     def displayName(self) -> str:
         return self.__tr("Routes (line segments)", "Algorithm")
@@ -492,8 +513,6 @@ class CasaGeoToolsRoutesLineSegmentAlgorithm(CasaGeoToolsRoutesAlgorithm):
 
     @override
     def _initAlgorithm(self, configuration: dict[str, Any] | None) -> None:
-        self.batch_mode = True
-
         self._addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT_LAYER,

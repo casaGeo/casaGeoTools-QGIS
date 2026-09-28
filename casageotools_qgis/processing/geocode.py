@@ -16,6 +16,7 @@
 
 from collections.abc import Sequence
 from datetime import datetime
+from enum import StrEnum
 from typing import TYPE_CHECKING, Any, override
 
 from qgis.core import (
@@ -55,6 +56,9 @@ if TYPE_CHECKING:
 
 class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
     __tr = TrMethod()
+
+    class Mode(StrEnum):
+        BATCH = "batch"
 
     INPUT_LAYER = "INPUT_LAYER"
 
@@ -107,6 +111,10 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
     OUTPUT_LOCATIONS = "OUTPUT_LOCATIONS"
     OUTPUT_NAVIGATIONS = "OUTPUT_NAVIGATIONS"
 
+    def __init__(self, *args, **kwargs) -> None:
+        kwargs.setdefault("mode", self.Mode.BATCH)
+        super().__init__(*args, **kwargs)
+
     @override
     def groupId(self) -> str:
         return self.GROUP_ID_CODER
@@ -139,14 +147,13 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
         trAddressNamesMode = translator.translateAddressNamesMode
         trPostalCodeMode = translator.translatePostalCodeMode
 
-        self.batch_mode = True
-
-        self._addBatchParameter(
+        self._addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT_LAYER,
                 self.__tr("Input layer"),
                 [Qgis.ProcessingSourceType.Vector],
-            )
+            ),
+            modes={self.Mode.BATCH},
         )
 
         self._addParameter(
@@ -156,14 +163,15 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 optional=True,
             )
         )
-        self._addBatchParameter(
+        self._addParameter(
             QgsProcessingParameterField(
                 self.ADDRESS_FIELD,
                 self.__tr("Free-form address (field)", "Parameter"),
                 parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
-            )
+            ),
+            modes={self.Mode.BATCH},
         )
 
         self._addParameter(
@@ -173,14 +181,15 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 optional=True,
             )
         )
-        self._addBatchParameter(
+        self._addParameter(
             QgsProcessingParameterField(
                 self.COUNTRY_FIELD,
                 self.__tr("Country (field)", "Parameter"),
                 parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
-            )
+            ),
+            modes={self.Mode.BATCH},
         )
 
         self._addParameter(
@@ -190,14 +199,15 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 optional=True,
             )
         )
-        self._addBatchParameter(
+        self._addParameter(
             QgsProcessingParameterField(
                 self.STATE_FIELD,
                 self.__tr("State (field)", "Parameter"),
                 parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
-            )
+            ),
+            modes={self.Mode.BATCH},
         )
 
         self._addParameter(
@@ -207,14 +217,15 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 optional=True,
             )
         )
-        self._addBatchParameter(
+        self._addParameter(
             QgsProcessingParameterField(
                 self.COUNTY_FIELD,
                 self.__tr("County (field)", "Parameter"),
                 parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
-            )
+            ),
+            modes={self.Mode.BATCH},
         )
 
         self._addParameter(
@@ -224,14 +235,15 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 optional=True,
             )
         )
-        self._addBatchParameter(
+        self._addParameter(
             QgsProcessingParameterField(
                 self.CITY_FIELD,
                 self.__tr("City (field)", "Parameter"),
                 parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
-            )
+            ),
+            modes={self.Mode.BATCH},
         )
 
         self._addParameter(
@@ -241,14 +253,15 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 optional=True,
             )
         )
-        self._addBatchParameter(
+        self._addParameter(
             QgsProcessingParameterField(
                 self.DISTRICT_FIELD,
                 self.__tr("District (field)", "Parameter"),
                 parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
-            )
+            ),
+            modes={self.Mode.BATCH},
         )
 
         self._addParameter(
@@ -258,14 +271,15 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 optional=True,
             )
         )
-        self._addBatchParameter(
+        self._addParameter(
             QgsProcessingParameterField(
                 self.STREET_FIELD,
                 self.__tr("Street (field)", "Parameter"),
                 parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
-            )
+            ),
+            modes={self.Mode.BATCH},
         )
 
         self._addParameter(
@@ -275,14 +289,15 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 optional=True,
             )
         )
-        self._addBatchParameter(
+        self._addParameter(
             QgsProcessingParameterField(
                 self.HOUSENUMBER_FIELD,
                 self.__tr("House number (field)", "Parameter"),
                 parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
-            )
+            ),
+            modes={self.Mode.BATCH},
         )
 
         self._addParameter(
@@ -292,14 +307,15 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 optional=True,
             )
         )
-        self._addBatchParameter(
+        self._addParameter(
             QgsProcessingParameterField(
                 self.POSTALCODE_FIELD,
                 self.__tr("Postal code (field)", "Parameter"),
                 parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
-            )
+            ),
+            modes={self.Mode.BATCH},
         )
 
         self._addParameter(
@@ -309,12 +325,13 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 optional=True,
             )
         )
-        self._addBatchParameter(
+        self._addParameter(
             QgsProcessingParameterBoolean(
                 self.POSITION_USE_GEOMETRY,
                 self.__tr("Use geometry centroid as search center", "Parameter"),
                 defaultValue=False,
-            )
+            ),
+            modes={self.Mode.BATCH},
         )
 
         self._addParameter(
@@ -327,14 +344,15 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 maxValue=MAX_LIMIT,
             )
         )
-        self._addBatchParameter(
+        self._addParameter(
             QgsProcessingParameterField(
                 self.LIMIT_FIELD,
                 self.__tr("Limit (field)", "Parameter"),
                 parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.Numeric,
                 optional=True,
-            )
+            ),
+            modes={self.Mode.BATCH},
         )
 
         self._addParameter(
@@ -344,14 +362,15 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 optional=True,
             )
         )
-        self._addBatchParameter(
+        self._addParameter(
             QgsProcessingParameterField(
                 self.COUNTRIES_FIELD,
                 self.__tr("Search countries (field)", "Parameter"),
                 parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
-            )
+            ),
+            modes={self.Mode.BATCH},
         )
 
         self._addParameter(
@@ -362,14 +381,15 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 defaultValue=trAddressNamesMode(DEFAULT_ADDRESS_NAMES_MODE),
             )
         )
-        self._addBatchParameter(
+        self._addParameter(
             QgsProcessingParameterField(
                 self.ADDRESS_NAMES_MODE_FIELD,
                 self.__tr("Address names mode (field)", "Parameter"),
                 parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
-            )
+            ),
+            modes={self.Mode.BATCH},
         )
 
         self._addParameter(
@@ -380,14 +400,15 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 defaultValue=trPostalCodeMode(DEFAULT_POSTAL_CODE_MODE),
             )
         )
-        self._addBatchParameter(
+        self._addParameter(
             QgsProcessingParameterField(
                 self.POSTAL_CODE_MODE_FIELD,
                 self.__tr("Postal code mode (field)", "Parameter"),
                 parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
-            )
+            ),
+            modes={self.Mode.BATCH},
         )
 
         self._addParameter(

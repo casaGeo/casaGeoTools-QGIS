@@ -14,9 +14,10 @@
 #
 #  SPDX-License-Identifier: Apache-2.0
 
-from collections.abc import Generator
+from collections.abc import Collection, Generator
+from enum import StrEnum
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Never, Self, override
+from typing import TYPE_CHECKING, Any, Never, Self, cast, override
 
 from qgis.core import (
     Qgis,
@@ -106,12 +107,19 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
     GROUP_ID_CODER = ""
     GROUP_ID_SPATIAL = ""
 
-    def __init__(self, plugin: "CasaGeoToolsPlugin") -> None:
+    def __init__(self, plugin: "CasaGeoToolsPlugin", *, mode: str = "") -> None:
         super().__init__()
         self.plugin = plugin
+        self.mode = mode
         self.status_ok = True
         self.status_message = ""
-        self.batch_mode = False
+
+        if (
+            (Mode := getattr(self, "Mode", None))
+            and isinstance(Mode, type)
+            and issubclass(Mode, StrEnum)
+        ):
+            self.mode = cast("type[StrEnum]", Mode)(mode)
 
     @cached_property
     def HERE_CRS(self) -> QgsCoordinateReferenceSystem:
@@ -119,7 +127,7 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
 
     @override
     def createInstance(self) -> Self:
-        return self.__class__(self.plugin)
+        return self.__class__(self.plugin, mode=self.mode)
 
     @override
     def canExecute(self) -> tuple[bool, str]:
@@ -202,28 +210,15 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
         parameterDefinition: QgsProcessingParameterDefinition,
         /,
         *,
-        batchModeOnly: bool = False,
         createOutput: bool = True,
+        modes: Collection[str] | None = None,
     ) -> None:
-        if batchModeOnly and not self.batch_mode:
+        if modes is not None and self.mode not in modes:
             return
 
         if not self.addParameter(parameterDefinition, createOutput):
             msg = f"Could not add parameter {parameterDefinition.name()!r}"
             raise ValueError(msg)
-
-    def _addBatchParameter(
-        self,
-        parameterDefinition: QgsProcessingParameterDefinition,
-        /,
-        *,
-        createOutput: bool = True,
-    ) -> None:
-        self._addParameter(
-            parameterDefinition,
-            batchModeOnly=True,
-            createOutput=createOutput,
-        )
 
     @override
     def validateInputCrs(

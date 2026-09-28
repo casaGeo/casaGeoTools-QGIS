@@ -15,6 +15,7 @@
 #  SPDX-License-Identifier: Apache-2.0
 
 from datetime import datetime
+from enum import StrEnum
 from typing import TYPE_CHECKING, Any, override
 
 from qgis.core import (
@@ -34,7 +35,7 @@ from qgis.core import (
     QgsProcessingParameterPoint,
     QgsProcessingParameterString,
 )
-from qgis.PyQt.QtCore import QDateTime, QMetaType
+from qgis.PyQt.QtCore import QMetaType
 
 from ..utils import (
     ProcessingFeatureSinkDefinition,
@@ -54,6 +55,10 @@ if TYPE_CHECKING:
 
 class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
     __tr = TrMethod()
+
+    class Mode(StrEnum):
+        SINGLE = "single"
+        BATCH = "batch"
 
     INPUT_LAYER = "INPUT_LAYER"
 
@@ -127,14 +132,15 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 self.__tr("Ranges (separated by semicolons)", "Parameter"),
             )
         )
-        self._addBatchParameter(
+        self._addParameter(
             QgsProcessingParameterField(
                 self.RANGES_FIELD,
                 self.__tr("Ranges (field)", "Parameter"),
                 parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.Any,
                 optional=True,
-            )
+            ),
+            modes={self.Mode.BATCH},
         )
 
         self._addParameter(
@@ -145,14 +151,15 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 defaultValue=trRangeUnit(DEFAULT_RANGE_UNIT),
             )
         )
-        self._addBatchParameter(
+        self._addParameter(
             QgsProcessingParameterField(
                 self.RANGES_UNIT_FIELD,
                 self.__tr("Ranges unit (field)", "Parameter"),
                 parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
-            )
+            ),
+            modes={self.Mode.BATCH},
         )
 
         self._addParameter(
@@ -163,14 +170,15 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 defaultValue=trTransportMode(DEFAULT_TRANSPORT_MODE),
             )
         )
-        self._addBatchParameter(
+        self._addParameter(
             QgsProcessingParameterField(
                 self.TRANSPORT_MODE_FIELD,
                 self.__tr("Transport mode (field)", "Parameter"),
                 parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
-            )
+            ),
+            modes={self.Mode.BATCH},
         )
 
         self._addParameter(
@@ -181,14 +189,15 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 defaultValue=trRoutingMode(DEFAULT_ROUTING_MODE),
             )
         )
-        self._addBatchParameter(
+        self._addParameter(
             QgsProcessingParameterField(
                 self.ROUTING_MODE_FIELD,
                 self.__tr("Routing mode (field)", "Parameter"),
                 parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
-            )
+            ),
+            modes={self.Mode.BATCH},
         )
 
         self._addParameter(
@@ -199,14 +208,15 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 defaultValue=trDirectionType(DEFAULT_DIRECTION),
             )
         )
-        self._addBatchParameter(
+        self._addParameter(
             QgsProcessingParameterField(
                 self.DIRECTION_FIELD,
                 self.__tr("Direction (field)", "Parameter"),
                 parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
-            )
+            ),
+            modes={self.Mode.BATCH},
         )
 
         self._addParameter(
@@ -216,14 +226,15 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 optional=True,
             )
         )
-        self._addBatchParameter(
+        self._addParameter(
             QgsProcessingParameterField(
                 self.DATETIME_FIELD,
                 self.__tr("Time of departure/arrival (field)", "Parameter"),
                 parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.DateTime,
                 optional=True,
-            )
+            ),
+            modes={self.Mode.BATCH},
         )
 
         self._addParameter(
@@ -235,14 +246,15 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 optional=True,
             )
         )
-        self._addBatchParameter(
+        self._addParameter(
             QgsProcessingParameterField(
                 self.AVOID_FEATURES_FIELD,
                 self.__tr("Avoid features (field)", "Parameter"),
                 parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
-            )
+            ),
+            modes={self.Mode.BATCH},
         )
 
         self._addParameter(
@@ -252,14 +264,15 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 optional=True,
             )
         )
-        self._addBatchParameter(
+        self._addParameter(
             QgsProcessingParameterField(
                 self.EXCLUDE_COUNTRIES_FIELD,
                 self.__tr("Exclude countries (field)", "Parameter"),
                 parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
-            )
+            ),
+            modes={self.Mode.BATCH},
         )
 
         self._addParameter(
@@ -467,6 +480,10 @@ class CasaGeoToolsIsolineSingleAlgorithm(CasaGeoToolsIsolineAlgorithm):
 
     LOCATION = "LOCATION"
 
+    def __init__(self, *args, **kwargs) -> None:
+        kwargs.setdefault("mode", self.Mode.SINGLE)
+        super().__init__(*args, **kwargs)
+
     @override
     def displayName(self) -> str:
         return self.__tr("Isolines", "Algorithm")
@@ -510,6 +527,10 @@ class CasaGeoToolsIsolineSingleAlgorithm(CasaGeoToolsIsolineAlgorithm):
 class CasaGeoToolsIsolineBatchAlgorithm(CasaGeoToolsIsolineAlgorithm):
     __tr = TrMethod()
 
+    def __init__(self, *args, **kwargs) -> None:
+        kwargs.setdefault("mode", self.Mode.BATCH)
+        super().__init__(*args, **kwargs)
+
     @override
     def displayName(self) -> str:
         return self.__tr("Isolines (batch)", "Algorithm")
@@ -520,8 +541,6 @@ class CasaGeoToolsIsolineBatchAlgorithm(CasaGeoToolsIsolineAlgorithm):
 
     @override
     def _initAlgorithm(self, configuration: dict[str, Any] | None) -> None:
-        self.batch_mode = True
-
         self._addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT_LAYER,
