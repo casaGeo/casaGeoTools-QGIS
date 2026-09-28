@@ -32,6 +32,7 @@ from qgis.core import (
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterField,
+    QgsProcessingParameterNumber,
     QgsProcessingParameterPoint,
     QgsProcessingParameterString,
 )
@@ -59,6 +60,9 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
     class Mode(StrEnum):
         SINGLE = "single"
         BATCH = "batch"
+
+    REQUEST_ID = "REQUEST_ID"
+    LOCATION = "LOCATION"
 
     INPUT_LAYER = "INPUT_LAYER"
 
@@ -94,6 +98,22 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
         return self.GROUP_ID_SPATIAL
 
     @override
+    def displayName(self) -> str:
+        match self.Mode(self.mode):
+            case self.Mode.SINGLE:
+                return self.__tr("Isolines", "Algorithm")
+            case self.Mode.BATCH:
+                return self.__tr("Isolines (batch)", "Algorithm")
+
+    @override
+    def name(self) -> str:
+        match self.Mode(self.mode):
+            case self.Mode.SINGLE:
+                return "isolines_single"
+            case self.Mode.BATCH:
+                return "isolines_batch"
+
+    @override
     def shortDescription(self) -> str:
         return self.__tr("Calculates isolines around locations.")
 
@@ -124,6 +144,34 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
         trRoutingMode = translator.translateRoutingMode
         trDirectionType = translator.translateDirectionType
         trAvoidableFeature = translator.translateAvoidableFeature
+
+        self._addParameter(
+            QgsProcessingParameterNumber(
+                self.REQUEST_ID,
+                self.__tr("Request ID", "Parameter"),
+                type=Qgis.ProcessingNumberParameterType.Integer,
+                defaultValue=self.request_counter.value + 1,
+                minValue=0,
+            ),
+            modes={self.Mode.SINGLE},
+        )
+
+        self._addParameter(
+            QgsProcessingParameterPoint(
+                self.LOCATION,
+                self.__tr("Location", "Parameter"),
+            ),
+            modes={self.Mode.SINGLE},
+        )
+
+        self._addParameter(
+            QgsProcessingParameterFeatureSource(
+                self.INPUT_LAYER,
+                self.__tr("Input layer", "Parameter"),
+                [Qgis.ProcessingSourceType.VectorPoint],
+            ),
+            modes={self.Mode.BATCH},
+        )
 
         # This could be converted into a QgsProcessingParameterMatrix.
         self._addParameter(
@@ -339,6 +387,91 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
         return super().sinkProperties(sink, parameters, context, sourceProperties)
 
     @override
+    def _convertInputGeometries(
+        self,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback,
+    ) -> "DataFrame":
+        match self.Mode(self.mode):
+            case self.Mode.SINGLE:
+                return self._convertInputGeometriesSingle(parameters, context, feedback)
+            case self.Mode.BATCH:
+                return self._convertInputGeometriesBatch(parameters, context, feedback)
+
+    def _convertInputGeometriesSingle(
+        self,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback,
+    ) -> "DataFrame":
+        from pandas import DataFrame
+
+        position = self._parameterAsTransformedPoint(
+            self.LOCATION, self.HERE_CRS, parameters, context
+        )
+
+        return DataFrame([
+            {
+                "position_longitude": position.x(),
+                "position_latitude": position.y(),
+            }
+        ])
+
+    def _convertInputGeometriesBatch(
+        self,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback,
+    ) -> "DataFrame":
+        from pandas import DataFrame
+
+        def getString(name: str, /) -> str:
+            return self.parameterAsString(parameters, name, context)
+
+        source = self._getSource(self.INPUT_LAYER, parameters, context)
+        fields = [
+            ranges_field := getString(self.RANGES_FIELD),
+            ranges_unit_field := getString(self.RANGES_UNIT_FIELD),
+            transport_mode_field := getString(self.TRANSPORT_MODE_FIELD),
+            routing_mode_field := getString(self.ROUTING_MODE_FIELD),
+            direction_field := getString(self.DIRECTION_FIELD),
+            datetime_field := getString(self.DATETIME_FIELD),
+            avoid_features_field := getString(self.AVOID_FEATURES_FIELD),
+            exclude_countries_field := getString(self.EXCLUDE_COUNTRIES_FIELD),
+        ]
+
+        request = self._featureRequest(context, feedback)
+        request.setSubsetOfAttributes((f for f in fields if f), source.fields())
+
+        data = []
+        for feature in features_of(source, request):
+            data.append(row := {})
+            row["id"] = feature.id()
+            row["position"] = geometry_as_shapely(feature.geometry())
+            if f := ranges_field:
+                row["ranges"] = [float(r) for r in feature[f].split(";")]
+            if f := ranges_unit_field:
+                row["ranges_unit"] = feature[f]
+            if f := transport_mode_field:
+                row["transport_mode"] = feature[f]
+            if f := routing_mode_field:
+                row["routing_mode"] = feature[f]
+            if f := direction_field:
+                row["direction"] = feature[f]
+            if f := datetime_field:
+                time = pydatetime(feature[f])
+                row["departure_time"] = time
+                row["arrival_time"] = time
+                row["traffic"] = bool(time)
+            if f := avoid_features_field:
+                row["avoid_features"] = feature[f]
+            if f := exclude_countries_field:
+                row["exclude_countries"] = feature[f]
+
+        return DataFrame(data)
+
+    @override
     def _calculateResultsMessage(self) -> str:
         return self.__tr("Calculating isolines")
 
@@ -474,134 +607,3 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
             isolines.name: isolines.dest,
             navigations.name: navigations.dest,
         }
-
-
-class CasaGeoToolsIsolineSingleAlgorithm(CasaGeoToolsIsolineAlgorithm):
-    __tr = TrMethod()
-
-    LOCATION = "LOCATION"
-
-    def __init__(self, *args, **kwargs) -> None:
-        kwargs.setdefault("mode", self.Mode.SINGLE)
-        super().__init__(*args, **kwargs)
-
-    @override
-    def displayName(self) -> str:
-        return self.__tr("Isolines", "Algorithm")
-
-    @override
-    def name(self) -> str:
-        return "isolines_single"
-
-    @override
-    def _initAlgorithm(self, configuration: dict[str, Any] | None) -> None:
-        self._addParameter(
-            QgsProcessingParameterPoint(
-                self.LOCATION,
-                self.__tr("Location", "Parameter"),
-            )
-        )
-
-        super()._initAlgorithm(configuration)
-
-    @override
-    def _convertInputGeometries(
-        self,
-        parameters: dict[str, Any],
-        context: QgsProcessingContext,
-        feedback: QgsProcessingFeedback,
-    ) -> "DataFrame":
-        from pandas import DataFrame
-
-        position = self._parameterAsTransformedPoint(
-            self.LOCATION, self.HERE_CRS, parameters, context
-        )
-
-        return DataFrame([
-            {
-                "position_longitude": position.x(),
-                "position_latitude": position.y(),
-            }
-        ])
-
-
-class CasaGeoToolsIsolineBatchAlgorithm(CasaGeoToolsIsolineAlgorithm):
-    __tr = TrMethod()
-
-    def __init__(self, *args, **kwargs) -> None:
-        kwargs.setdefault("mode", self.Mode.BATCH)
-        super().__init__(*args, **kwargs)
-
-    @override
-    def displayName(self) -> str:
-        return self.__tr("Isolines (batch)", "Algorithm")
-
-    @override
-    def name(self) -> str:
-        return "isolines_batch"
-
-    @override
-    def _initAlgorithm(self, configuration: dict[str, Any] | None) -> None:
-        self._addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.INPUT_LAYER,
-                self.__tr("Input layer", "Parameter"),
-                [Qgis.ProcessingSourceType.VectorPoint],
-            )
-        )
-
-        super()._initAlgorithm(configuration)
-
-    @override
-    def _convertInputGeometries(
-        self,
-        parameters: dict[str, Any],
-        context: QgsProcessingContext,
-        feedback: QgsProcessingFeedback,
-    ) -> "DataFrame":
-        from pandas import DataFrame
-
-        def getString(name: str, /) -> str:
-            return self.parameterAsString(parameters, name, context)
-
-        source = self._getSource(self.INPUT_LAYER, parameters, context)
-        fields = [
-            ranges_field := getString(self.RANGES_FIELD),
-            ranges_unit_field := getString(self.RANGES_UNIT_FIELD),
-            transport_mode_field := getString(self.TRANSPORT_MODE_FIELD),
-            routing_mode_field := getString(self.ROUTING_MODE_FIELD),
-            direction_field := getString(self.DIRECTION_FIELD),
-            datetime_field := getString(self.DATETIME_FIELD),
-            avoid_features_field := getString(self.AVOID_FEATURES_FIELD),
-            exclude_countries_field := getString(self.EXCLUDE_COUNTRIES_FIELD),
-        ]
-
-        request = self._featureRequest(context, feedback)
-        request.setSubsetOfAttributes((f for f in fields if f), source.fields())
-
-        data = []
-        for feature in features_of(source, request):
-            data.append(row := {})
-            row["id"] = feature.id()
-            row["position"] = geometry_as_shapely(feature.geometry())
-            if f := ranges_field:
-                row["ranges"] = [float(r) for r in feature[f].split(";")]
-            if f := ranges_unit_field:
-                row["ranges_unit"] = feature[f]
-            if f := transport_mode_field:
-                row["transport_mode"] = feature[f]
-            if f := routing_mode_field:
-                row["routing_mode"] = feature[f]
-            if f := direction_field:
-                row["direction"] = feature[f]
-            if f := datetime_field:
-                time = pydatetime(feature[f])
-                row["departure_time"] = time
-                row["arrival_time"] = time
-                row["traffic"] = bool(time)
-            if f := avoid_features_field:
-                row["avoid_features"] = feature[f]
-            if f := exclude_countries_field:
-                row["exclude_countries"] = feature[f]
-
-        return DataFrame(data)

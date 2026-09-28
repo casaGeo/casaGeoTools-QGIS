@@ -75,10 +75,7 @@ class CasaGeoToolsProcessingProvider(QgsProcessingProvider):
     @override
     def loadAlgorithms(self) -> None:
         from .geocode import CasaGeoToolsGeocodeAlgorithm
-        from .isoline import (
-            CasaGeoToolsIsolineBatchAlgorithm,
-            CasaGeoToolsIsolineSingleAlgorithm,
-        )
+        from .isoline import CasaGeoToolsIsolineAlgorithm as Isoline
         from .poi import CasaGeoToolsPOISearchAlgorithm
         from .routes import (
             CasaGeoToolsRoutesLineSegmentAlgorithm,
@@ -89,8 +86,8 @@ class CasaGeoToolsProcessingProvider(QgsProcessingProvider):
         self.addAlgorithm(CasaGeoToolsGeocodeAlgorithm(self.plugin, mode="batch"))
         self.addAlgorithm(CasaGeoToolsPOISearchAlgorithm(self.plugin, mode="single"))
         self.addAlgorithm(CasaGeoToolsPOISearchAlgorithm(self.plugin, mode="batch"))
-        self.addAlgorithm(CasaGeoToolsIsolineSingleAlgorithm(self.plugin))
-        self.addAlgorithm(CasaGeoToolsIsolineBatchAlgorithm(self.plugin))
+        self.addAlgorithm(Isoline(self.plugin, mode=Isoline.Mode.SINGLE))
+        self.addAlgorithm(Isoline(self.plugin, mode=Isoline.Mode.BATCH))
         self.addAlgorithm(CasaGeoToolsRoutesSingleAlgorithm(self.plugin))
         self.addAlgorithm(CasaGeoToolsRoutesLineSegmentAlgorithm(self.plugin))
 
