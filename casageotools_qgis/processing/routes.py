@@ -65,6 +65,10 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         BATCH = "batch"
         LINESEGMENT = "linesegment"
 
+    REQUEST_ID = "REQUEST_ID"
+    ORIGIN = "ORIGIN"
+    DESTINATION = "DESTINATION"
+
     INPUT_LAYER = "INPUT_LAYER"
 
     ALTERNATIVES = "ALTERNATIVES"
@@ -96,6 +100,44 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         return self.GROUP_ID_SPATIAL
 
     @override
+    def displayName(self) -> str:
+        match self.Mode(self.mode):
+            case self.Mode.SINGLE:
+                return self.__tr("Routes", "Algorithm")
+            case self.Mode.BATCH:
+                return self.__tr("Routes (batch)", "Algorithm")
+            case self.Mode.LINESEGMENT:
+                return self.__tr("Routes (line segment)", "Algorithm")
+
+    @override
+    def name(self) -> str:
+        match self.Mode(self.mode):
+            case self.Mode.SINGLE:
+                return "routes_single"
+            case self.Mode.BATCH:
+                return "routes_batch"
+            case self.Mode.LINESEGMENT:
+                return "routes_linesegment"
+
+    @override
+    def shortDescription(self) -> str:
+        match self.Mode(self.mode):
+            case self.Mode.SINGLE:
+                return self.__tr(
+                    "Calculate routes between two locations.", "Description (single)"
+                )
+            case self.Mode.BATCH:
+                return self.__tr(
+                    "Calculate routes between pairs of locations where the origin and destination are specified as numeric coordinates."
+                    "Description (batch)",
+                )
+            case self.Mode.LINESEGMENT:
+                return self.__tr(
+                    "Calculate routes between pairs of locations where the origin and destination are specified as a line segment."
+                    "Description (line segment)",
+                )
+
+    @override
     def _initAlgorithm(self, configuration: dict[str, Any] | None) -> None:
         from casageo.spatial import (
             DEFAULT_ALTERNATIVES,
@@ -112,6 +154,42 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         trTransportMode = translator.translateTransportMode
         trRoutingMode = translator.translateRoutingMode
         trAvoidableFeature = translator.translateAvoidableFeature
+
+        self._addParameter(
+            QgsProcessingParameterNumber(
+                self.REQUEST_ID,
+                self.__tr("Request ID", "Parameter"),
+                type=Qgis.ProcessingNumberParameterType.Integer,
+                defaultValue=self.request_counter.value + 1,
+                minValue=0,
+            ),
+            modes={self.Mode.SINGLE},
+        )
+
+        self._addParameter(
+            QgsProcessingParameterPoint(
+                self.ORIGIN,
+                self.__tr("Origin", "Parameter"),
+            ),
+            modes={self.Mode.SINGLE},
+        )
+
+        self._addParameter(
+            QgsProcessingParameterPoint(
+                self.DESTINATION,
+                self.__tr("Destination", "Parameter"),
+            ),
+            modes={self.Mode.SINGLE},
+        )
+
+        self._addParameter(
+            QgsProcessingParameterFeatureSource(
+                self.INPUT_LAYER,
+                self.__tr("Layer of line segments defining origin and destination"),
+                [Qgis.ProcessingSourceType.VectorLine],
+            ),
+            modes={self.Mode.LINESEGMENT},
+        )
 
         self._addParameter(
             QgsProcessingParameterNumber(
@@ -307,6 +385,117 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         return super().sinkProperties(sink, parameters, context, sourceProperties)
 
     @override
+    def _convertInputGeometries(
+        self,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback,
+    ) -> "DataFrame":
+        match self.Mode(self.mode):
+            case self.Mode.SINGLE:
+                return self._convertInputGeometriesSingle(parameters, context, feedback)
+            case self.Mode.BATCH:
+                return self._convertInputGeometriesBatch(parameters, context, feedback)
+            case self.Mode.LINESEGMENT:
+                return self._convertInputGeometriesLineSegment(
+                    parameters, context, feedback
+                )
+
+    def _convertInputGeometriesSingle(
+        self,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback,
+    ) -> "DataFrame":
+        from pandas import DataFrame
+
+        origin = self._parameterAsTransformedPoint(
+            self.ORIGIN, self.HERE_CRS, parameters, context
+        )
+        destination = self._parameterAsTransformedPoint(
+            self.DESTINATION, self.HERE_CRS, parameters, context
+        )
+
+        return DataFrame([
+            {
+                "origin_longitude": origin.x(),
+                "origin_latitude": origin.y(),
+                "destination_longitude": destination.x(),
+                "destination_latitude": destination.y(),
+            }
+        ])
+
+    def _convertInputGeometriesBatch(
+        self,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback,
+    ) -> "DataFrame":
+        raise NotImplementedError
+
+    def _convertInputGeometriesLineSegment(
+        self,
+        parameters: dict[str, Any],
+        context: QgsProcessingContext,
+        feedback: QgsProcessingFeedback,
+    ) -> "DataFrame":
+        from pandas import DataFrame
+
+        def getString(name: str, /) -> str:
+            return self.parameterAsString(parameters, name, context)
+
+        def toEndpoints(feature: QgsFeature) -> tuple[QgsPointXY, QgsPointXY]:
+            # FIXME: Better error messages.
+            try:
+                origin, destination = feature.geometry().asPolyline()
+            except (TypeError, ValueError) as err:
+                msg = self.__tr(
+                    "Invalid geometry on feature {featureid}: {error}"
+                ).format(featureid=feature.id(), error=err)
+                raise QgsProcessingException(msg) from err
+            return (origin, destination)
+
+        source = self._getSource(self.INPUT_LAYER, parameters, context)
+        fields = [
+            alternatives_field := getString(self.ALTERNATIVES_FIELD),
+            transport_mode_field := getString(self.TRANSPORT_MODE_FIELD),
+            routing_mode_field := getString(self.ROUTING_MODE_FIELD),
+            departure_time_field := getString(self.DEPARTURE_TIME_FIELD),
+            arrival_time_field := getString(self.ARRIVAL_TIME_FIELD),
+            avoid_features_field := getString(self.AVOID_FEATURES_FIELD),
+            exclude_countries_field := getString(self.EXCLUDE_COUNTRIES_FIELD),
+        ]
+
+        request = self._featureRequest(context, feedback)
+        request.setSubsetOfAttributes((f for f in fields if f), source.fields())
+
+        data = []
+        for feature in features_of(source, request):
+            data.append(row := {})
+            origin, destination = toEndpoints(feature)
+            row["id"] = feature.id()
+            row["origin_longitude"] = origin.x()
+            row["origin_latitude"] = origin.y()
+            row["destination_longitude"] = destination.x()
+            row["destination_latitude"] = destination.y()
+            if f := alternatives_field:
+                row["alternatives"] = feature[f]
+            if f := transport_mode_field:
+                row["transport_mode"] = feature[f]
+            if f := routing_mode_field:
+                row["routing_mode"] = feature[f]
+            if f := departure_time_field:
+                row["departure_time"] = pydatetime(feature[f])
+            if f := arrival_time_field:
+                row["arrival_time"] = pydatetime(feature[f])
+            if f := avoid_features_field:
+                row["avoid_features"] = feature[f]
+            if f := exclude_countries_field:
+                row["exclude_countries"] = feature[f]
+
+        return DataFrame(data)
+
+    @override
     def _calculateResultsMessage(self) -> str:
         return self.__tr("Calculating routes")
 
@@ -423,169 +612,6 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             routes.name: routes.dest,
             navigations.name: navigations.dest,
         }
-
-
-class CasaGeoToolsRoutesSingleAlgorithm(CasaGeoToolsRoutesAlgorithm):
-    __tr = TrMethod()
-
-    ORIGIN = "ORIGIN"
-    DESTINATION = "DESTINATION"
-
-    def __init__(self, *args, **kwargs) -> None:
-        kwargs.setdefault("mode", self.Mode.SINGLE)
-        super().__init__(*args, **kwargs)
-
-    @override
-    def displayName(self) -> str:
-        return self.__tr("Routes", "Algorithm")
-
-    @override
-    def name(self) -> str:
-        return "routes_single"
-
-    @override
-    def shortDescription(self) -> str:
-        return self.__tr("Calculate routes between two locations.")
-
-    @override
-    def _initAlgorithm(self, configuration: dict[str, Any] | None) -> None:
-        self.addParameter(
-            QgsProcessingParameterPoint(
-                self.ORIGIN,
-                self.__tr("Origin", "Parameter"),
-            )
-        )
-
-        self.addParameter(
-            QgsProcessingParameterPoint(
-                self.DESTINATION,
-                self.__tr("Destination", "Parameter"),
-            )
-        )
-
-        super()._initAlgorithm(configuration)
-
-    @override
-    def _convertInputGeometries(
-        self,
-        parameters: dict[str, Any],
-        context: QgsProcessingContext,
-        feedback: QgsProcessingFeedback,
-    ) -> "DataFrame":
-        from pandas import DataFrame
-
-        origin = self._parameterAsTransformedPoint(
-            self.ORIGIN, self.HERE_CRS, parameters, context
-        )
-        destination = self._parameterAsTransformedPoint(
-            self.DESTINATION, self.HERE_CRS, parameters, context
-        )
-
-        return DataFrame([
-            {
-                "origin_longitude": origin.x(),
-                "origin_latitude": origin.y(),
-                "destination_longitude": destination.x(),
-                "destination_latitude": destination.y(),
-            }
-        ])
-
-
-class CasaGeoToolsRoutesLineSegmentAlgorithm(CasaGeoToolsRoutesAlgorithm):
-    __tr = TrMethod()
-
-    def __init__(self, *args, **kwargs) -> None:
-        kwargs.setdefault("mode", self.Mode.LINESEGMENT)
-        super().__init__(*args, **kwargs)
-
-    @override
-    def displayName(self) -> str:
-        return self.__tr("Routes (line segments)", "Algorithm")
-
-    @override
-    def name(self) -> str:
-        return "routes_linesegment"
-
-    @override
-    def shortDescription(self) -> str:
-        return self.__tr(
-            "Calculate routes between two points where the origin and destination are given as a line segment."
-        )
-
-    @override
-    def _initAlgorithm(self, configuration: dict[str, Any] | None) -> None:
-        self._addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.INPUT_LAYER,
-                self.__tr("Layer of line segments defining origin and destination"),
-                [Qgis.ProcessingSourceType.VectorLine],
-            )
-        )
-
-        super()._initAlgorithm(configuration)
-
-    @override
-    def _convertInputGeometries(
-        self,
-        parameters: dict[str, Any],
-        context: QgsProcessingContext,
-        feedback: QgsProcessingFeedback,
-    ) -> "DataFrame":
-        from pandas import DataFrame
-
-        def getString(name: str, /) -> str:
-            return self.parameterAsString(parameters, name, context)
-
-        def toEndpoints(feature: QgsFeature) -> tuple[QgsPointXY, QgsPointXY]:
-            # FIXME: Better error messages.
-            try:
-                origin, destination = feature.geometry().asPolyline()
-            except (TypeError, ValueError) as err:
-                msg = self.__tr(
-                    "Invalid geometry on feature {featureid}: {error}"
-                ).format(featureid=feature.id(), error=err)
-                raise QgsProcessingException(msg) from err
-            return (origin, destination)
-
-        source = self._getSource(self.INPUT_LAYER, parameters, context)
-        fields = [
-            alternatives_field := getString(self.ALTERNATIVES_FIELD),
-            transport_mode_field := getString(self.TRANSPORT_MODE_FIELD),
-            routing_mode_field := getString(self.ROUTING_MODE_FIELD),
-            departure_time_field := getString(self.DEPARTURE_TIME_FIELD),
-            arrival_time_field := getString(self.ARRIVAL_TIME_FIELD),
-            avoid_features_field := getString(self.AVOID_FEATURES_FIELD),
-            exclude_countries_field := getString(self.EXCLUDE_COUNTRIES_FIELD),
-        ]
-
-        request = self._featureRequest(context, feedback)
-        request.setSubsetOfAttributes((f for f in fields if f), source.fields())
-
-        data = []
-        for feature in features_of(source, request):
-            data.append(row := {})
-            origin, destination = toEndpoints(feature)
-            row["id"] = feature.id()
-            row["origin_longitude"] = origin.x()
-            row["origin_latitude"] = origin.y()
-            row["destination_longitude"] = destination.x()
-            row["destination_latitude"] = destination.y()
-            if f := alternatives_field:
-                row["alternatives"] = feature[f]
-            if f := transport_mode_field:
-                row["transport_mode"] = feature[f]
-            if f := routing_mode_field:
-                row["routing_mode"] = feature[f]
-            if f := departure_time_field:
-                row["departure_time"] = pydatetime(feature[f])
-            if f := arrival_time_field:
-                row["arrival_time"] = pydatetime(feature[f])
-            if f := avoid_features_field:
-                row["avoid_features"] = feature[f]
-            if f := exclude_countries_field:
-                row["exclude_countries"] = feature[f]
-
-        return DataFrame(data)
 
 
 class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
