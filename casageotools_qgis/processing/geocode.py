@@ -158,7 +158,7 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 self.REQUEST_ID,
                 self.__tr("Request ID", "Parameter"),
                 type=Qgis.ProcessingNumberParameterType.Integer,
-                defaultValue=1,  # TODO: Add a counter
+                defaultValue=self.request_counter.value + 1,
                 minValue=0,
             ),
             modes={self.Mode.SINGLE},

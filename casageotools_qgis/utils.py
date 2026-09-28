@@ -16,7 +16,7 @@
 
 from collections.abc import Callable, Generator, Iterable, Iterator
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, LiteralString, cast, overload
+from typing import TYPE_CHECKING, Any, LiteralString, cast, overload, override
 
 from qgis.PyQt.QtCore import QCoreApplication
 
@@ -39,6 +39,18 @@ if TYPE_CHECKING:
     from shapely.geometry.base import BaseGeometry as ShapelyBaseGeometry
 
     from .plugin import CasaGeoToolsPlugin
+
+
+class Box[T]:
+    __slots__ = ("value",)
+    __match_args__ = ("value",)
+
+    def __init__(self, value: T) -> None:
+        self.value = value
+
+    @override
+    def __repr__(self) -> str:
+        return f"{type(self).__name__}({self.value!r})"
 
 
 class TrMethod:

@@ -14,10 +14,11 @@
 #
 #  SPDX-License-Identifier: Apache-2.0
 
+from collections import defaultdict
 from collections.abc import Collection, Generator
 from enum import StrEnum
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Never, Self, cast, override
+from typing import TYPE_CHECKING, Any, ClassVar, Never, Self, cast, override
 
 from qgis.core import (
     Qgis,
@@ -38,6 +39,7 @@ from qgis.core import (
 
 from ..resources import LIBRARY_IDENTIFIER, MINIMUM_REQUIRED_LIBRARY_VERSION
 from ..utils import (
+    Box,
     ProcessingFeatureSinkDefinition,
     TrMethod,
     parameter_crs_pairs,
@@ -108,6 +110,8 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
     GROUP_ID_CODER = ""
     GROUP_ID_SPATIAL = ""
 
+    algorithm_request_counters: ClassVar = defaultdict(lambda: Box(0))
+
     def __init__(self, plugin: "CasaGeoToolsPlugin", *, mode: str = "") -> None:
         super().__init__()
         self.plugin = plugin
@@ -125,6 +129,10 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
     @cached_property
     def HERE_CRS(self) -> QgsCoordinateReferenceSystem:
         return QgsCoordinateReferenceSystem.fromEpsgId(4326)
+
+    @cached_property
+    def request_counter(self) -> Box[int]:
+        return self.algorithm_request_counters[self.id()]
 
     @override
     def createInstance(self) -> Self:
@@ -244,6 +252,8 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
 
         if feedback is None:
             feedback = QgsProcessingFeedback(logFeedback=False)
+
+        self.request_counter.value += 1
 
         feedback.setProgressText(self._convertInputGeometriesMessage())
         queries = self._convertInputGeometries(parameters, context, feedback)
