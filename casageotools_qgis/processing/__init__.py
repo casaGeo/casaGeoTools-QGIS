@@ -76,7 +76,7 @@ class CasaGeoToolsProcessingProvider(QgsProcessingProvider):
     def loadAlgorithms(self) -> None:
         from .geocode import CasaGeoToolsGeocodeAlgorithm as Geocode
         from .isoline import CasaGeoToolsIsolineAlgorithm as Isoline
-        from .poi import CasaGeoToolsPOISearchAlgorithm as Poi
+        from .poi import CasaGeoToolsPoiAlgorithm as Poi
         from .routes import CasaGeoToolsRoutesAlgorithm as Routes
 
         self.addAlgorithm(Geocode(self.plugin, mode=Geocode.Mode.SINGLE))

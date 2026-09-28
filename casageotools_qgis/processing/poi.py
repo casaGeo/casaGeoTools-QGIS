@@ -53,7 +53,7 @@ if TYPE_CHECKING:
     from pandas import DataFrame
 
 
-class CasaGeoToolsPOISearchAlgorithm(CasaGeoToolsProcessingAlgorithm):
+class CasaGeoToolsPoiAlgorithm(CasaGeoToolsProcessingAlgorithm):
     __tr = TrMethod()
 
     class Mode(StrEnum):
