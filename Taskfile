@@ -159,7 +159,7 @@ build-zip() {
 
 	# These must currently be equal for the ZIP file to include the correct
 	# plugin path. You can work around this with symlinks, if necessary.
-	[[ "$PLUGINDIR" == "./$PLUGIN_ID" ]]
+	[[ "$PLUGINDIR" == "$PLUGIN_ID" ]]
 
 	rm -f "$zipfile"
 	zip -r -MM "$zipfile" "$PLUGIN_ID" -x '*/__pycache__/*' '*/.buildinfo*' \
@@ -182,32 +182,9 @@ sphinx-make() {
 	make -C docs SPHINXBUILD='uv run sphinx-build' "$@"
 }
 
-#set-temporary-home() {
-#	local template tmpdir
-#	template=$(realpath -- build.XXXXXXXXXX)
-#	tmpdir=$(mktemp --directory -- "$template")
-#	# shellcheck disable=SC2064
-#	trap "rm -rf -- ${tmpdir@Q}" EXIT
-#
-#	# pb_tool uses $HOME on Linux and $APPDATA/$USERPROFILE on Windows.
-#	export HOME="$tmpdir"
-#	export USERPROFILE="$tmpdir"
-#	export APPDATA="$USERPROFILE/AppData"
-#}
-
-#confparse() {
-#	uv run python - "$@" <<-\CONFPARSE
-#	import sys
-#	from configparser import ConfigParser
-#	_, filename, section, key = sys.argv
-#	config = ConfigParser()
-#	config.read(filename)
-#	print(config[section][key])
-#	CONFPARSE
-#}
-
 application-data-directory() {
 	: 'Return the system-specific data directory for GUI applications.'
+	local BASH_XTRACEFD; exec {BASH_XTRACEFD}>/dev/null
 	case "$OSTYPE" in
 	linux-gnu*)     printf '%s\n' "${XDG_DATA_HOME:-$HOME/.local/share}" ;;
 	darwin*)        printf '%s\n' "$HOME/Library/Application Support"    ;;
