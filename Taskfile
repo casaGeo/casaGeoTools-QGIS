@@ -30,6 +30,7 @@ PLUGINDIR="$PLUGIN_ID"
 # - qt6-qtbase-devel for rcc
 # - qt6-linguist for lupdate-pro and lrelease-pro
 # - python3-pyqt6-base for pyuic6
+# - pandoc
 
 QGIS_PYTHON=/usr/bin/python3
 QGIS_PROFILE=default
@@ -218,8 +219,8 @@ plugin-metadata() {
 	server = $(yq -r '.tool.qgis.metadata.general.server // false' pyproject.toml)
 	hasProcessingProvider = $(yq -r '.tool.qgis.metadata.general.hasProcessingProvider // false' pyproject.toml)
 	METADATA
-	sed -e '1c about ='     -e '/^\s*<!--.*-->\s*$/d' -e '/./,$!d' -e 's/^/\t/' README.md
-	sed -e '1c changelog =' -e '/^\s*<!--.*-->\s*$/d' -e '/./,$!d' -e 's/^/\t/' CHANGELOG.md
+	pandoc --to=plain --wrap=none README.md    | sed -e '1c about ='     -e '/./,$!d' -e 's/^/\t/'
+	pandoc --to=plain --wrap=none CHANGELOG.md | sed -e '1c changelog =' -e '/./,$!d' -e 's/^/\t/'
 }
 
 project-file-definition() {
