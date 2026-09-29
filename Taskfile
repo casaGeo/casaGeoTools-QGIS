@@ -86,6 +86,14 @@ undeploy() {
 	rm -fv -- "$datadir/QGIS/QGIS4/profiles/$QGIS_PROFILE/python/plugins/$PLUGIN_ID"
 }
 
+flatpak-deploy() {
+	XDG_DATA_HOME="$HOME/.var/app/org.qgis.qgis/data" deploy
+}
+
+flatpak-undeploy() {
+	XDG_DATA_HOME="$HOME/.var/app/org.qgis.qgis/data" undeploy
+}
+
 package() {
 	build
 
