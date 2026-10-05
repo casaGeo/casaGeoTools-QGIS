@@ -87,9 +87,19 @@ if TYPE_CHECKING:
 class CasaGeoToolsPlugin:
     __tr = TrMethod()
 
+    translator: QTranslator
+    processing_provider: "CasaGeoToolsProcessingProvider"
+    options_widget_factory: "CasaGeoToolsOptionsWidgetFactory"
+
+    plugin_menu_name: str
+    vector_menu_name: str
+    plugin_menu_entries: list[QAction]
+    vector_menu_entries: list[QAction]
+    plugin_help_menu_entries: list[QAction]
+
     identifier = PLUGIN_IDENTIFIER
 
-    @property
+    @cached_property
     def name(self) -> str:
         return self.__tr("casaGeoTools", "Plugin name")
 
@@ -105,38 +115,7 @@ class CasaGeoToolsPlugin:
     def spatialTranslator(self) -> CasaGeoToolsSpatialTranslator:
         return CasaGeoToolsSpatialTranslator(self)
 
-    @cached_property
-    def actionInstallPythonDependencies(self) -> QAction:
-        action = QAction(
-            self.icon,
-            self.__tr(
-                "Install Python Dependencies",
-                "Install Python Dependencies action",
-            ),
-        )
-        action.triggered.connect(self.installPythonDependencies)
-        return action
-
-    @cached_property
-    def actionSettings(self) -> QAction:
-        action = QAction(
-            self.icon, self.__tr("casaGeoTools Settings", "Settings action")
-        )
-        action.triggered.connect(self.showSettingsDialog)
-        return action
-
-    @cached_property
-    def actionHelp(self) -> QAction:
-        action = QAction(
-            self.icon, self.__tr("casaGeoTools Documentation", "Help action")
-        )
-        action.setStatusTip(
-            self.__tr(
-                "Open casaGeoTools plugin documentation in the browser", "Help action"
-            )
-        )
-        action.triggered.connect(self.showHelp)
-        return action
+    # Settings
 
     @cached_property
     def settings(self) -> QgsSettingsTreeNode:
@@ -177,16 +156,14 @@ class CasaGeoToolsPlugin:
             maxLength=64,
         )
 
+    # Primary Interface
+
     def __init__(self, iface: QgisInterface) -> None:
         self.iface = iface
-        self.translator = QTranslator()
-        self.processing_provider: CasaGeoToolsProcessingProvider | None = None
-        self.options_widget_factory: CasaGeoToolsOptionsWidgetFactory | None = None
         self.is_processing_initialized = False
         self.is_fully_initialized = False
 
-        # self._main_dialog: CasaGeoToolsMainDialog | None = None
-
+        self.translator = QTranslator()
         if self.translator.load(
             QLocale(), PLUGIN_IDENTIFIER, ".", PLUGIN_I18N_DIRECTORY
         ):
@@ -228,29 +205,49 @@ class CasaGeoToolsPlugin:
 
         self.initProcessing()
 
-        # self.iface.addToolBarIcon(self.actionSettings)
-        # self.iface.addPluginToMenu("&casaGeoTools", self.actionSettings)
-        # self.iface.addPluginToVectorMenu("&casaGeoTools", self.actionSettings)
+        self.options_widget_factory = CasaGeoToolsOptionsWidgetFactory(self)
+
+        self.plugin_menu_name = self.__tr("&casaGeoTools", "Plugin menu")
+        self.plugin_menu_entries = [
+            self.showSettingsAction,
+            self.installPythonDependenciesAction,
+        ]
+
+        self.vector_menu_name = self.__tr("&casaGeoTools", "Vector menu")
+        self.vector_menu_entries = []
+
+        self.plugin_help_menu_entries = [
+            self.showDocumentationAction,
+        ]
+
+        self.iface.registerOptionsWidgetFactory(self.options_widget_factory)
+
+        for entry in self.plugin_menu_entries:
+            self.iface.addPluginToMenu(self.plugin_menu_name, entry)
+
+        for entry in self.vector_menu_entries:
+            self.iface.addPluginToVectorMenu(self.vector_menu_name, entry)
 
         if pluginHelpMenu := self.iface.pluginHelpMenu():
-            pluginHelpMenu.addAction(self.actionHelp)
-
-        self.options_widget_factory = CasaGeoToolsOptionsWidgetFactory(self)
-        self.iface.registerOptionsWidgetFactory(self.options_widget_factory)
+            for entry in self.plugin_help_menu_entries:
+                pluginHelpMenu.addAction(entry)
 
         self.is_fully_initialized = True
 
     def unloadGui(self) -> None:
         """Unload the graphical components of this plugin."""
 
-        # self.iface.removeToolBarIcon(self.actionSettings)
-        # self.iface.removePluginMenu("&casaGeoTools", self.actionSettings)
-        # self.iface.removePluginVectorMenu("&casaGeoTools", self.actionSettings)
+        self.iface.unregisterOptionsWidgetFactory(self.options_widget_factory)
+
+        for entry in self.plugin_menu_entries:
+            self.iface.removePluginMenu(self.plugin_menu_name, entry)
+
+        for entry in self.vector_menu_entries:
+            self.iface.removePluginVectorMenu(self.vector_menu_name, entry)
 
         if pluginHelpMenu := self.iface.pluginHelpMenu():
-            pluginHelpMenu.removeAction(self.actionHelp)
-
-        self.iface.unregisterOptionsWidgetFactory(self.options_widget_factory)
+            for entry in self.plugin_help_menu_entries:
+                pluginHelpMenu.removeAction(entry)
 
     def unloadProcessing(self) -> None:
         """Unload the processing components of this plugin."""
@@ -275,6 +272,8 @@ class CasaGeoToolsPlugin:
         QgsSettingsTree.unregisterPluginTreeNode(PLUGIN_IDENTIFIER)
         QCoreApplication.removeTranslator(self.translator)
 
+    # Secondary Interface
+
     def casaGeoClient(self, feedback: QgsFeedback | None = None) -> "CasaGeoClient":
         from .utilscg import CasaGeoToolsQgisEnabledCasaGeoClient
 
@@ -297,6 +296,20 @@ class CasaGeoToolsPlugin:
     def requirementsFile(self) -> str:
         return os.path.join(PLUGIN_DIRECTORY, "requirements.txt")
 
+    # Actions
+
+    @cached_property
+    def installPythonDependenciesAction(self) -> QAction:
+        action = QAction(
+            self.icon,
+            self.__tr(
+                "Install Python Dependencies...",
+                "Install Python Dependencies action",
+            ),
+        )
+        action.triggered.connect(self.installPythonDependencies)
+        return action
+
     def installPythonDependencies(self) -> None:
         from casageotools_qgis.install import install_requirements
 
@@ -315,6 +328,27 @@ class CasaGeoToolsPlugin:
                 ),
             )
 
+    @cached_property
+    def showDocumentationAction(self) -> QAction:
+        action = QAction(
+            self.icon, self.__tr("casaGeoTools Documentation", "Documentation action")
+        )
+        action.setStatusTip(
+            self.__tr(
+                "Open casaGeoTools plugin documentation in the browser",
+                "Documentation action",
+            )
+        )
+        action.triggered.connect(self.showDocumentation)
+        return action
+
+    def showDocumentation(self) -> None:
+        """Show the plugin documentation."""
+        # We would like to use qgis.utils.showPluginHelp(), but that
+        # function is currently broken because it passes a path with
+        # file:// prefix to QUrl.fromLocalFile().
+        QDesktopServices.openUrl(self.helpUrl())
+
     # def showMainDialog(self) -> None:
     #     """Show the main dialog."""
     #     from .maindialog import CasaGeoToolsMainDialog
@@ -330,13 +364,14 @@ class CasaGeoToolsPlugin:
     #     self._main_dialog.activateWindow()
     #     # self._main_dialog.raise_()
 
-    def showSettingsDialog(self) -> None:
+    @cached_property
+    def showSettingsAction(self) -> QAction:
+        action = QAction(
+            self.icon, self.__tr("casaGeoTools Settings", "Settings action")
+        )
+        action.triggered.connect(self.showSettings)
+        return action
+
+    def showSettings(self) -> None:
         """Show the plugin settings dialog."""
         self.iface.showOptionsDialog(self.iface.mainWindow(), self.identifier)
-
-    def showHelp(self) -> None:
-        """Show the plugin documentation."""
-        # We would like to use qgis.utils.showPluginHelp(), but that
-        # function is currently broken because it passes a path with
-        # file:// prefix to QUrl.fromLocalFile().
-        QDesktopServices.openUrl(self.helpUrl())
