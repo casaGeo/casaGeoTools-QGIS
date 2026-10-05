@@ -135,6 +135,11 @@ build-metadata() {
 	plugin-requirements >| "$PLUGINDIR/requirements.txt"
 }
 
+build-metadata-dev() {
+	build-metadata
+	plugin-requirements-dev >| "$PLUGINDIR/requirements.txt"
+}
+
 build-translations() {
 	lrelease
 }
@@ -227,6 +232,14 @@ plugin-metadata() {
 
 plugin-requirements() {
 	yq -r '.project.dependencies | join("\n")' pyproject.toml
+}
+
+plugin-requirements-dev() {
+	local casageotools_path
+	casageotools_path=$(yq -er '.tool.uv.sources.casageotools.path' pyproject.toml)
+	casageotools_path=$(realpath -E -- "$casageotools_path")
+	printf -- '-e %s\n' "$casageotools_path"
+	plugin-requirements | sed -E '/^casageotools[>=]=/Id'
 }
 
 project-file-definition() {
