@@ -98,6 +98,10 @@ class CasaGeoToolsPlugin:
     plugin_help_menu_entries: list[QAction]
 
     identifier = PLUGIN_IDENTIFIER
+    directory = PLUGIN_DIRECTORY
+    assets_directory = PLUGIN_ASSETS_DIRECTORY
+    help_directory = PLUGIN_HELP_DIRECTORY
+    i18n_directory = PLUGIN_I18N_DIRECTORY
 
     @cached_property
     def name(self) -> str:
@@ -105,7 +109,7 @@ class CasaGeoToolsPlugin:
 
     @cached_property
     def icon(self) -> QIcon:
-        return QIcon(os.path.join(PLUGIN_ASSETS_DIRECTORY, "casageotools.png"))
+        return QIcon(os.path.join(self.assets_directory, "casageotools.png"))
 
     @cached_property
     def coderTranslator(self) -> CasaGeoToolsCoderTranslator:
@@ -119,13 +123,13 @@ class CasaGeoToolsPlugin:
 
     @cached_property
     def settings(self) -> QgsSettingsTreeNode:
-        return ensure(QgsSettingsTree.createPluginTreeNode(PLUGIN_IDENTIFIER))
+        return ensure(QgsSettingsTree.createPluginTreeNode(self.identifier))
 
     @cached_property
     def settingApikey(self) -> QgsSettingsEntryString:
         return QgsSettingsEntryString(
             "apikey",
-            PLUGIN_IDENTIFIER,
+            self.identifier,
             description=self.__tr("Your casaGeo API Key"),
             maxLength=64,
         )
@@ -134,7 +138,7 @@ class CasaGeoToolsPlugin:
     def settingLanguage(self) -> QgsSettingsEntryString:
         return QgsSettingsEntryString(
             "language",
-            PLUGIN_IDENTIFIER,
+            self.identifier,
             description=self.__tr("Preferred output language"),
             maxLength=64,
         )
@@ -143,7 +147,7 @@ class CasaGeoToolsPlugin:
     def settingUnitSystem(self) -> QgsSettingsEntryString:
         return QgsSettingsEntryString(
             "unitSystem",
-            PLUGIN_IDENTIFIER,
+            self.identifier,
             description=self.__tr("Preferred unit system"),
         )
 
@@ -151,7 +155,7 @@ class CasaGeoToolsPlugin:
     def settingPoliticalView(self) -> QgsSettingsEntryString:
         return QgsSettingsEntryString(
             "politicalView",
-            PLUGIN_IDENTIFIER,
+            self.identifier,
             description=self.__tr("Preferred political view"),
             maxLength=64,
         )
@@ -164,9 +168,7 @@ class CasaGeoToolsPlugin:
         self.is_fully_initialized = False
 
         self.translator = QTranslator()
-        if self.translator.load(
-            QLocale(), PLUGIN_IDENTIFIER, ".", PLUGIN_I18N_DIRECTORY
-        ):
+        if self.translator.load(QLocale(), self.identifier, ".", self.i18n_directory):
             QCoreApplication.installTranslator(self.translator)
 
         # The settings tree system is kind of unintuitive and/or buggy
@@ -269,7 +271,7 @@ class CasaGeoToolsPlugin:
         if self.is_processing_initialized:
             self.unloadProcessing()
 
-        QgsSettingsTree.unregisterPluginTreeNode(PLUGIN_IDENTIFIER)
+        QgsSettingsTree.unregisterPluginTreeNode(self.identifier)
         QCoreApplication.removeTranslator(self.translator)
 
     # Secondary Interface
@@ -286,7 +288,7 @@ class CasaGeoToolsPlugin:
         )
 
     def helpFile(self, path: str = "index.html") -> str:
-        return os.path.join(PLUGIN_HELP_DIRECTORY, path)
+        return os.path.join(self.help_directory, path)
 
     def helpUrl(self, path: str = "index.html", fragment: str | None = None) -> QUrl:
         url = QUrl.fromLocalFile(self.helpFile(path))
@@ -294,7 +296,7 @@ class CasaGeoToolsPlugin:
         return url
 
     def requirementsFile(self) -> str:
-        return os.path.join(PLUGIN_DIRECTORY, "requirements.txt")
+        return os.path.join(self.directory, "requirements.txt")
 
     # Actions
 
