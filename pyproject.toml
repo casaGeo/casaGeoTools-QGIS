@@ -8,7 +8,7 @@ readme = "README.md"
 authors = [{ name = "casaGeo Data + Services GmbH", email = "info@casageo.de" }]
 requires-python = ">=3.12"
 dependencies = [
-    "casageotools",
+    "casageotools>=1.1.0",
 ]
 
 [project.urls]

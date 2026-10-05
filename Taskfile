@@ -103,11 +103,12 @@ package() {
 
 clean() {
 	rm -f -- \
-		"$PLUGINDIR/LICENSE"      \
-		"$PLUGINDIR/metadata.txt" \
-		"$PLUGINDIR/help"         \
-		"$PLUGINDIR/i18n"/*.qm    \
-		"$PLUGINDIR/ui"/*.py      \
+		"$PLUGINDIR/LICENSE"          \
+		"$PLUGINDIR/metadata.txt"     \
+		"$PLUGINDIR/requirements.txt" \
+		"$PLUGINDIR/help"             \
+		"$PLUGINDIR/i18n"/*.qm        \
+		"$PLUGINDIR/ui"/*.py          \
 		# EOA
 	sphinx-make clean
 }
@@ -129,8 +130,9 @@ update-translations() {
 ###############
 
 build-metadata() {
-	ln -fT -- LICENSE  "$PLUGINDIR/LICENSE"
-	plugin-metadata >| "$PLUGINDIR/metadata.txt"
+	ln -fT -- LICENSE      "$PLUGINDIR/LICENSE"
+	plugin-metadata     >| "$PLUGINDIR/metadata.txt"
+	plugin-requirements >| "$PLUGINDIR/requirements.txt"
 }
 
 build-translations() {
@@ -221,6 +223,10 @@ plugin-metadata() {
 	METADATA
 	pandoc --to=plain --wrap=none README.md    | sed -e '1c about ='     -e '/./,$!d' -e 's/^/\t/'
 	pandoc --to=plain --wrap=none CHANGELOG.md | sed -e '1c changelog =' -e '/./,$!d' -e 's/^/\t/'
+}
+
+plugin-requirements() {
+	yq -r '.project.dependencies | join("\n")' pyproject.toml
 }
 
 project-file-definition() {
