@@ -40,6 +40,7 @@ from qgis.PyQt.QtGui import (
 
 from .resources import (
     PLUGIN_ASSETS_DIRECTORY,
+    PLUGIN_DIRECTORY,
     PLUGIN_HELP_DIRECTORY,
     PLUGIN_I18N_DIRECTORY,
     PLUGIN_IDENTIFIER,
@@ -103,6 +104,18 @@ class CasaGeoToolsPlugin:
     @cached_property
     def spatialTranslator(self) -> CasaGeoToolsSpatialTranslator:
         return CasaGeoToolsSpatialTranslator(self)
+
+    @cached_property
+    def actionInstallPythonDependencies(self) -> QAction:
+        action = QAction(
+            self.icon,
+            self.__tr(
+                "Install Python Dependencies",
+                "Install Python Dependencies action",
+            ),
+        )
+        action.triggered.connect(self.installPythonDependencies)
+        return action
 
     @cached_property
     def actionSettings(self) -> QAction:
@@ -280,6 +293,27 @@ class CasaGeoToolsPlugin:
         url = QUrl.fromLocalFile(self.helpFile(path))
         url.setFragment(fragment)
         return url
+
+    def requirementsFile(self) -> str:
+        return os.path.join(PLUGIN_DIRECTORY, "requirements.txt")
+
+    def installPythonDependencies(self) -> None:
+        from casageotools_qgis.install import install_requirements
+
+        if install_requirements(self.requirementsFile()):
+            ensure(self.iface.messageBar()).pushSuccess(
+                "Success",
+                self.__tr("Dependencies for {plugin} are now installed").format(
+                    plugin=self.identifier
+                ),
+            )
+        else:
+            ensure(self.iface.messageBar()).pushCritical(
+                "Error",
+                self.__tr("Installation of dependencies for {plugin} failed").format(
+                    plugin=self.identifier
+                ),
+            )
 
     # def showMainDialog(self) -> None:
     #     """Show the main dialog."""
