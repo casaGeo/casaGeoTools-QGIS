@@ -305,8 +305,8 @@ class CasaGeoToolsPlugin:
         action = QAction(
             self.icon,
             self.__tr(
-                "Install Python Dependencies...",
-                "Install Python Dependencies action",
+                "Install Python dependencies...",
+                "Install Python dependencies action",
             ),
         )
         action.triggered.connect(self.installPythonDependencies)
