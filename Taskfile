@@ -125,6 +125,10 @@ update-translations() {
 	lupdate
 }
 
+update-translations-drop-obsolete() {
+	lupdate -no-obsolete
+}
+
 ###############
 # Build Tasks #
 ###############
