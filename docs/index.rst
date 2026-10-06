@@ -20,3 +20,4 @@ documentation for details.
    :caption: Contents:
 
    installation
+   algorithms
