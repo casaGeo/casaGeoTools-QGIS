@@ -318,16 +318,16 @@ class CasaGeoToolsPlugin:
         if install_requirements(self.requirementsFile()):
             ensure(self.iface.messageBar()).pushSuccess(
                 "Success",
-                self.__tr("Dependencies for {plugin} are now installed").format(
-                    plugin=self.identifier
-                ),
+                self.__tr(
+                    "Dependencies for {plugin} are now installed. Please restart QGIS for the changes to take effect."
+                ).format(plugin=self.identifier),
             )
         else:
             ensure(self.iface.messageBar()).pushCritical(
                 "Error",
-                self.__tr("Installation of dependencies for {plugin} failed").format(
-                    plugin=self.identifier
-                ),
+                self.__tr(
+                    "Installation of dependencies for {plugin} failed. Please check the Log Messages panel."
+                ).format(plugin=self.identifier),
             )
 
     @cached_property
