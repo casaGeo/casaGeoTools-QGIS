@@ -103,10 +103,6 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
     OUTPUT_NAVIGATIONS = "OUTPUT_NAVIGATIONS"
 
     @override
-    def groupId(self) -> str:
-        return self.GROUP_ID_SPATIAL
-
-    @override
     def displayName(self) -> str:
         match self.Mode(self.mode):
             case self.Mode.SINGLE:
@@ -731,10 +727,6 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
     SEQUENCE_EXPRESSION = "SEQUENCE_EXPRESSION"
 
     OUTPUT_ROUTES = "OUTPUT_ROUTES"
-
-    @override
-    def groupId(self) -> str:
-        return self.GROUP_ID_SPATIAL
 
     @override
     def displayName(self) -> str:

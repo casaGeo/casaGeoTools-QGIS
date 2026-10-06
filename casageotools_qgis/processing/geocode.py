@@ -115,10 +115,6 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
     OUTPUT_NAVIGATIONS = "OUTPUT_NAVIGATIONS"
 
     @override
-    def groupId(self) -> str:
-        return self.GROUP_ID_CODER
-
-    @override
     def displayName(self) -> str:
         match self.Mode(self.mode):
             case self.Mode.SINGLE:

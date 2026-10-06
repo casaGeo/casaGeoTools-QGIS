@@ -103,9 +103,6 @@ class CasaGeoToolsProcessingProvider(QgsProcessingProvider):
 class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
     __tr = TrMethod()
 
-    GROUP_ID_CODER = ""
-    GROUP_ID_SPATIAL = ""
-
     algorithm_request_counters: ClassVar = defaultdict(lambda: Box(0))
 
     def __init__(self, plugin: "CasaGeoToolsPlugin", *, mode: str = "") -> None:
@@ -137,16 +134,6 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
     @override
     def canExecute(self) -> tuple[bool, str]:
         return self.status_ok, self.status_message
-
-    @override
-    def group(self) -> str:
-        match self.groupId():
-            case self.GROUP_ID_CODER:
-                return self.__tr("Coder", "Group")
-            case self.GROUP_ID_SPATIAL:
-                return self.__tr("Spatial", "Group")
-            case gid:
-                return gid
 
     @override
     def helpUrl(self) -> str:
