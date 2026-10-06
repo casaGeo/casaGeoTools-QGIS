@@ -63,12 +63,14 @@ class CasaGeoToolsOptionsPage(QgsOptionsPageWidget):
         self._ui.apikeyLineEdit.setText(self._plugin.settingApikey.value())
         self._ui.languagePrefLineEdit.setText(self._plugin.settingLanguage.value())
         self._ui.unitsPrefComboBox.setCurrentIndex(
-            self._ui.unitsPrefComboBox.findData(self._plugin.settingUnitSystem.value())
+            self._ui.unitsPrefComboBox.findData(pref)
+            if (pref := self._plugin.settingUnitSystem.value())
+            else 0
         )
         self._ui.politicalPrefComboBox.setCurrentIndex(
-            self._ui.politicalPrefComboBox.findData(
-                self._plugin.settingPoliticalView.value()
-            )
+            self._ui.politicalPrefComboBox.findData(pref)
+            if (pref := self._plugin.settingPoliticalView.value())
+            else 0
         )
 
     @override
