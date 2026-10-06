@@ -103,17 +103,17 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
     def displayName(self) -> str:
         match self.Mode(self.mode):
             case self.Mode.SINGLE:
-                return self.__tr("Isolines", "Algorithm")
+                return self.__tr("Isoline", "Algorithm")
             case self.Mode.BATCH:
-                return self.__tr("Isolines (batch)", "Algorithm")
+                return self.__tr("Isoline (batch)", "Algorithm")
 
     @override
     def name(self) -> str:
         match self.Mode(self.mode):
             case self.Mode.SINGLE:
-                return "isolines_single"
+                return "isoline_single"
             case self.Mode.BATCH:
-                return "isolines_batch"
+                return "isoline_batch"
 
     @override
     def shortDescription(self) -> str:
