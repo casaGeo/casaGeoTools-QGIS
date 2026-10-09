@@ -103,6 +103,8 @@ class CasaGeoToolsPlugin:
     help_directory = PLUGIN_HELP_DIRECTORY
     i18n_directory = PLUGIN_I18N_DIRECTORY
 
+    __install_python_dependencies_task_id: int = 0
+
     @cached_property
     def name(self) -> str:
         return self.__tr("casaGeoTools", "Plugin name")
@@ -313,22 +315,44 @@ class CasaGeoToolsPlugin:
         return action
 
     def installPythonDependencies(self) -> None:
-        from casageotools_qgis.install import install_requirements
+        from casageotools_qgis.install import CasaGeoToolsInstallRequirementsTask
 
-        if install_requirements(self.requirementsFile()):
+        if self.__install_python_dependencies_task_id:
+            ensure(self.iface.messageBar()).pushInfo(
+                None,
+                self.__tr(
+                    "Dependencies for {plugin} are currently being installed. Please wait..."
+                ).format(plugin=self.identifier),
+            )
+            return
+
+        def onSuccess():
+            self.__install_python_dependencies_task_id = 0
             ensure(self.iface.messageBar()).pushSuccess(
                 "Success",
                 self.__tr(
                     "Dependencies for {plugin} are now installed. Please restart QGIS for the changes to take effect."
                 ).format(plugin=self.identifier),
             )
-        else:
+
+        def onFailure():
+            self.__install_python_dependencies_task_id = 0
             ensure(self.iface.messageBar()).pushCritical(
                 "Error",
                 self.__tr(
                     "Installation of dependencies for {plugin} failed. Please check the Log Messages panel."
                 ).format(plugin=self.identifier),
             )
+
+        task = CasaGeoToolsInstallRequirementsTask(self.requirementsFile())
+        task.taskCompleted.connect(onSuccess)
+        task.taskTerminated.connect(onFailure)
+
+        taskid = ensure(QgsApplication.taskManager()).addTask(task)
+        self.__install_python_dependencies_task_id = taskid
+
+        # Show message about dependencies being installed.
+        self.installPythonDependencies()
 
     @cached_property
     def showDocumentationAction(self) -> QAction:
