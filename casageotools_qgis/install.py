@@ -1,3 +1,4 @@
+import importlib.util
 import os
 import re
 import subprocess
@@ -65,12 +66,33 @@ def _install_requirements(filename: str) -> None:
         Qgis.MessageLevel.Info,
     )
 
+    process_encoding = "utf-8"
+    process_environment = dict(os.environ, PYTHONIOENCODING="utf-8")
+
+    # Pip might not be available, for example in the QGIS Flatpak.
+    # We cannot run this unconditionally, because `ensurepip` might be
+    # disabled in the presence of a system Python installation.
+    # This is the case under Arch and Debian.
+    if not importlib.util.find_spec("pip"):
+        subprocess.run(
+            [sys.executable, "-m", "ensurepip", "--user"],
+            capture_output=True,
+            check=True,
+            encoding=process_encoding,
+            env=process_environment,
+        )
+
+    # We cannot use `-s` here, because pip might only be available from
+    # the user install directory. This is the case when we install pip
+    # using `ensurepip --user`. Note that plain `ensurepip` will also
+    # install to the user install directory when the system install
+    # directory is not writable.
     pip_freeze = subprocess.run(
-        [sys.executable, "-s", "-m", "pip", "list", "--format=freeze"],
+        [sys.executable, "-m", "pip", "list", "--format=freeze"],
         capture_output=True,
         check=True,
-        encoding="utf-8",
-        env=dict(os.environ, PYTHONIOENCODING="utf-8"),
+        encoding=process_encoding,
+        env=process_environment,
     )
 
     constraints = [
@@ -110,8 +132,8 @@ def _install_requirements(filename: str) -> None:
             ],
             capture_output=True,
             check=True,
-            encoding="utf-8",
-            env=dict(os.environ, PYTHONIOENCODING="utf-8"),
+            encoding=process_encoding,
+            env=process_environment,
         )
 
         QgsMessageLog.logMessage(
