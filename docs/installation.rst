@@ -47,8 +47,11 @@ the ``--dry-run`` argument if everything looks correct.
 .. code-block:: bat
 
    python3 -m pip --version || python3 -m ensurepip --user
-   python3 -m pip list --format=freeze | findstr /b /i /r /c:"gdal= numpy= pyqt[^=]*= sip=" > %TEMP%\constraints.txt
-   python3 -m pip install --user --dry-run --constraint %TEMP%\constraints.txt casaGeoTools
+   python3 -m pip list --format=freeze ^
+      | findstr /b /i /r "gdal= numpy= pyqt[^=]*= sip=" > %TEMP%\constraints.txt ^
+      || (echo. & echo ERROR: Unable to pin critical system packages) >&2
+   python3 -m pip install --user --dry-run --constraint %TEMP%\constraints.txt ^
+      casaGeoTools
 
 
 Linux
@@ -69,8 +72,11 @@ everything looks correct.
 .. code-block:: bash
 
    python3 -m pip --version || python3 -m ensurepip --user
-   python3 -m pip list --format=freeze | grep -iE '^(gdal=|numpy=|pyqt[^=]*=|sip=)' > /tmp/constraints.txt
-   python3 -m pip install --user --dry-run --constraint /tmp/constraints.txt casaGeoTools
+   python3 -m pip list --format=freeze \
+      | grep -iE '^(gdal=|numpy=|pyqt[^=]*=|sip=)' > /tmp/constraints.txt \
+      || (echo; echo ERROR: Unable to pin critical system packages) >&2
+   python3 -m pip install --user --dry-run --constraint /tmp/constraints.txt \
+      casaGeoTools
 
 If you installed QGIS some other way, check the relevant documentation on how to
 access the QGIS Python environment and install Python packages.
