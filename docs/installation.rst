@@ -8,41 +8,19 @@ Installation Instructions
 
 This extension requires the ``casaGeoTools`` package and it’s dependencies to be
 installed in your QGIS Python environment. Core functionality will be
-unavailable otherwise.
+unavailable otherwise. You can find the list of dependencies and their required
+versions in the file ``requirements.txt`` in the plugin directory.
+
+The recommended way to install this plugin’s Python dependencies is to use the
+automatic installation method described below.
 
 
 Automatic Installation
 ======================
 
-This is the recommended way to install Python dependencies for most users.
-
 Open QGIS and click on :menuselection:`Plugins --> casaGeoTools --> Install
 Python dependencies...`. This will install ``casaGeoTools`` and it’s
 dependencies as user-packages into the Python environment used by QGIS.
-
-.. note::
-   If you are a Linux user and have installed QGIS using Flatpak, you have to
-   take some extra steps. Read on below.
-
-
-Linux – Flatpak
----------------
-
-If you are using QGIS under Linux, you are likely using the Flatpak version. You
-can check this by going to :menuselection:`Help --> About QGIS` and looking for
-the words “Flatpak runtime”.
-
-Flatpak applications run inside a sandbox to isolate them from the host system.
-To install Python packages into the sandbox, you have to start QGIS with the
-development runtime so it has access to ``pip``. To do this, just enter these
-commands into the terminal::
-
-   flatpak install "$(flatpak info --show-sdk org.qgis.qgis)"
-   flatpak run --devel org.qgis.qgis
-
-This will install the required development runtime and use it to start a new
-instance of QGIS. There you can perform the automatic installation as described
-above.
 
 
 Manual Installation
@@ -59,50 +37,40 @@ dependencies, which is why the commands below use a ``constraints.txt`` file.
 Windows
 -------
 
-Under Windows, you can use the ``python-qgis.bat`` launcher script that is part
-of QGIS. This script is located in the ``bin`` directory of your QGIS
-installation. Check the output of the commands below and remove the
-``--dry-run`` argument if everything looks correct.
+Under Windows, start the OSGeo4W Shell that comes bundled with your QGIS
+installation. You can find it in the QGIS folder on your desktop, or by
+right-clicking QGIS in the Start Menu and selecting Open File Location.
 
-.. code-block:: batch
+Enter the commands below into the OSGeo4W Shell, check the output, and remove
+the ``--dry-run`` argument if everything looks correct.
 
-   python-qgis -s -m pip freeze | findstr /b /i /c:"gdal" /c:"numpy" /c:"pyqt" > %TEMP%\constraints.txt
-   python-qgis -m pip install --user --dry-run --constraint %TEMP%\constraints.txt casaGeoTools
+.. code-block:: bat
+
+   python3 -m pip --version || python3 -m ensurepip --user
+   python3 -m pip list --format=freeze | findstr /b /i /r /c:"gdal= numpy= pyqt[^=]*= sip=" > %TEMP%\constraints.txt
+   python3 -m pip install --user --dry-run --constraint %TEMP%\constraints.txt casaGeoTools
 
 
-Linux – Native
---------------
+Linux
+-----
 
-Under Linux, if QGIS is installed using the native package manager, you can use
-the system ``pip`` to install ``casaGeoTools`` into your home directory. Check
-the output of the commands below and remove the ``--dry-run`` argument if
+Under Linux, QGIS may be installed either as a native package or as a Flatpak.
+You can check which one is the case by going to :menuselection:`Help --> About
+QGIS` and looking for the words “Flatpak runtime”.
+
+If you are using a native package, enter the commands below into the terminal
+directly. If you are using the Flatpak version, run ``flatpak run --command=bash
+org.qgis.qgis`` to open a shell in the isolated Flatpak environment before
+entering the commands below.
+
+Check the output of each command and remove the ``--dry-run`` argument if
 everything looks correct.
 
 .. code-block:: bash
 
-   python -s -m pip freeze | grep -iE '^(gdal|numpy|pyqt)' > /tmp/constraints.txt
-   python -m pip install --user --dry-run --constraint /tmp/constraints.txt casaGeoTools
+   python3 -m pip --version || python3 -m ensurepip --user
+   python3 -m pip list --format=freeze | grep -iE '^(gdal=|numpy=|pyqt[^=]*=|sip=)' > /tmp/constraints.txt
+   python3 -m pip install --user --dry-run --constraint /tmp/constraints.txt casaGeoTools
 
-
-Linux – Flatpak
----------------
-
-Under Linux, if QGIS is installed as a Flatpak, you have to install
-``casaGeoTools`` into the isolated Flatpak environment. To do this, run the
-commands below to install the development runtime for the QGIS Flatpak and open
-a developer-mode shell inside the Flatpak environment.
-
-.. code-block:: bash
-
-   flatpak install "$(flatpak info --show-sdk org.qgis.qgis)"
-   flatpak run --devel --command=bash org.qgis.qgis
-
-Within the Flatpak environment, you can now use the same commands as for a
-native Linux installation to install Python packages into the QGIS Python
-environment. Check the output and remove the ``--dry-run`` argument if
-everything looks correct.
-
-.. code-block:: bash
-
-   python -s -m pip freeze | grep -iE '^(gdal|numpy|pyqt)' > /tmp/constraints.txt
-   python -m pip install --user --dry-run --constraint /tmp/constraints.txt casaGeoTools
+If you installed QGIS some other way, check the relevant documentation on how to
+access the QGIS Python environment and install Python packages.
