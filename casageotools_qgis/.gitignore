@@ -2,4 +2,4 @@
 /help
 /metadata.txt
 /requirements.txt
-/ui/*.py
+/ui/[!_]*.py

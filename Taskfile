@@ -108,7 +108,7 @@ clean() {
 		"$PLUGINDIR/requirements.txt" \
 		"$PLUGINDIR/help"             \
 		"$PLUGINDIR/i18n"/*.qm        \
-		"$PLUGINDIR/ui"/*.py          \
+		"$PLUGINDIR/ui"/[!_]*.py      \
 		# EOA
 	sphinx-make clean
 }
