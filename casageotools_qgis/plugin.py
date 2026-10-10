@@ -217,13 +217,13 @@ class CasaGeoToolsPlugin:
 
         self.options_widget_factory = CasaGeoToolsOptionsWidgetFactory(self)
 
-        self.plugin_menu_name = self.__tr("&casaGeoTools", "Plugin menu")
+        self.plugin_menu_name = self.name
         self.plugin_menu_entries = [
             self.showSettingsAction,
             self.installPythonDependenciesAction,
         ]
 
-        self.vector_menu_name = self.__tr("&casaGeoTools", "Vector menu")
+        self.vector_menu_name = self.name
         self.vector_menu_entries = []
 
         self.plugin_help_menu_entries = [
