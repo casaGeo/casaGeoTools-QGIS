@@ -19,13 +19,19 @@ from functools import cached_property
 from typing import TYPE_CHECKING
 
 from qgis.core import (
+    Qgis,
     QgsApplication,
     QgsFeedback,
+    QgsMessageLog,
     QgsSettingsEntryString,
     QgsSettingsTree,
     QgsSettingsTreeNode,
+    QgsTask,
 )
-from qgis.gui import QgisInterface
+from qgis.gui import (
+    QgisInterface,
+    QgsMessageBar,
+)
 from qgis.PyQt.QtCore import (
     QCoreApplication,
     QLocale,
@@ -103,7 +109,7 @@ class CasaGeoToolsPlugin:
     help_directory = PLUGIN_HELP_DIRECTORY
     i18n_directory = PLUGIN_I18N_DIRECTORY
 
-    __install_python_dependencies_task_id: int = 0
+    __install_python_dependencies_task: QgsTask | None = None
 
     @cached_property
     def name(self) -> str:
@@ -317,42 +323,78 @@ class CasaGeoToolsPlugin:
     def installPythonDependencies(self) -> None:
         from casageotools_qgis.install import CasaGeoToolsInstallRequirementsTask
 
-        if self.__install_python_dependencies_task_id:
-            ensure(self.iface.messageBar()).pushInfo(
-                None,
-                self.__tr(
-                    "Dependencies for {plugin} are currently being installed. Please wait..."
-                ).format(plugin=self.identifier),
+        info_title = ""
+        info_text = self.__tr(
+            "Dependencies for {plugin} are currently being installed. Please wait...",
+            "Message bar text",
+        ).format(plugin=self.identifier)
+        info_level = Qgis.MessageLevel.Info
+
+        def onRunning():
+            messageBar: QgsMessageBar = ensure(self.iface.messageBar())
+            messageBar.pushMessage(
+                title=info_title,
+                text=info_text,
+                level=info_level,
             )
+
+        def onFinish(*, successful: bool):
+            self.__install_python_dependencies_task = None
+            messageBar: QgsMessageBar = ensure(self.iface.messageBar())
+
+            # Dismiss the progress message(s) so they don't stack behind
+            # the success message and reappear once it is dismissed.
+            for item in messageBar.items():
+                if (
+                    item.level() == info_level
+                    and item.title() == info_title
+                    and item.text() == info_text
+                ):
+                    item.dismiss()
+
+            if successful:
+                messageBar.pushMessage(
+                    self.__tr("Installation Successful", "Message bar title"),
+                    self.__tr(
+                        "Dependencies for {plugin} are now installed. Please restart QGIS for the changes to take effect.",
+                        "Message bar text",
+                    ).format(plugin=self.identifier),
+                    level=Qgis.MessageLevel.Success,
+                    duration=0,
+                )
+            else:
+                messageBar.pushMessage(
+                    self.__tr("Installation Failed", "Message bar title"),
+                    self.__tr(
+                        "Dependencies for {plugin} could not be installed. Please check the Log Messages panel.",
+                        "Message bar text",
+                    ).format(plugin=self.identifier),
+                    level=Qgis.MessageLevel.Critical,
+                    duration=0,
+                )
+
+        if self.__install_python_dependencies_task:
+            onRunning()
             return
 
-        def onSuccess():
-            self.__install_python_dependencies_task_id = 0
-            ensure(self.iface.messageBar()).pushSuccess(
-                "Success",
-                self.__tr(
-                    "Dependencies for {plugin} are now installed. Please restart QGIS for the changes to take effect."
-                ).format(plugin=self.identifier),
-            )
-
-        def onFailure():
-            self.__install_python_dependencies_task_id = 0
-            ensure(self.iface.messageBar()).pushCritical(
-                "Error",
-                self.__tr(
-                    "Installation of dependencies for {plugin} failed. Please check the Log Messages panel."
-                ).format(plugin=self.identifier),
-            )
-
         task = CasaGeoToolsInstallRequirementsTask(self.requirementsFile())
-        task.taskCompleted.connect(onSuccess)
-        task.taskTerminated.connect(onFailure)
+        task.begun.connect(onRunning)
+        task.taskCompleted.connect(lambda: onFinish(successful=True))
+        task.taskTerminated.connect(lambda: onFinish(successful=False))
 
-        taskid = ensure(QgsApplication.taskManager()).addTask(task)
-        self.__install_python_dependencies_task_id = taskid
+        # IMPORTANT: The ownership transfer from Python to C++ in
+        # QgsTaskManager::addTask() appears to be broken; we have to
+        # keep a reference to the QgsTask object around, or it will be
+        # cancelled and deleted as soon as it goes out of scope.
 
-        # Show message about dependencies being installed.
-        self.installPythonDependencies()
+        if ensure(QgsApplication.taskManager()).addTask(task):
+            self.__install_python_dependencies_task = task
+        else:
+            QgsMessageLog.logMessage(
+                "Failed to add dependency installation task to QgsApplication.taskManager()",
+                tag=self.identifier,
+                level=Qgis.MessageLevel.Critical,
+            )
 
     @cached_property
     def showDocumentationAction(self) -> QAction:
