@@ -34,6 +34,7 @@ PLUGINDIR="$PLUGIN_ID"
 
 QGIS_PYTHON=/usr/bin/python3
 QGIS_PROFILE=default
+QGIS_FLATPAK_ID="org.qgis.qgis"
 
 PATH+=":/usr/lib64/qt6/bin"
 PATH+=":/usr/lib64/qt6/libexec"
@@ -64,40 +65,49 @@ build() {
 
 deploy() {
 	local plugindir datadir qgis3profile qgis4profile
+	local -a datadirs
+
 	plugindir=$(realpath -- "$PLUGINDIR")
-	datadir=$(application-data-directory)
+	datadirs+=$(application-data-directory)
 
-	qgis3profile="$datadir/QGIS/QGIS3/profiles/$QGIS_PROFILE"
-	if [[ -d "$qgis3profile" ]]; then
-		mkdir -p -- "$qgis3profile/python/plugins"
-		ln -sfvT -- "$plugindir" "$qgis3profile/python/plugins/$PLUGIN_ID"
+	if [[ "$OSTYPE" == linux-gnu* ]]; then
+		datadirs+="$HOME/.var/app/$QGIS_FLATPAK_ID/data"
 	fi
 
-	qgis4profile="$datadir/QGIS/QGIS4/profiles/$QGIS_PROFILE"
-	if [[ -d "$qgis4profile" ]]; then
-		mkdir -p -- "$qgis4profile/python/plugins"
-		ln -sfvT -- "$plugindir" "$qgis4profile/python/plugins/$PLUGIN_ID"
-	fi
+	for datadir in "${datadirs[@]}"; do
+		qgis3profile="$datadir/QGIS/QGIS3/profiles/$QGIS_PROFILE"
+		if [[ -d "$qgis3profile" ]]; then
+			mkdir -p -- "$qgis3profile/python/plugins"
+			ln -sfvT -- "$plugindir" "$qgis3profile/python/plugins/$PLUGIN_ID"
+		fi
+
+		qgis4profile="$datadir/QGIS/QGIS4/profiles/$QGIS_PROFILE"
+		if [[ -d "$qgis4profile" ]]; then
+			mkdir -p -- "$qgis4profile/python/plugins"
+			ln -sfvT -- "$plugindir" "$qgis4profile/python/plugins/$PLUGIN_ID"
+		fi
+	done
 }
 
 undeploy() {
 	local datadir
-	datadir=$(application-data-directory)
-	rm -fv -- "$datadir/QGIS/QGIS3/profiles/$QGIS_PROFILE/python/plugins/$PLUGIN_ID"
-	rm -fv -- "$datadir/QGIS/QGIS4/profiles/$QGIS_PROFILE/python/plugins/$PLUGIN_ID"
-}
+	local -a datadirs
 
-flatpak-deploy() {
-	XDG_DATA_HOME="$HOME/.var/app/org.qgis.qgis/data" deploy
-}
+	datadirs+=$(application-data-directory)
 
-flatpak-undeploy() {
-	XDG_DATA_HOME="$HOME/.var/app/org.qgis.qgis/data" undeploy
+	if [[ "$OSTYPE" == linux-gnu* ]]; then
+		datadirs+="$HOME/.var/app/$QGIS_FLATPAK_ID/data"
+	fi
+
+	for datadir in "${datadirs[@]}"; do
+		rm -fv -- "$datadir/QGIS/QGIS3/profiles/$QGIS_PROFILE/python/plugins/$PLUGIN_ID"
+		rm -fv -- "$datadir/QGIS/QGIS4/profiles/$QGIS_PROFILE/python/plugins/$PLUGIN_ID"
+	done
 }
 
 package() {
+	clean
 	build
-
 	build-zip
 }
 
@@ -165,7 +175,6 @@ build-help() {
 
 build-zip() {
 	local zipname zipfile
-	#zipfile="dist/${PLUGIN_ID//_/-}-$PLUGIN_VERSION.zip"
 	zipname=$(uv version --output-format=json | jq -er '"\(.package_name)-\(.version)"')
 	zipfile="dist/$zipname.zip"
 
