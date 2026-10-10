@@ -53,6 +53,10 @@ the ``--dry-run`` argument if everything looks correct.
    python3 -m pip install --user --dry-run --constraint %TEMP%\constraints.txt ^
       casaGeoTools
 
+.. note::
+   QGIS will only pick up on these changes after a restart. If you’ve had
+   QGIS running in the background while following these steps, restart it now.
+
 
 Linux
 -----
@@ -77,6 +81,10 @@ everything looks correct.
       || (echo; echo ERROR: Unable to pin critical system packages) >&2
    python3 -m pip install --user --dry-run --constraint /tmp/constraints.txt \
       casaGeoTools
+
+.. note::
+   QGIS will only pick up on these changes after a restart. If you’ve had
+   QGIS running in the background while following these steps, restart it now.
 
 If you installed QGIS some other way, check the relevant documentation on how to
 access the QGIS Python environment and install Python packages.
