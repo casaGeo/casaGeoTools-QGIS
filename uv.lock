@@ -66,6 +66,7 @@ dependencies = [
     { name = "httpx" },
     { name = "pandas" },
     { name = "shapely" },
+    { name = "typing-extensions" },
 ]
 
 [package.metadata]
@@ -75,6 +76,7 @@ requires-dist = [
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "pandas", specifier = ">=2.2.0" },
     { name = "shapely", specifier = ">=2.1.0" },
+    { name = "typing-extensions", specifier = ">=4.5.0" },
 ]
 
 [package.metadata.requires-dev]

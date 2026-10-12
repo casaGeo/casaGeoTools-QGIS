@@ -104,10 +104,10 @@ class CasaGeoToolsPoiAlgorithm(CasaGeoToolsProcessingAlgorithm):
     def _initAlgorithm(self, configuration: dict[str, Any] | None) -> None:
         from casageo.coder import (
             DEFAULT_ADDRESS_NAMES_MODE,
-            DEFAULT_LIMIT,
+            DEFAULT_POI_LIMIT,
             DEFAULT_POSTAL_CODE_MODE,
-            MAX_LIMIT,
-            MIN_LIMIT,
+            MAXIMUM_POI_LIMIT,
+            MINIMUM_POI_LIMIT,
             AddressNamesMode,
             PostalCodeMode,
         )
@@ -159,9 +159,9 @@ class CasaGeoToolsPoiAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 self.LIMIT,
                 self.__tr("Limit"),
                 Qgis.ProcessingNumberParameterType.Integer,
-                defaultValue=DEFAULT_LIMIT,
-                minValue=MIN_LIMIT,
-                maxValue=MAX_LIMIT,
+                defaultValue=DEFAULT_POI_LIMIT,
+                minValue=MINIMUM_POI_LIMIT,
+                maxValue=MAXIMUM_POI_LIMIT,
             )
         )
         self._addParameter(

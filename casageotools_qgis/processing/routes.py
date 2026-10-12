@@ -143,11 +143,11 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
     @override
     def _initAlgorithm(self, configuration: dict[str, Any] | None) -> None:
         from casageo.spatial import (
-            DEFAULT_ALTERNATIVES,
+            DEFAULT_ALTERNATIVE_ROUTES,
             DEFAULT_ROUTING_MODE,
             DEFAULT_TRANSPORT_MODE,
-            MAX_ALTERNATIVES,
-            MIN_ALTERNATIVES,
+            MAXIMUM_ALTERNATIVE_ROUTES,
+            MINIMUM_ALTERNATIVE_ROUTES,
             AvoidableFeature,
             RoutingMode,
             TransportMode,
@@ -253,9 +253,9 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 self.ALTERNATIVES,
                 self.__tr("Number of alternative routes", "Parameter"),
                 Qgis.ProcessingNumberParameterType.Integer,
-                minValue=MIN_ALTERNATIVES,
-                maxValue=MAX_ALTERNATIVES,
-                defaultValue=DEFAULT_ALTERNATIVES,
+                minValue=MINIMUM_ALTERNATIVE_ROUTES,
+                maxValue=MAXIMUM_ALTERNATIVE_ROUTES,
+                defaultValue=DEFAULT_ALTERNATIVE_ROUTES,
             )
         )
         self._addParameter(

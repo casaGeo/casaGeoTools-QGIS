@@ -138,10 +138,10 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
     def _initAlgorithm(self, configuration: dict[str, Any] | None) -> None:
         from casageo.coder import (
             DEFAULT_ADDRESS_NAMES_MODE,
-            DEFAULT_LIMIT,
+            DEFAULT_GEOCODE_LIMIT,
             DEFAULT_POSTAL_CODE_MODE,
-            MAX_LIMIT,
-            MIN_LIMIT,
+            MAXIMUM_GEOCODE_LIMIT,
+            MINIMUM_GEOCODE_LIMIT,
             AddressNamesMode,
             PostalCodeMode,
         )
@@ -363,9 +363,9 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 self.LIMIT,
                 self.__tr("Limit"),
                 Qgis.ProcessingNumberParameterType.Integer,
-                defaultValue=DEFAULT_LIMIT,
-                minValue=MIN_LIMIT,
-                maxValue=MAX_LIMIT,
+                defaultValue=DEFAULT_GEOCODE_LIMIT,
+                minValue=MINIMUM_GEOCODE_LIMIT,
+                maxValue=MAXIMUM_GEOCODE_LIMIT,
             )
         )
         self._addParameter(
@@ -744,7 +744,7 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
         with_match_quality = getBool(self.WITH_MATCH_QUALITY)
 
         try:
-            return casageo.coder.address(
+            return casageo.coder.geocode(
                 client,
                 queries,
                 defaults,

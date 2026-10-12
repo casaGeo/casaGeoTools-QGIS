@@ -538,7 +538,7 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
         }
 
         try:
-            return casageo.spatial.isolines(
+            return casageo.spatial.isoline(
                 client,
                 queries,
                 defaults,
