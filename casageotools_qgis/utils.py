@@ -41,6 +41,10 @@ if TYPE_CHECKING:
     from .plugin import CasaGeoToolsPlugin
 
 
+def QT_VERSION_CHECK(major: int, minor: int = 0, patch: int = 0, /) -> int:
+    return major << 16 | minor << 8 | patch
+
+
 class Box[T]:
     __slots__ = ("value",)
     __match_args__ = ("value",)

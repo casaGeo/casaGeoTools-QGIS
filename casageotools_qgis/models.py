@@ -14,17 +14,37 @@
 #
 #  SPDX-License-Identifier: Apache-2.0
 
-from typing import override
+from collections.abc import Mapping
+from typing import Final, override
 
 from qgis.PyQt.QtCore import (
     QAbstractListModel,
     QCollator,
+    QLocale,
     QModelIndex,
     QObject,
     Qt,
 )
 
 from .utils import TrMethod
+
+POLITICAL_VIEW_QLOCALE_ALPHA3_MAPPING: Final[Mapping[QLocale.Country, str]] = {
+    QLocale.Country.Argentina: "ARG",
+    QLocale.Country.Egypt: "EGY",
+    QLocale.Country.India: "IND",
+    QLocale.Country.Kenya: "KEN",
+    QLocale.Country.Morocco: "MAR",
+    QLocale.Country.Pakistan: "PAK",
+    QLocale.Country.Russia: "RUS",
+    QLocale.Country.Sudan: "SDN",
+    QLocale.Country.Serbia: "SRB",
+    QLocale.Country.Suriname: "SUR",
+    QLocale.Country.Syria: "SYR",
+    QLocale.Country.Turkey: "TUR",
+    QLocale.Country.Tanzania: "TZA",
+    QLocale.Country.Uruguay: "URY",
+    QLocale.Country.Vietnam: "VNM",
+}
 
 
 class CasaGeoToolsUnitSystemModel(QAbstractListModel):
@@ -82,6 +102,7 @@ class CasaGeoToolsPoliticalViewModel(QAbstractListModel):
             "code": "",
             "name": self.__tr("Default", "Political View"),
         }
+        # Sadly QLocale.countryToString() does not return localized names.
         self._views = [
             {"code": "ARG", "name": self.__tr("Argentina", "Political View")},
             {"code": "EGY", "name": self.__tr("Egypt", "Political View")},
@@ -94,7 +115,7 @@ class CasaGeoToolsPoliticalViewModel(QAbstractListModel):
             {"code": "SRB", "name": self.__tr("Serbia", "Political View")},
             {"code": "SUR", "name": self.__tr("Suriname", "Political View")},
             {"code": "SYR", "name": self.__tr("Syria", "Political View")},
-            {"code": "TUR", "name": self.__tr("Turkey", "Political View")},
+            {"code": "TUR", "name": self.__tr("Türkiye", "Political View")},
             {"code": "TZA", "name": self.__tr("Tanzania", "Political View")},
             {"code": "URY", "name": self.__tr("Uruguay", "Political View")},
             {"code": "VNM", "name": self.__tr("Vietnam", "Political View")},

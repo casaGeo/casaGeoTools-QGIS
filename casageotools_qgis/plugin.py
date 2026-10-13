@@ -287,6 +287,11 @@ class CasaGeoToolsPlugin:
     def casaGeoClient(self, feedback: QgsFeedback | None = None) -> "CasaGeoClient":
         from .utilscg import CasaGeoToolsQgisEnabledCasaGeoClient
 
+        # We have the option of using the QGIS locale to determine
+        # preferences. We just have to decide how to expose that
+        # functionality to the user, and whether we should apply it
+        # globally or per-project.
+
         return CasaGeoToolsQgisEnabledCasaGeoClient(
             self.settingApikey.value(),
             preferred_language=self.settingLanguage.value() or None,
