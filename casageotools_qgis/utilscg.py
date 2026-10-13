@@ -15,9 +15,14 @@
 #  SPDX-License-Identifier: Apache-2.0
 
 import json as jsonlib
-from typing import Any
+from typing import Any, override
 
-from casageo.tools import APIValueError, CasaGeoClient, CasaGeoError
+from casageo.tools import (
+    APIValueError,
+    CasaGeoClient,
+    CasaGeoError,
+    NetworkRequestBackend,
+)
 from qgis.core import QgsFeedback, QgsNetworkAccessManager
 from qgis.PyQt.QtCore import QUrl
 from qgis.PyQt.QtNetwork import QNetworkReply, QNetworkRequest
@@ -27,21 +32,31 @@ class CasaGeoToolsQgisEnabledCasaGeoClient(CasaGeoClient):
     def __init__(
         self, *args, qgis_feedback: QgsFeedback | None = None, **kwargs
     ) -> None:
-        super().__init__(*args, **kwargs)
-        self.__auth_header = self.apikey.encode()
-        self.__server_url = QUrl(self.server)
         self.__feedback = qgis_feedback
+        super().__init__(*args, **kwargs)
 
-    def request(self, method: str, url: str, *, json: Any | None = None) -> Any:
+    @override
+    def setup_network_request_backend(self) -> NetworkRequestBackend:
+        return QgisNetworkRequestBackend(self, feedback=self.__feedback)
+
+
+class QgisNetworkRequestBackend(NetworkRequestBackend):
+    def __init__(self, client: CasaGeoClient, *, feedback: QgsFeedback | None) -> None:
+        self.auth_header = client.apikey.encode()
+        self.server_url = QUrl(client.server_url)
+        self.feedback = feedback
+
+    @override
+    def request(self, method: str, url: str, *, json: Any | None = None, **_) -> Any:
         NetworkError = QNetworkReply.NetworkError
 
-        request = QNetworkRequest(self.__server_url.resolved(QUrl(url)))
-        request.setRawHeader(b"Authorization", self.__auth_header)
+        request = QNetworkRequest(self.server_url.resolved(QUrl(url)))
+        request.setRawHeader(b"Authorization", self.auth_header)
 
         match method.upper():
             case "GET":
                 reply = QgsNetworkAccessManager.blockingGet(
-                    request, forceRefresh=True, feedback=self.__feedback
+                    request, forceRefresh=True, feedback=self.feedback
                 )
             case "POST":
                 data = jsonlib.dumps(
@@ -58,7 +73,7 @@ class CasaGeoToolsQgisEnabledCasaGeoClient(CasaGeoClient):
                     request,
                     data,
                     forceRefresh=True,
-                    feedback=self.__feedback,
+                    feedback=self.feedback,
                 )
             case _:
                 raise ValueError(f"Unsupported method: {method}")
@@ -80,3 +95,7 @@ class CasaGeoToolsQgisEnabledCasaGeoClient(CasaGeoClient):
 
         msg = f"Request failed (code {reply.error()}): {reply.errorString()}"
         raise CasaGeoError(msg)
+
+    @override
+    def close(self) -> None:
+        pass
