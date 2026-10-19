@@ -285,19 +285,19 @@ class CasaGeoToolsPlugin:
     # Secondary Interface
 
     def casaGeoClient(self, feedback: QgsFeedback | None = None) -> "CasaGeoClient":
-        from .utilscg import CasaGeoToolsQgisEnabledCasaGeoClient
+        from .utilscg import QgisNetworkBackend
 
         # We have the option of using the QGIS locale to determine
         # preferences. We just have to decide how to expose that
         # functionality to the user, and whether we should apply it
         # globally or per-project.
 
-        return CasaGeoToolsQgisEnabledCasaGeoClient(
+        return CasaGeoClient(
             self.settingApikey.value(),
             preferred_language=self.settingLanguage.value() or None,
             preferred_unit_system=self.settingUnitSystem.value() or None,
             preferred_political_view=self.settingPoliticalView.value() or None,
-            qgis_feedback=feedback,
+            network_backend=QgisNetworkBackend(feedback=feedback),
         )
 
     def helpFile(self, path: str = "index.html") -> str:

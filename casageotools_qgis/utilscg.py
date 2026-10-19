@@ -21,7 +21,7 @@ from casageo.tools import (
     APIValueError,
     CasaGeoClient,
     CasaGeoError,
-    NetworkRequestBackend,
+    NetworkBackend,
     UnitSystem,
 )
 from qgis.core import QgsFeedback, QgsNetworkAccessManager
@@ -32,23 +32,18 @@ from . import models
 from .utils import QT_VERSION_CHECK
 
 
-class CasaGeoToolsQgisEnabledCasaGeoClient(CasaGeoClient):
-    def __init__(
-        self, *args, qgis_feedback: QgsFeedback | None = None, **kwargs
-    ) -> None:
-        self.__feedback = qgis_feedback
-        super().__init__(*args, **kwargs)
+class QgisNetworkBackend(NetworkBackend):
+    auth_header: bytes
+    server_url: QUrl
+    feedback: QgsFeedback | None
+
+    def __init__(self, *, feedback: QgsFeedback | None) -> None:
+        self.feedback = feedback
 
     @override
-    def setup_network_request_backend(self) -> NetworkRequestBackend:
-        return QgisNetworkRequestBackend(self, feedback=self.__feedback)
-
-
-class QgisNetworkRequestBackend(NetworkRequestBackend):
-    def __init__(self, client: CasaGeoClient, *, feedback: QgsFeedback | None) -> None:
+    def setup(self, client: CasaGeoClient, **kwargs) -> None:
         self.auth_header = client.apikey.encode()
         self.server_url = QUrl(client.server_url)
-        self.feedback = feedback
 
     @override
     def request(self, method: str, url: str, *, json: Any | None = None, **_) -> Any:
@@ -99,10 +94,6 @@ class QgisNetworkRequestBackend(NetworkRequestBackend):
 
         msg = f"Request failed (code {reply.error()}): {reply.errorString()}"
         raise CasaGeoError(msg)
-
-    @override
-    def close(self) -> None:
-        pass
 
 
 def preferredLanguageFromLocale(locale: QLocale) -> str | None:

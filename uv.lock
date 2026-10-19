@@ -65,6 +65,7 @@ dependencies = [
     { name = "geopandas" },
     { name = "httpx" },
     { name = "pandas" },
+    { name = "requests" },
     { name = "shapely" },
     { name = "typing-extensions" },
 ]
@@ -75,6 +76,7 @@ requires-dist = [
     { name = "geopandas", specifier = ">=1.0.0" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "pandas", specifier = ">=2.2.0" },
+    { name = "requests", specifier = ">=2.33.0" },
     { name = "shapely", specifier = ">=2.1.0" },
     { name = "typing-extensions", specifier = ">=4.5.0" },
 ]
@@ -83,6 +85,8 @@ requires-dist = [
 dev = [
     { name = "basedpyright", specifier = "==1.39.5" },
     { name = "pandas-stubs", specifier = "==2.3.3.260113" },
+    { name = "pytest", specifier = "==9.1.1" },
+    { name = "pytest-dotenv", specifier = "==0.5.2" },
     { name = "ruff", specifier = "==0.15.12" },
     { name = "types-geopandas", specifier = "==1.1.1.20251214" },
     { name = "types-python-dateutil", specifier = "==2.9.0.20260408" },
