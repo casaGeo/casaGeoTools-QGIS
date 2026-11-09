@@ -22,7 +22,7 @@ Changelog = "https://github.com/casaGeo/casaGeoTools-QGIS/blob/main/CHANGELOG.md
 
 [dependency-groups]
 dev = [
-    "basedpyright==1.39.5",
+    "basedpyright==1.40.2",
     "ruff==0.15.12",
     "sphinx==9.1.0",
 ]
