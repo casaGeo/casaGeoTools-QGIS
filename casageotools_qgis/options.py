@@ -21,9 +21,14 @@ from qgis.gui import (
     QgsOptionsPageWidget,
     QgsOptionsWidgetFactory,
 )
+from qgis.PyQt.QtCore import QLocale
 from qgis.PyQt.QtWidgets import QWidget
 
-from .models import CasaGeoToolsPoliticalViewModel, CasaGeoToolsUnitSystemModel
+from .models import (
+    CasaGeoToolsPoliticalViewModel,
+    CasaGeoToolsUnitSystemModel,
+    preferredLanguagesFromLocale,
+)
 from .ui.OptionsPage import Ui_CasaGeoToolsOptionsPage
 from .utils import TrMethod
 
@@ -44,6 +49,9 @@ class CasaGeoToolsOptionsPage(QgsOptionsPageWidget):
         self._political_views_model = CasaGeoToolsPoliticalViewModel()
 
         self._ui.setupUi(self)
+        self._ui.languagePrefLineEdit.setPlaceholderText(
+            ", ".join(preferredLanguagesFromLocale(QLocale()))
+        )
         self._ui.unitsPrefComboBox.setModel(self._unit_system_model)
         self._ui.politicalPrefComboBox.setModel(self._political_views_model)
 

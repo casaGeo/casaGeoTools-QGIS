@@ -22,14 +22,10 @@ from casageo.tools import (
     CasaGeoClient,
     CasaGeoError,
     NetworkBackend,
-    UnitSystem,
 )
 from qgis.core import QgsFeedback, QgsNetworkAccessManager
-from qgis.PyQt.QtCore import QT_VERSION, QLocale, QUrl
+from qgis.PyQt.QtCore import QUrl
 from qgis.PyQt.QtNetwork import QNetworkReply, QNetworkRequest
-
-from . import models
-from .utils import QT_VERSION_CHECK
 
 
 class QgisNetworkBackend(NetworkBackend):
@@ -94,22 +90,3 @@ class QgisNetworkBackend(NetworkBackend):
 
         msg = f"Request failed (code {reply.error()}): {reply.errorString()}"
         raise CasaGeoError(msg)
-
-
-def preferredLanguageFromLocale(locale: QLocale) -> str | None:
-    return ",".join(locale.uiLanguages()) or None
-
-
-def preferredUnitSystemFromLocale(locale: QLocale) -> UnitSystem | None:
-    match locale.measurementSystem():
-        case QLocale.MeasurementSystem.MetricSystem:
-            return UnitSystem.METRIC
-        case QLocale.MeasurementSystem.ImperialSystem:
-            return UnitSystem.IMPERIAL
-    return None
-
-
-def preferredPoliticalViewFromLocale(locale: QLocale) -> str | None:
-    QT_VERSION_6_2 = QT_VERSION_CHECK(6, 2)
-    territory = locale.territory() if QT_VERSION >= QT_VERSION_6_2 else locale.country()
-    return models.POLITICAL_VIEW_QLOCALE_ALPHA3_MAPPING.get(territory)

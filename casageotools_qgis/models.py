@@ -18,6 +18,7 @@ from collections.abc import Mapping
 from typing import Final, override
 
 from qgis.PyQt.QtCore import (
+    QT_VERSION,
     QAbstractListModel,
     QCollator,
     QLocale,
@@ -26,7 +27,7 @@ from qgis.PyQt.QtCore import (
     Qt,
 )
 
-from .utils import TrMethod
+from .utils import QT_VERSION_CHECK, TrMethod
 
 POLITICAL_VIEW_QLOCALE_ALPHA3_MAPPING: Final[Mapping[QLocale.Country, str]] = {
     QLocale.Country.Argentina: "ARG",
@@ -47,19 +48,40 @@ POLITICAL_VIEW_QLOCALE_ALPHA3_MAPPING: Final[Mapping[QLocale.Country, str]] = {
 }
 
 
+def preferredLanguagesFromLocale(locale: QLocale) -> list[str]:
+    return locale.uiLanguages()
+
+
+def preferredUnitSystemFromLocale(locale: QLocale) -> str | None:
+    match locale.measurementSystem():
+        case QLocale.MeasurementSystem.MetricSystem:
+            return "metric"
+        case QLocale.MeasurementSystem.ImperialSystem:
+            return "imperial"
+    return None
+
+
+def preferredPoliticalViewFromLocale(locale: QLocale) -> str | None:
+    QT_VERSION_6_2 = QT_VERSION_CHECK(6, 2)
+    territory = locale.territory() if QT_VERSION >= QT_VERSION_6_2 else locale.country()
+    return POLITICAL_VIEW_QLOCALE_ALPHA3_MAPPING.get(territory)
+
+
 class CasaGeoToolsUnitSystemModel(QAbstractListModel):
     __tr = TrMethod()
 
     def __init__(self, parent: QObject | None = None) -> None:
         super().__init__(parent)
-        self.__systems = [
+        self._default = preferredUnitSystemFromLocale(QLocale()) or "metric"
+        self._unit_systems = [
             {"id": "metric", "name": self.__tr("Metric", "Unit System")},
             {"id": "imperial", "name": self.__tr("Imperial", "Unit System")},
         ]
+        self._unit_system_map = {elem["id"]: elem for elem in self._unit_systems}
 
     @override
     def rowCount(self, parent: QModelIndex | None = None) -> int:
-        return len(self.__systems)
+        return len(self._unit_systems) + 1
 
     @override
     def headerData(
@@ -80,16 +102,35 @@ class CasaGeoToolsUnitSystemModel(QAbstractListModel):
     def data(
         self, index: QModelIndex, role: int = Qt.ItemDataRole.DisplayRole
     ) -> str | None:
-        if not index.isValid() or index.row() >= self.rowCount():
+        if not (index.isValid() and 0 <= index.row() < self.rowCount()):
+            return None
+
+        if index.row() == 0:
+            match role:
+                case Qt.ItemDataRole.DisplayRole:
+                    return self.__tr(
+                        "System default ({value})",
+                        "DisplayRole",
+                    ).format(
+                        value=self._unit_system_map[self._default]["name"],
+                    )
+                case Qt.ItemDataRole.AccessibleTextRole:
+                    return self.__tr(
+                        "System default, currently {value}",
+                        "AccessibleTextRole",
+                    ).format(
+                        value=self._unit_system_map[self._default]["name"],
+                    )
+                case Qt.ItemDataRole.UserRole:
+                    return ""
             return None
 
         match role:
             case Qt.ItemDataRole.DisplayRole:
-                return self.__systems[index.row()]["name"]
-            case Qt.ItemDataRole.EditRole:
-                return self.__systems[index.row()]["id"]
+                return self._unit_systems[index.row() - 1]["name"]
             case Qt.ItemDataRole.UserRole:
-                return self.__systems[index.row()]["id"]
+                return self._unit_systems[index.row() - 1]["id"]
+
         return None
 
 
@@ -98,9 +139,10 @@ class CasaGeoToolsPoliticalViewModel(QAbstractListModel):
 
     def __init__(self, parent: QObject | None = None) -> None:
         super().__init__(parent)
-        self._default_view = {
-            "code": "",
-            "name": self.__tr("Default", "Political View"),
+        self._default = preferredPoliticalViewFromLocale(QLocale()) or "XXX"
+        self._international_view = {
+            "code": "XXX",
+            "name": self.__tr("International", "Political View"),
         }
         # Sadly QLocale.countryToString() does not return localized names.
         self._views = [
@@ -120,10 +162,12 @@ class CasaGeoToolsPoliticalViewModel(QAbstractListModel):
             {"code": "URY", "name": self.__tr("Uruguay", "Political View")},
             {"code": "VNM", "name": self.__tr("Vietnam", "Political View")},
         ]
+        self._view_map = {elem["code"]: elem for elem in self._views}
+        self._view_map[self._international_view["code"]] = self._international_view
 
     @override
     def rowCount(self, parent: QModelIndex | None = None) -> int:
-        return len(self._views) + 1
+        return len(self._views) + 2
 
     @override
     def headerData(
@@ -145,18 +189,41 @@ class CasaGeoToolsPoliticalViewModel(QAbstractListModel):
     def data(
         self, index: QModelIndex, role: int = Qt.ItemDataRole.DisplayRole
     ) -> str | None:
-        if not index.isValid() or index.row() >= self.rowCount() or index.column() != 0:
+        if not (index.isValid() and 0 <= index.row() < self.rowCount()):
             return None
 
-        item = self._default_view if index.row() == 0 else self._views[index.row() - 1]
+        if index.row() == 0:
+            match role:
+                case Qt.ItemDataRole.DisplayRole:
+                    return self.__tr(
+                        "System default ({value})",
+                        "DisplayRole",
+                    ).format(
+                        value=self._view_map[self._default]["name"],
+                    )
+                case Qt.ItemDataRole.AccessibleTextRole:
+                    return self.__tr(
+                        "System default, currently {value}",
+                        "AccessibleTextRole",
+                    ).format(
+                        value=self._view_map[self._default]["name"],
+                    )
+                case Qt.ItemDataRole.UserRole:
+                    return ""
+            return None
+
+        item = (
+            self._international_view
+            if index.row() == 1
+            else self._views[index.row() - 2]
+        )
 
         match role:
             case Qt.ItemDataRole.DisplayRole:
                 return item["name"]
-            case Qt.ItemDataRole.EditRole:
-                return item["code"]
             case Qt.ItemDataRole.UserRole:
                 return item["code"]
+
         return None
 
     @override
