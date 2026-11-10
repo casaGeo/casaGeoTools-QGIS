@@ -118,7 +118,7 @@ build-devrelease() {
 
 	# shellcheck disable=SC2064
 	trap "uv version -- ${oldversion@Q}" EXIT
-	uv version --bump "dev=$releasedate"
+	uv version -- "${oldversion}.0.${releasedate}"
 
 	package
 }

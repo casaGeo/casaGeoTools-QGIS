@@ -1,6 +1,8 @@
 [project]
 name = "casaGeoTools-QGIS"
-version = "1.1.0.dev0"
+# QGIS uses string comparison instead of version comparison, so symbolic
+# suffices like .dev are not supported.
+version = "0.9.9"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
 description = "HERE Connector for QGIS"
@@ -38,6 +40,8 @@ reportImplicitOverride = "warning"
 name = "casaGeoTools for QGIS"
 qgisMinimumVersion = "3.44"  # QgsGeometry.from_shapely()
 qgisMaximumVersion = "4.99"
+# Should we determine this dynamically from the version number?
+# experimental = $(RX='^[1-9]\d*\.\d+\.\d+$' yq -r '.project.version // "" | test(strenv(RX)) | not' pyproject.toml)
 experimental = true
 tags = ["analysis", "geocoding", "routing"]
 icon = "assets/casageotools.png"
