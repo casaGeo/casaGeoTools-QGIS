@@ -9,6 +9,7 @@
 author = "casaGeo Data + Services GmbH"
 project = "casaGeoTools QGIS Plugin"
 project_copyright = "2026, casaGeo Data + Services GmbH"
+# TODO: Parse version and release from pyproject.toml
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

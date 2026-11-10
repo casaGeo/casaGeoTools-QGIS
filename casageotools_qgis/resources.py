@@ -17,6 +17,7 @@
 import os
 from typing import cast
 
+# TODO: Parse this information from requirements.txt.
 LIBRARY_IDENTIFIER = "casaGeoTools"
 MINIMUM_REQUIRED_LIBRARY_VERSION = (1, 1, 0)
 
