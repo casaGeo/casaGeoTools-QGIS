@@ -38,7 +38,7 @@ class QgisNetworkBackend(NetworkBackend):
 
     @override
     def setup(self, client: CasaGeoClient, **kwargs) -> None:
-        self.auth_header = client.apikey.encode()
+        self.auth_header = b"Token " + client.apikey.encode()
         self.server_url = QUrl(client.server_url)
 
     @override
