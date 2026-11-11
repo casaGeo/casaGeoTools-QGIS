@@ -113,7 +113,7 @@ class CasaGeoToolsPlugin:
 
     @cached_property
     def name(self) -> str:
-        return self.__tr("casaGeoTools", "Plugin name")
+        return self.__tr("casaGeoTools")
 
     @cached_property
     def icon(self) -> QIcon:
@@ -334,13 +334,7 @@ class CasaGeoToolsPlugin:
 
     @cached_property
     def installPythonDependenciesAction(self) -> QAction:
-        action = QAction(
-            self.icon,
-            self.__tr(
-                "Install Python dependencies...",
-                "Install Python dependencies action",
-            ),
-        )
+        action = QAction(self.icon, self.__tr("Install Python dependencies..."))
         action.triggered.connect(self.installPythonDependencies)
         return action
 
@@ -349,8 +343,7 @@ class CasaGeoToolsPlugin:
 
         info_title = ""
         info_text = self.__tr(
-            "Dependencies for {plugin} are currently being installed. Please wait...",
-            "Message bar text",
+            "Dependencies for {plugin} are currently being installed. Please wait..."
         ).format(plugin=self.identifier)
         info_level = Qgis.MessageLevel.Info
 
@@ -378,20 +371,20 @@ class CasaGeoToolsPlugin:
 
             if successful:
                 messageBar.pushMessage(
-                    self.__tr("Installation Successful", "Message bar title"),
+                    self.__tr("Installation Successful"),
                     self.__tr(
-                        "Dependencies for {plugin} are now installed. Please restart QGIS for the changes to take effect.",
-                        "Message bar text",
+                        "Dependencies for {plugin} are now installed. "
+                        "Please restart QGIS for the changes to take effect."
                     ).format(plugin=self.identifier),
                     level=Qgis.MessageLevel.Success,
                     duration=0,
                 )
             else:
                 messageBar.pushMessage(
-                    self.__tr("Installation Failed", "Message bar title"),
+                    self.__tr("Installation Failed"),
                     self.__tr(
-                        "Dependencies for {plugin} could not be installed. Please check the Log Messages panel.",
-                        "Message bar text",
+                        "Dependencies for {plugin} could not be installed. "
+                        "Please check the Log Messages panel."
                     ).format(plugin=self.identifier),
                     level=Qgis.MessageLevel.Critical,
                     duration=0,
@@ -422,14 +415,9 @@ class CasaGeoToolsPlugin:
 
     @cached_property
     def showDocumentationAction(self) -> QAction:
-        action = QAction(
-            self.icon, self.__tr("casaGeoTools Documentation", "Documentation action")
-        )
+        action = QAction(self.icon, self.__tr("casaGeoTools Documentation"))
         action.setStatusTip(
-            self.__tr(
-                "Open casaGeoTools plugin documentation in the browser",
-                "Documentation action",
-            )
+            self.__tr("Open casaGeoTools plugin documentation in the browser")
         )
         action.triggered.connect(self.showDocumentation)
         return action
@@ -458,9 +446,7 @@ class CasaGeoToolsPlugin:
 
     @cached_property
     def showSettingsAction(self) -> QAction:
-        action = QAction(
-            self.icon, self.__tr("casaGeoTools Settings", "Settings action")
-        )
+        action = QAction(self.icon, self.__tr("casaGeoTools Settings"))
         action.triggered.connect(self.showSettings)
         return action
 

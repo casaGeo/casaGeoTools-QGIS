@@ -172,7 +172,7 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addParameter(
             QgsProcessingParameterField(
                 self.REQUEST_ID_FIELD,
-                self.__tr("Request ID field", "Parameter"),
+                self.__tr("Request ID (field)", "Parameter"),
                 parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.Numeric,
                 optional=True,
@@ -361,7 +361,7 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addParameter(
             QgsProcessingParameterNumber(
                 self.LIMIT,
-                self.__tr("Limit"),
+                self.__tr("Limit", "Parameter"),
                 Qgis.ProcessingNumberParameterType.Integer,
                 defaultValue=DEFAULT_GEOCODE_LIMIT,
                 minValue=MINIMUM_GEOCODE_LIMIT,
@@ -382,7 +382,7 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addParameter(
             QgsProcessingParameterString(
                 self.COUNTRIES,
-                self.__tr("Search countries (separated by commas)"),
+                self.__tr("Search countries (separated by commas)", "Parameter"),
                 optional=True,
             )
         )
@@ -400,7 +400,7 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addParameter(
             QgsProcessingParameterEnum(
                 self.ADDRESS_NAMES_MODE,
-                self.__tr("Address names mode"),
+                self.__tr("Address names mode", "Parameter"),
                 options=map(trAddressNamesMode, AddressNamesMode),
                 defaultValue=trAddressNamesMode(DEFAULT_ADDRESS_NAMES_MODE),
             )
@@ -419,7 +419,7 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addParameter(
             QgsProcessingParameterEnum(
                 self.POSTAL_CODE_MODE,
-                self.__tr("Postal code mode"),
+                self.__tr("Postal code mode", "Parameter"),
                 options=map(trPostalCodeMode, PostalCodeMode),
                 defaultValue=trPostalCodeMode(DEFAULT_POSTAL_CODE_MODE),
             )
@@ -438,7 +438,7 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addParameter(
             QgsProcessingParameterBoolean(
                 self.WITH_ADDRESS_DETAILS,
-                self.__tr("Include address details"),
+                self.__tr("Include address details", "Parameter"),
                 defaultValue=True,
             )
         )
@@ -446,7 +446,7 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addParameter(
             QgsProcessingParameterBoolean(
                 self.WITH_MATCH_QUALITY,
-                self.__tr("Include match quality"),
+                self.__tr("Include match quality", "Parameter"),
                 defaultValue=True,
             )
         )
@@ -454,7 +454,7 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT_LOCATIONS,
-                self.__tr("Geocoded locations"),
+                self.__tr("Geocoded locations", "Parameter"),
                 Qgis.ProcessingSourceType.VectorPoint,
             )
         )
@@ -462,7 +462,7 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT_NAVIGATIONS,
-                self.__tr("Geocoded navigation points"),
+                self.__tr("Geocoded navigation points", "Parameter"),
                 Qgis.ProcessingSourceType.VectorPoint,
             )
         )

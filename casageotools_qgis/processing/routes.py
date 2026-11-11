@@ -126,18 +126,14 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
     def shortDescription(self) -> str:
         match self.Mode(self.mode):
             case self.Mode.SINGLE:
-                return self.__tr(
-                    "Calculate routes between two locations.", "Description (single)"
-                )
+                return self.__tr("Calculate routes between two locations.")
             case self.Mode.BATCH:
                 return self.__tr(
                     "Calculate routes between pairs of locations where the origin and destination are specified as numeric coordinates."
-                    "Description (batch)",
                 )
             case self.Mode.LINESEGMENT:
                 return self.__tr(
                     "Calculate routes between pairs of locations where the origin and destination are specified as a line segment."
-                    "Description (line segment)",
                 )
 
     @override
@@ -796,7 +792,8 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
         if len(data) > 2:
             feedback.pushWarning(
                 self.__tr(
-                    "The input layer contains intermediate waypoints. Routing with intermediate waypoints is not implemented yet and these waypoints will be ignored."
+                    "The input layer contains intermediate waypoints. "
+                    "Routing with intermediate waypoints is not implemented yet and these waypoints will be ignored."
                 )
             )
 

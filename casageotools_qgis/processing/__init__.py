@@ -156,7 +156,7 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
                 self.status_ok = False
                 self.status_message = self.__tr(
                     "Failed to parse version information for the {module} Python module. "
-                    "Please reinstall the module under Plugins > {plugin} > Install Python dependencies.",
+                    "Please reinstall the module under Plugins > {plugin} > Install Python dependencies."
                 ).format(module=LIBRARY_IDENTIFIER, plugin=self.plugin.name)
                 return
 
@@ -164,7 +164,7 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
                 self.status_ok = False
                 self.status_message = self.__tr(
                     "The {module} library is outdated, please install at least version {version}. "
-                    "You can update the library under Plugins > {plugin} > Install Python dependencies.",
+                    "You can update the library under Plugins > {plugin} > Install Python dependencies."
                 ).format(
                     module=LIBRARY_IDENTIFIER,
                     version=".".join(map(str, MINIMUM_REQUIRED_LIBRARY_VERSION)),
@@ -176,7 +176,7 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
                 self.status_ok = False
                 self.status_message = self.__tr(
                     "Please input your API key in the settings. "
-                    "You can access the plugin settings under Settings > Options > {plugin}.",
+                    "You can access the plugin settings under Settings > Options > {plugin}."
                 ).format(plugin=self.plugin.name)
                 return
 
@@ -185,17 +185,17 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
             self.status_ok = False
             self.status_message = self.__tr(
                 "The {module} Python module is not installed. "
-                "You can install missing Python modules under Plugins > {plugin} > Install Python dependencies.",
+                "You can install missing Python modules under Plugins > {plugin} > Install Python dependencies."
             ).format(module=err.name, plugin=self.plugin.name)
         except ImportError as err:
             self.status_ok = False
             self.status_message = self.__tr(
-                "The {module} module could not be imported: {err}",
+                "The {module} module could not be imported: {err}"
             ).format(module=err.name, err=str(err))
         except Exception as err:
             self.status_ok = False
             self.status_message = self.__tr(
-                "An error occurred while initializing the algorithm: {err}",
+                "An error occurred while initializing the algorithm: {err}"
             ).format(err=str(err))
 
     def _initAlgorithm(self, configuration: dict[str, Any] | None) -> None:

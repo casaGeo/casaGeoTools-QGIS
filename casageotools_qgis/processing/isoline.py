@@ -117,10 +117,11 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
     @override
     def shortHelpString(self) -> str:
-        return self.__tr("""
-        Calculates isolines around locations.
-        The input points will be converted into EPSG:4326 and the resulting isolines are EPSG:4326 polygons. There may be multiple output polygons for a single input point. 
-        """)
+        return self.__tr(
+            "Calculates isolines around locations.\n"
+            "The input points will be converted into EPSG:4326 and the resulting isolines are EPSG:4326 polygons. "
+            "There may be multiple output polygons for a single input point.\n"
+        )
 
     @override
     def _initAlgorithm(self, configuration: dict[str, Any] | None) -> None:
@@ -165,7 +166,7 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addParameter(
             QgsProcessingParameterField(
                 self.REQUEST_ID_FIELD,
-                self.__tr("Request ID field", "Parameter"),
+                self.__tr("Request ID (field)", "Parameter"),
                 parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.Numeric,
                 optional=True,

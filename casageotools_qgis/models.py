@@ -108,17 +108,11 @@ class CasaGeoToolsUnitSystemModel(QAbstractListModel):
         if index.row() == 0:
             match role:
                 case Qt.ItemDataRole.DisplayRole:
-                    return self.__tr(
-                        "System default ({value})",
-                        "DisplayRole",
-                    ).format(
+                    return self.__tr("System default ({value})").format(
                         value=self._unit_system_map[self._default]["name"],
                     )
                 case Qt.ItemDataRole.AccessibleTextRole:
-                    return self.__tr(
-                        "System default, currently {value}",
-                        "AccessibleTextRole",
-                    ).format(
+                    return self.__tr("System default, currently {value}").format(
                         value=self._unit_system_map[self._default]["name"],
                     )
                 case Qt.ItemDataRole.UserRole:
@@ -195,17 +189,11 @@ class CasaGeoToolsPoliticalViewModel(QAbstractListModel):
         if index.row() == 0:
             match role:
                 case Qt.ItemDataRole.DisplayRole:
-                    return self.__tr(
-                        "System default ({value})",
-                        "DisplayRole",
-                    ).format(
+                    return self.__tr("System default ({value})").format(
                         value=self._view_map[self._default]["name"],
                     )
                 case Qt.ItemDataRole.AccessibleTextRole:
-                    return self.__tr(
-                        "System default, currently {value}",
-                        "AccessibleTextRole",
-                    ).format(
+                    return self.__tr("System default, currently {value}").format(
                         value=self._view_map[self._default]["name"],
                     )
                 case Qt.ItemDataRole.UserRole:

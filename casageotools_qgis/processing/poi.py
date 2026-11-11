@@ -88,9 +88,9 @@ class CasaGeoToolsPoiAlgorithm(CasaGeoToolsProcessingAlgorithm):
     def displayName(self) -> str:
         match self.Mode(self.mode):
             case self.Mode.SINGLE:
-                return self.__tr("POI Search", "Algorithm")
+                return self.__tr("POI", "Algorithm")
             case self.Mode.BATCH:
-                return self.__tr("POI Search (batch)", "Algorithm")
+                return self.__tr("POI (batch)", "Algorithm")
 
     @override
     def name(self) -> str:
@@ -138,7 +138,7 @@ class CasaGeoToolsPoiAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addParameter(
             QgsProcessingParameterField(
                 self.REQUEST_ID_FIELD,
-                self.__tr("Request ID field", "Parameter"),
+                self.__tr("Request ID (field)", "Parameter"),
                 parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.Numeric,
                 optional=True,
@@ -157,7 +157,7 @@ class CasaGeoToolsPoiAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addParameter(
             QgsProcessingParameterNumber(
                 self.LIMIT,
-                self.__tr("Limit"),
+                self.__tr("Limit", "Parameter"),
                 Qgis.ProcessingNumberParameterType.Integer,
                 defaultValue=DEFAULT_POI_LIMIT,
                 minValue=MINIMUM_POI_LIMIT,
@@ -178,7 +178,7 @@ class CasaGeoToolsPoiAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addParameter(
             QgsProcessingParameterString(
                 self.COUNTRIES,
-                self.__tr("Search countries (separated by commas)"),
+                self.__tr("Search countries (separated by commas)", "Parameter"),
                 optional=True,
             )
         )
@@ -196,7 +196,7 @@ class CasaGeoToolsPoiAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addParameter(
             QgsProcessingParameterEnum(
                 self.ADDRESS_NAMES_MODE,
-                self.__tr("Address names mode"),
+                self.__tr("Address names mode", "Parameter"),
                 options=map(trAddressNamesMode, AddressNamesMode),
                 defaultValue=trAddressNamesMode(DEFAULT_ADDRESS_NAMES_MODE),
             )
@@ -215,7 +215,7 @@ class CasaGeoToolsPoiAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addParameter(
             QgsProcessingParameterEnum(
                 self.POSTAL_CODE_MODE,
-                self.__tr("Postal code mode"),
+                self.__tr("Postal code mode", "Parameter"),
                 options=map(trPostalCodeMode, PostalCodeMode),
                 defaultValue=trPostalCodeMode(DEFAULT_POSTAL_CODE_MODE),
             )
