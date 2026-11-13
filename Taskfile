@@ -74,10 +74,10 @@ deploy() {
 	local -a datadirs
 
 	plugindir=$(realpath -- "$PLUGINDIR")
-	datadirs+=$(application-data-directory)
+	datadirs=("$(application-data-directory)")
 
 	if [[ "$OSTYPE" == linux-gnu* ]]; then
-		datadirs+="$HOME/.var/app/$QGIS_FLATPAK_ID/data"
+		datadirs+=("$HOME/.var/app/$QGIS_FLATPAK_ID/data")
 	fi
 
 	for datadir in "${datadirs[@]}"; do
