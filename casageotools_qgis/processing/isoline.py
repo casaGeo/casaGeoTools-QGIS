@@ -147,7 +147,7 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT_LAYER,
-                self.__tr("Input layer", "Parameter"),
+                self.__tr("Input layer", "Input Layer"),
                 [Qgis.ProcessingSourceType.VectorPoint],
             ),
             modes={self.Mode.BATCH},
@@ -177,7 +177,7 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addParameter(
             QgsProcessingParameterPoint(
                 self.LOCATION,
-                self.__tr("Location", "Parameter"),
+                self.__tr("Location coordinates", "Parameter"),
             ),
             modes={self.Mode.SINGLE},
         )
@@ -335,7 +335,7 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT_ISOLINES,
-                self.__tr("Isoline polygons", "Parameter"),
+                self.__tr("Polygons", "Output Layer"),
                 Qgis.ProcessingSourceType.VectorPolygon,
             )
         )
@@ -343,7 +343,7 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT_NAVIGATIONS,
-                self.__tr("Isoline navigation points", "Parameter"),
+                self.__tr("Navigation points", "Output Layer"),
                 Qgis.ProcessingSourceType.VectorPoint,
             )
         )

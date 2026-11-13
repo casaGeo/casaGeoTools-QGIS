@@ -119,7 +119,7 @@ class CasaGeoToolsPoiAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT_LAYER,
-                self.__tr("Input layer", "Parameter"),
+                self.__tr("Input layer", "Input Layer"),
                 [Qgis.ProcessingSourceType.VectorPoint],
             ),
             modes={self.Mode.BATCH},
@@ -149,7 +149,7 @@ class CasaGeoToolsPoiAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addParameter(
             QgsProcessingParameterPoint(
                 self.LOCATION,
-                self.__tr("Location", "Parameter"),
+                self.__tr("Location coordinates", "Parameter"),
             ),
             modes={self.Mode.SINGLE},
         )
@@ -242,7 +242,7 @@ class CasaGeoToolsPoiAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT_LOCATIONS,
-                self.__tr("POI locations", "Parameter"),
+                self.__tr("Locations", "Output Layer"),
                 Qgis.ProcessingSourceType.VectorPoint,
             )
         )
@@ -250,7 +250,7 @@ class CasaGeoToolsPoiAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT_NAVIGATIONS,
-                self.__tr("POI navigation points", "Parameter"),
+                self.__tr("Navigation points", "Output Layer"),
                 Qgis.ProcessingSourceType.VectorPoint,
             )
         )

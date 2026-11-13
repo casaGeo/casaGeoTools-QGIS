@@ -195,7 +195,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addParameter(
             QgsProcessingParameterPoint(
                 self.ORIGIN,
-                self.__tr("Origin", "Parameter"),
+                self.__tr("Origin coordinates", "Parameter"),
             ),
             modes={self.Mode.SINGLE},
         )
@@ -221,7 +221,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addParameter(
             QgsProcessingParameterPoint(
                 self.DESTINATION,
-                self.__tr("Destination", "Parameter"),
+                self.__tr("Destination coordinates", "Parameter"),
             ),
             modes={self.Mode.SINGLE},
         )
@@ -380,7 +380,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT_ROUTES,
-                self.__tr("Calculated routes", "Parameter"),
+                self.__tr("Routes", "Output Layer"),
                 Qgis.ProcessingSourceType.VectorLine,
             )
         )
@@ -388,7 +388,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT_NAVIGATIONS,
-                self.__tr("Routing navigation points", "Parameter"),
+                self.__tr("Navigation points", "Output Layer"),
                 Qgis.ProcessingSourceType.VectorPoint,
             )
         )

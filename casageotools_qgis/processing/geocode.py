@@ -153,7 +153,7 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT_LAYER,
-                self.__tr("Input layer", "Parameter"),
+                self.__tr("Input layer", "Input Layer"),
                 [Qgis.ProcessingSourceType.Vector],
             ),
             modes={self.Mode.BATCH},
@@ -345,7 +345,7 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addParameter(
             QgsProcessingParameterPoint(
                 self.POSITION,
-                self.__tr("Search center", "Parameter"),
+                self.__tr("Search center coordinates", "Parameter"),
                 optional=True,
             )
         )
@@ -454,7 +454,7 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT_LOCATIONS,
-                self.__tr("Geocoded locations", "Parameter"),
+                self.__tr("Locations", "Output Layer"),
                 Qgis.ProcessingSourceType.VectorPoint,
             )
         )
@@ -462,7 +462,7 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT_NAVIGATIONS,
-                self.__tr("Geocoded navigation points", "Parameter"),
+                self.__tr("Navigation points", "Output Layer"),
                 Qgis.ProcessingSourceType.VectorPoint,
             )
         )
