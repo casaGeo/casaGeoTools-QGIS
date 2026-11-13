@@ -516,8 +516,8 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
     </message>
     <message>
         <location filename="../plugin.py" line="337"/>
-        <source>Install Python dependencies...</source>
-        <translation type="unfinished"></translation>
+        <source>Install Python dependencies</source>
+        <translation>Python-Abhängigkeiten installieren</translation>
     </message>
     <message>
         <location filename="../plugin.py" line="346"/>

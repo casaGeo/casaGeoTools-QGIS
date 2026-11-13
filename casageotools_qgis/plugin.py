@@ -334,7 +334,7 @@ class CasaGeoToolsPlugin:
 
     @cached_property
     def installPythonDependenciesAction(self) -> QAction:
-        action = QAction(self.icon, self.__tr("Install Python dependencies..."))
+        action = QAction(self.icon, self.__tr("Install Python dependencies"))
         action.triggered.connect(self.installPythonDependencies)
         return action
 

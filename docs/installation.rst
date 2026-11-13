@@ -9,7 +9,7 @@ Installation Instructions
 This extension requires the ``casaGeoTools`` package and it’s dependencies to be
 installed in your QGIS Python environment. Core functionality will be
 unavailable otherwise. You can find the list of dependencies and their required
-versions in the file ``requirements.txt`` in the plugin directory.
+versions in the file :file:`requirements.txt` in the plugin directory.
 
 The recommended way to install this plugin’s Python dependencies is to use the
 automatic installation method described below.
@@ -31,7 +31,8 @@ the correct Python interpreter** before entering the commands below into the
 corresponding shell. It should be the same interpreter used by QGIS with all
 corresponding environment variables set to the right values. You also have to
 take care not to accidentally install a newer version of one of the QGIS core
-dependencies, which is why the commands below use a ``constraints.txt`` file.
+dependencies, which is why the commands below use a :file:`constraints.txt`
+file.
 
 
 Windows
