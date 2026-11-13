@@ -182,114 +182,6 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         self._addParameter(
             QgsProcessingParameterString(
-                self.ADDRESS,
-                self.__tr("Free-form address", "Parameter"),
-                optional=True,
-            )
-        )
-        self._addParameter(
-            QgsProcessingParameterField(
-                self.ADDRESS_FIELD,
-                self.__tr("Free-form address (field)", "Parameter"),
-                parentLayerParameterName=self.INPUT_LAYER,
-                type=Qgis.ProcessingFieldParameterDataType.String,
-                optional=True,
-            ),
-            modes={self.Mode.BATCH},
-        )
-
-        self._addParameter(
-            QgsProcessingParameterString(
-                self.COUNTRY,
-                self.__tr("Country", "Parameter"),
-                optional=True,
-            )
-        )
-        self._addParameter(
-            QgsProcessingParameterField(
-                self.COUNTRY_FIELD,
-                self.__tr("Country (field)", "Parameter"),
-                parentLayerParameterName=self.INPUT_LAYER,
-                type=Qgis.ProcessingFieldParameterDataType.String,
-                optional=True,
-            ),
-            modes={self.Mode.BATCH},
-        )
-
-        self._addParameter(
-            QgsProcessingParameterString(
-                self.STATE,
-                self.__tr("State", "Parameter"),
-                optional=True,
-            )
-        )
-        self._addParameter(
-            QgsProcessingParameterField(
-                self.STATE_FIELD,
-                self.__tr("State (field)", "Parameter"),
-                parentLayerParameterName=self.INPUT_LAYER,
-                type=Qgis.ProcessingFieldParameterDataType.String,
-                optional=True,
-            ),
-            modes={self.Mode.BATCH},
-        )
-
-        self._addParameter(
-            QgsProcessingParameterString(
-                self.COUNTY,
-                self.__tr("County", "Parameter"),
-                optional=True,
-            )
-        )
-        self._addParameter(
-            QgsProcessingParameterField(
-                self.COUNTY_FIELD,
-                self.__tr("County (field)", "Parameter"),
-                parentLayerParameterName=self.INPUT_LAYER,
-                type=Qgis.ProcessingFieldParameterDataType.String,
-                optional=True,
-            ),
-            modes={self.Mode.BATCH},
-        )
-
-        self._addParameter(
-            QgsProcessingParameterString(
-                self.CITY,
-                self.__tr("City", "Parameter"),
-                optional=True,
-            )
-        )
-        self._addParameter(
-            QgsProcessingParameterField(
-                self.CITY_FIELD,
-                self.__tr("City (field)", "Parameter"),
-                parentLayerParameterName=self.INPUT_LAYER,
-                type=Qgis.ProcessingFieldParameterDataType.String,
-                optional=True,
-            ),
-            modes={self.Mode.BATCH},
-        )
-
-        self._addParameter(
-            QgsProcessingParameterString(
-                self.DISTRICT,
-                self.__tr("District", "Parameter"),
-                optional=True,
-            )
-        )
-        self._addParameter(
-            QgsProcessingParameterField(
-                self.DISTRICT_FIELD,
-                self.__tr("District (field)", "Parameter"),
-                parentLayerParameterName=self.INPUT_LAYER,
-                type=Qgis.ProcessingFieldParameterDataType.String,
-                optional=True,
-            ),
-            modes={self.Mode.BATCH},
-        )
-
-        self._addParameter(
-            QgsProcessingParameterString(
                 self.STREET,
                 self.__tr("Street (and optionally house number)", "Parameter"),
                 optional=True,
@@ -335,6 +227,114 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
             QgsProcessingParameterField(
                 self.POSTALCODE_FIELD,
                 self.__tr("Postal code (field)", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
+                type=Qgis.ProcessingFieldParameterDataType.String,
+                optional=True,
+            ),
+            modes={self.Mode.BATCH},
+        )
+
+        self._addParameter(
+            QgsProcessingParameterString(
+                self.DISTRICT,
+                self.__tr("District", "Parameter"),
+                optional=True,
+            )
+        )
+        self._addParameter(
+            QgsProcessingParameterField(
+                self.DISTRICT_FIELD,
+                self.__tr("District (field)", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
+                type=Qgis.ProcessingFieldParameterDataType.String,
+                optional=True,
+            ),
+            modes={self.Mode.BATCH},
+        )
+
+        self._addParameter(
+            QgsProcessingParameterString(
+                self.CITY,
+                self.__tr("City", "Parameter"),
+                optional=True,
+            )
+        )
+        self._addParameter(
+            QgsProcessingParameterField(
+                self.CITY_FIELD,
+                self.__tr("City (field)", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
+                type=Qgis.ProcessingFieldParameterDataType.String,
+                optional=True,
+            ),
+            modes={self.Mode.BATCH},
+        )
+
+        self._addParameter(
+            QgsProcessingParameterString(
+                self.COUNTY,
+                self.__tr("County", "Parameter"),
+                optional=True,
+            )
+        )
+        self._addParameter(
+            QgsProcessingParameterField(
+                self.COUNTY_FIELD,
+                self.__tr("County (field)", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
+                type=Qgis.ProcessingFieldParameterDataType.String,
+                optional=True,
+            ),
+            modes={self.Mode.BATCH},
+        )
+
+        self._addParameter(
+            QgsProcessingParameterString(
+                self.STATE,
+                self.__tr("State", "Parameter"),
+                optional=True,
+            )
+        )
+        self._addParameter(
+            QgsProcessingParameterField(
+                self.STATE_FIELD,
+                self.__tr("State (field)", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
+                type=Qgis.ProcessingFieldParameterDataType.String,
+                optional=True,
+            ),
+            modes={self.Mode.BATCH},
+        )
+
+        self._addParameter(
+            QgsProcessingParameterString(
+                self.COUNTRY,
+                self.__tr("Country", "Parameter"),
+                optional=True,
+            )
+        )
+        self._addParameter(
+            QgsProcessingParameterField(
+                self.COUNTRY_FIELD,
+                self.__tr("Country (field)", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
+                type=Qgis.ProcessingFieldParameterDataType.String,
+                optional=True,
+            ),
+            modes={self.Mode.BATCH},
+        )
+
+        self._addParameter(
+            QgsProcessingParameterString(
+                self.ADDRESS,
+                self.__tr("Free-form address", "Parameter"),
+                optional=True,
+            )
+        )
+        self._addParameter(
+            QgsProcessingParameterField(
+                self.ADDRESS_FIELD,
+                self.__tr("Free-form address (field)", "Parameter"),
                 parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
