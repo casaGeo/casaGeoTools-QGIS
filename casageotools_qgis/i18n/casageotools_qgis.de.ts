@@ -114,7 +114,7 @@
         <location filename="../processing/geocode.py" line="156"/>
         <source>Input layer</source>
         <comment>Input Layer</comment>
-        <translation type="unfinished">Eingabe-Layer</translation>
+        <translation>Eingabe-Layer</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="193"/>
@@ -406,6 +406,29 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
     </message>
 </context>
 <context>
+    <name>CasaGeoToolsOptions</name>
+    <message>
+        <location filename="../plugin.py" line="429"/>
+        <source>casaGeo API Key</source>
+        <translation>casaGeo API-Schlüssel</translation>
+    </message>
+    <message>
+        <location filename="../plugin.py" line="438"/>
+        <source>Preferred output language</source>
+        <translation>Ausgabesprache</translation>
+    </message>
+    <message>
+        <location filename="../plugin.py" line="446"/>
+        <source>Preferred unit system</source>
+        <translation>Einheitensystem</translation>
+    </message>
+    <message>
+        <location filename="../plugin.py" line="454"/>
+        <source>Preferred political view</source>
+        <translation>Politische Sicht</translation>
+    </message>
+</context>
+<context>
     <name>CasaGeoToolsOptionsPage</name>
     <message>
         <location filename="../ui/OptionsPage.ui" line="20"/>
@@ -451,67 +474,47 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
         <translation>casaGeoTools</translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="136"/>
-        <source>Your casaGeo API Key</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugin.py" line="145"/>
-        <source>Preferred output language</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugin.py" line="153"/>
-        <source>Preferred unit system</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugin.py" line="161"/>
-        <source>Preferred political view</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../plugin.py" line="333"/>
+        <location filename="../plugin.py" line="286"/>
         <source>Install Python dependencies</source>
         <translation>Python-Abhängigkeiten installieren</translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="342"/>
+        <location filename="../plugin.py" line="295"/>
         <source>Dependencies for {plugin} are currently being installed. Please wait...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="370"/>
+        <location filename="../plugin.py" line="323"/>
         <source>Installation Successful</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="372"/>
+        <location filename="../plugin.py" line="325"/>
         <source>Dependencies for {plugin} are now installed. Please restart QGIS for the changes to take effect.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="380"/>
+        <location filename="../plugin.py" line="333"/>
         <source>Installation Failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="382"/>
+        <location filename="../plugin.py" line="335"/>
         <source>Dependencies for {plugin} could not be installed. Please check the Log Messages panel.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="414"/>
+        <location filename="../plugin.py" line="367"/>
         <source>casaGeoTools Documentation</source>
         <translation>casaGeoTools-Dokumentation</translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="416"/>
+        <location filename="../plugin.py" line="369"/>
         <source>Open casaGeoTools plugin documentation in the browser</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="445"/>
+        <location filename="../plugin.py" line="398"/>
         <source>casaGeoTools Settings</source>
         <translation>casaGeoTools-Einstellungen</translation>
     </message>
@@ -522,7 +525,7 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
         <location filename="../processing/poi.py" line="131"/>
         <source>Request ID</source>
         <comment>Parameter</comment>
-        <translation type="unfinished">Verarbeitungs-ID</translation>
+        <translation>Verarbeitungs-ID</translation>
     </message>
     <message>
         <location filename="../processing/poi.py" line="170"/>
@@ -558,7 +561,7 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
         <location filename="../processing/poi.py" line="122"/>
         <source>Input layer</source>
         <comment>Input Layer</comment>
-        <translation type="unfinished">Eingabe-Layer</translation>
+        <translation>Eingabe-Layer</translation>
     </message>
     <message>
         <location filename="../processing/poi.py" line="141"/>
@@ -778,7 +781,7 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
         <location filename="../processing/routes.py" line="187"/>
         <source>Request ID field</source>
         <comment>Parameter</comment>
-        <translation type="unfinished">Feld für Verarbeitungs-ID</translation>
+        <translation>Feld für Verarbeitungs-ID</translation>
     </message>
     <message>
         <location filename="../processing/routes.py" line="205"/>
