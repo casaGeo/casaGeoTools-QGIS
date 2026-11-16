@@ -5,7 +5,7 @@ name = "casaGeoTools-QGIS"
 version = "0.9.9"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
-description = "HERE Connector for QGIS"
+description = "casaGeoTools for QGIS"
 readme = "README.md"
 authors = [{ name = "casaGeo Data + Services GmbH", email = "info@casageo.de" }]
 requires-python = ">=3.12"
