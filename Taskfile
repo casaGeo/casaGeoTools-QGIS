@@ -27,10 +27,10 @@ PLUGINDIR="$PLUGIN_ID"
 
 # Requires:
 # - QGIS 3 or 4 for the PyQGIS API
-# - qt6-qtbase-devel for rcc
+# - qt6-qtbase-devel for rcc and uic
 # - qt6-linguist for lupdate-pro and lrelease-pro
-# - python3-pyqt6-base for pyuic6
 # - pandoc
+# - yq
 
 QGIS_PYTHON=/usr/bin/python3
 QGIS_PROFILE=default
@@ -178,8 +178,11 @@ build-translations() {
 }
 
 build-forms-and-resources() {
-	pyuic6 -- "$PLUGINDIR/ui"
-	sed -i 's/^from PyQt6/from qgis.PyQt/' -- "$PLUGINDIR/ui"/*.py
+	local form
+	for form in "$PLUGINDIR/ui"/*.ui; do
+		uic --generator=python --from-imports --output="${form%.ui}.py" -- "$form"
+	done
+	sed -i -E 's/^from Py(Qt|Side)6/from qgis.PyQt/' -- "$PLUGINDIR/ui"/*.py
 }
 
 build-docs() {

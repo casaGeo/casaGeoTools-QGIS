@@ -48,6 +48,9 @@ icon = "assets/casageotools.png"
 category = "Vector"
 hasProcessingProvider = true
 
+[tool.ruff]
+extend-exclude = ["casageotools_qgis/ui/[!_]*.py"]
+
 [tool.ruff.format]
 preview = true
 
