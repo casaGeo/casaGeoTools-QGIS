@@ -51,9 +51,8 @@ from .resources import (
     PLUGIN_I18N_DIRECTORY,
     PLUGIN_IDENTIFIER,
 )
+from .translations import CasaGeoToolsTranslations
 from .utils import (
-    CasaGeoToolsCoderTranslator,
-    CasaGeoToolsSpatialTranslator,
     TrMethod,
     ensure,
 )
@@ -120,12 +119,8 @@ class CasaGeoToolsPlugin:
         return QIcon(os.path.join(self.assets_directory, "casageotools.png"))
 
     @cached_property
-    def coderTranslator(self) -> CasaGeoToolsCoderTranslator:
-        return CasaGeoToolsCoderTranslator(self)
-
-    @cached_property
-    def spatialTranslator(self) -> CasaGeoToolsSpatialTranslator:
-        return CasaGeoToolsSpatialTranslator(self)
+    def translations(self) -> CasaGeoToolsTranslations:
+        return CasaGeoToolsTranslations(self)
 
     # Settings
 

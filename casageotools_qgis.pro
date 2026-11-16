@@ -13,6 +13,7 @@ SOURCES = \
     casageotools_qgis/processing/poi.py \
     casageotools_qgis/processing/routes.py \
     casageotools_qgis/resources.py \
+    casageotools_qgis/translations.py \
     casageotools_qgis/utils.py \
     casageotools_qgis/utilscg.py
 

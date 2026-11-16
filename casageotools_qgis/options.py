@@ -45,8 +45,8 @@ class CasaGeoToolsOptionsPage(QgsOptionsPageWidget):
         super().__init__(parent)
         self._plugin = plugin
         self._ui = Ui_CasaGeoToolsOptionsPage()
-        self._unit_system_model = CasaGeoToolsUnitSystemModel()
-        self._political_views_model = CasaGeoToolsPoliticalViewModel()
+        self._unit_system_model = CasaGeoToolsUnitSystemModel(plugin)
+        self._political_views_model = CasaGeoToolsPoliticalViewModel(plugin)
 
         self._ui.setupUi(self)
         self._ui.languagePrefLineEdit.setPlaceholderText(

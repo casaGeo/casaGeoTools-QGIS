@@ -137,12 +137,12 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
             TransportMode,
         )
 
-        translator = self.plugin.spatialTranslator
-        trRangeUnit = translator.translateRangeUnit
-        trTransportMode = translator.translateTransportMode
-        trRoutingMode = translator.translateRoutingMode
-        trDirectionType = translator.translateDirectionType
-        trAvoidableFeature = translator.translateAvoidableFeature
+        translations = self.plugin.translations
+        trRangeUnit = translations.translateRangeUnit
+        trTransportMode = translations.translateTransportMode
+        trRoutingMode = translations.translateRoutingMode
+        trDirectionType = translations.translateDirectionType
+        trAvoidableFeature = translations.translateAvoidableFeature
 
         self._addParameter(
             QgsProcessingParameterFeatureSource(

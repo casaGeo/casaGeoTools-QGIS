@@ -15,7 +15,7 @@
 #  SPDX-License-Identifier: Apache-2.0
 
 from collections.abc import Mapping
-from typing import Final, override
+from typing import TYPE_CHECKING, Final, override
 
 from qgis.PyQt.QtCore import (
     QT_VERSION,
@@ -28,6 +28,10 @@ from qgis.PyQt.QtCore import (
 )
 
 from .utils import QT_VERSION_CHECK, TrMethod
+
+if TYPE_CHECKING:
+    from .plugin import CasaGeoToolsPlugin
+
 
 POLITICAL_VIEW_QLOCALE_ALPHA3_MAPPING: Final[Mapping[QLocale.Country, str]] = {
     QLocale.Country.Argentina: "ARG",
@@ -70,12 +74,15 @@ def preferredPoliticalViewFromLocale(locale: QLocale) -> str | None:
 class CasaGeoToolsUnitSystemModel(QAbstractListModel):
     __tr = TrMethod()
 
-    def __init__(self, parent: QObject | None = None) -> None:
+    def __init__(
+        self, plugin: "CasaGeoToolsPlugin", parent: QObject | None = None
+    ) -> None:
         super().__init__(parent)
+        trUnitSystem = plugin.translations.translateUnitSystem
         self._default = preferredUnitSystemFromLocale(QLocale()) or "metric"
         self._unit_systems = [
-            {"id": "metric", "name": self.__tr("Metric", "Unit System")},
-            {"id": "imperial", "name": self.__tr("Imperial", "Unit System")},
+            {"id": "metric", "name": trUnitSystem("metric")},
+            {"id": "imperial", "name": trUnitSystem("imperial")},
         ]
         self._unit_system_map = {elem["id"]: elem for elem in self._unit_systems}
 
@@ -131,30 +138,30 @@ class CasaGeoToolsUnitSystemModel(QAbstractListModel):
 class CasaGeoToolsPoliticalViewModel(QAbstractListModel):
     __tr = TrMethod()
 
-    def __init__(self, parent: QObject | None = None) -> None:
+    def __init__(
+        self, plugin: "CasaGeoToolsPlugin", parent: QObject | None = None
+    ) -> None:
         super().__init__(parent)
+        trPoliticalView = plugin.translations.translatePoliticalView
         self._default = preferredPoliticalViewFromLocale(QLocale()) or "XXX"
-        self._international_view = {
-            "code": "XXX",
-            "name": self.__tr("International", "Political View"),
-        }
+        self._international_view = {"code": "XXX", "name": trPoliticalView("XXX")}
         # Sadly QLocale.countryToString() does not return localized names.
         self._views = [
-            {"code": "ARG", "name": self.__tr("Argentina", "Political View")},
-            {"code": "EGY", "name": self.__tr("Egypt", "Political View")},
-            {"code": "KEN", "name": self.__tr("Kenya", "Political View")},
-            {"code": "IND", "name": self.__tr("India", "Political View")},
-            {"code": "MAR", "name": self.__tr("Morocco", "Political View")},
-            {"code": "PAK", "name": self.__tr("Pakistan", "Political View")},
-            {"code": "RUS", "name": self.__tr("Russia", "Political View")},
-            {"code": "SDN", "name": self.__tr("Sudan", "Political View")},
-            {"code": "SRB", "name": self.__tr("Serbia", "Political View")},
-            {"code": "SUR", "name": self.__tr("Suriname", "Political View")},
-            {"code": "SYR", "name": self.__tr("Syria", "Political View")},
-            {"code": "TUR", "name": self.__tr("Türkiye", "Political View")},
-            {"code": "TZA", "name": self.__tr("Tanzania", "Political View")},
-            {"code": "URY", "name": self.__tr("Uruguay", "Political View")},
-            {"code": "VNM", "name": self.__tr("Vietnam", "Political View")},
+            {"code": "ARG", "name": trPoliticalView("ARG")},
+            {"code": "EGY", "name": trPoliticalView("EGY")},
+            {"code": "KEN", "name": trPoliticalView("KEN")},
+            {"code": "IND", "name": trPoliticalView("IND")},
+            {"code": "MAR", "name": trPoliticalView("MAR")},
+            {"code": "PAK", "name": trPoliticalView("PAK")},
+            {"code": "RUS", "name": trPoliticalView("RUS")},
+            {"code": "SDN", "name": trPoliticalView("SDN")},
+            {"code": "SRB", "name": trPoliticalView("SRB")},
+            {"code": "SUR", "name": trPoliticalView("SUR")},
+            {"code": "SYR", "name": trPoliticalView("SYR")},
+            {"code": "TUR", "name": trPoliticalView("TUR")},
+            {"code": "TZA", "name": trPoliticalView("TZA")},
+            {"code": "URY", "name": trPoliticalView("URY")},
+            {"code": "VNM", "name": trPoliticalView("VNM")},
         ]
         self._view_map = {elem["code"]: elem for elem in self._views}
         self._view_map[self._international_view["code"]] = self._international_view

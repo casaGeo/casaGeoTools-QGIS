@@ -146,9 +146,9 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
             PostalCodeMode,
         )
 
-        translator = self.plugin.coderTranslator
-        trAddressNamesMode = translator.translateAddressNamesMode
-        trPostalCodeMode = translator.translatePostalCodeMode
+        translations = self.plugin.translations
+        trAddressNamesMode = translations.translateAddressNamesMode
+        trPostalCodeMode = translations.translatePostalCodeMode
 
         self._addParameter(
             QgsProcessingParameterFeatureSource(

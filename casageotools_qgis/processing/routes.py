@@ -149,10 +149,10 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             TransportMode,
         )
 
-        translator = self.plugin.spatialTranslator
-        trTransportMode = translator.translateTransportMode
-        trRoutingMode = translator.translateRoutingMode
-        trAvoidableFeature = translator.translateAvoidableFeature
+        translations = self.plugin.translations
+        trTransportMode = translations.translateTransportMode
+        trRoutingMode = translations.translateRoutingMode
+        trAvoidableFeature = translations.translateAvoidableFeature
 
         self._addParameter(
             QgsProcessingParameterFeatureSource(
