@@ -51,6 +51,7 @@ setup-venv() {
 
 check() {
 	git ls-files -z -- "$PLUGINDIR/*.py" | xargs -0 uv run scripts/check_tr_calls.py
+	git ls-files -z -- "$PLUGINDIR/*.ts" | xargs -0 lcheck --check-finished --no-place-marker --
 }
 
 update() {
