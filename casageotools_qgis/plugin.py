@@ -323,6 +323,7 @@ class CasaGeoToolsPlugin:
         return os.path.join(self.help_directory, path)
 
     def helpUrl(self, path: str = "index.html", fragment: str | None = None) -> QUrl:
+        # TODO: Change this to https://docs.casageo.de/casageotools-qgis/
         url = QUrl.fromLocalFile(self.helpFile(path))
         url.setFragment(fragment)
         return url
@@ -402,7 +403,7 @@ class CasaGeoToolsPlugin:
         # IMPORTANT: The ownership transfer from Python to C++ in
         # QgsTaskManager::addTask() appears to be broken; we have to
         # keep a reference to the QgsTask object around, or it will be
-        # cancelled and deleted as soon as it goes out of scope.
+        # canceled and deleted as soon as it goes out of scope.
 
         if ensure(QgsApplication.taskManager()).addTask(task):
             self.__install_python_dependencies_task = task

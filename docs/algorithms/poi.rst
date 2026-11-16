@@ -12,7 +12,6 @@ POI Algorithm
 Single Request Mode
 ===================
 
-
 .. _algorithm-poi-batch:
 
 Batch Request Mode

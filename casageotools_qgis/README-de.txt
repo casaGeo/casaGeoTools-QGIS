@@ -1,5 +1,3 @@
-Thank you for choosing casaGeoTools for QGIS.
-
 Sie können diese Erweiterung direkt über die QGIS-Oberfläche installieren.
 Öffnen Sie dazu das Menü unter "Erweiterungen" > "Erweiterungen verwalten und
 installieren..." > "Aus ZIP installieren" und wählen Sie die Plugin-ZIP-Datei

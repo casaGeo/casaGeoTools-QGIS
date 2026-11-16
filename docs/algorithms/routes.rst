@@ -12,7 +12,6 @@ Routes Algorithm
 Single Request Mode
 ===================
 
-
 .. _algorithm-routes-batch:
 
 Batch Request Mode

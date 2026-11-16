@@ -12,7 +12,6 @@ Geocode Algorithm
 Single Request Mode
 ===================
 
-
 .. _algorithm-geocode-batch:
 
 Batch Request Mode

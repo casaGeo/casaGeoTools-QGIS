@@ -1,9 +1,5 @@
 # Changelog
 
-<!-- Version 0.2.0  -->
-<!-- - Added this   -->
-<!-- - Removed that -->
+Version 1.0.0
 
-Version 0.1.0
-
-- First developmental release
+- Initial release with support for geocoding, POI, isolines and routing

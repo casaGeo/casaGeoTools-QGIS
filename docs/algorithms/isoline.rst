@@ -12,7 +12,6 @@ Isoline Algorithm
 Single Request Mode
 ===================
 
-
 .. _algorithm-isoline-batch:
 
 Batch Request Mode
