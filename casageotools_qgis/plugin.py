@@ -25,7 +25,6 @@ from qgis.core import (
     QgsMessageLog,
     QgsSettingsEntryString,
     QgsSettingsTree,
-    QgsSettingsTreeNode,
     QgsTask,
 )
 from qgis.gui import (
@@ -60,7 +59,7 @@ from .utils import (
 if TYPE_CHECKING:
     from casageo.tools import CasaGeoClient
 
-    from .options import CasaGeoToolsOptionsWidgetFactory
+    from .optionsgui import CasaGeoToolsOptionsWidgetFactory
     from .processing import CasaGeoToolsProcessingProvider
 
 
@@ -93,6 +92,7 @@ class CasaGeoToolsPlugin:
     __tr = TrMethod()
 
     translator: QTranslator
+    options: "CasaGeoToolsOptions"
     processing_provider: "CasaGeoToolsProcessingProvider"
     options_widget_factory: "CasaGeoToolsOptionsWidgetFactory"
 
@@ -122,45 +122,6 @@ class CasaGeoToolsPlugin:
     def translations(self) -> CasaGeoToolsTranslations:
         return CasaGeoToolsTranslations(self)
 
-    # Settings
-
-    @cached_property
-    def settings(self) -> QgsSettingsTreeNode:
-        return ensure(QgsSettingsTree.createPluginTreeNode(self.identifier))
-
-    @cached_property
-    def settingApikey(self) -> QgsSettingsEntryString:
-        return QgsSettingsEntryString(
-            "apikey",
-            self.identifier,
-            description=self.__tr("Your casaGeo API Key"),
-            maxLength=64,
-        )
-
-    @cached_property
-    def settingLanguage(self) -> QgsSettingsEntryString:
-        return QgsSettingsEntryString(
-            "language",
-            self.identifier,
-            description=self.__tr("Preferred output language"),
-        )
-
-    @cached_property
-    def settingUnitSystem(self) -> QgsSettingsEntryString:
-        return QgsSettingsEntryString(
-            "unitSystem",
-            self.identifier,
-            description=self.__tr("Preferred unit system"),
-        )
-
-    @cached_property
-    def settingPoliticalView(self) -> QgsSettingsEntryString:
-        return QgsSettingsEntryString(
-            "politicalView",
-            self.identifier,
-            description=self.__tr("Preferred political view"),
-        )
-
     # Primary Interface
 
     def __init__(self, iface: QgisInterface) -> None:
@@ -172,15 +133,7 @@ class CasaGeoToolsPlugin:
         if self.translator.load(QLocale(), self.identifier, ".", self.i18n_directory):
             QCoreApplication.installTranslator(self.translator)
 
-        # The settings tree system is kind of unintuitive and/or buggy
-        # regarding the registration of child settings. What seems to
-        # work is creating the child setting with the PLUGIN_IDENTIFIER
-        # and then manually registering it afterward (even though it
-        # should register itself automatically).
-        self.settings.registerChildSetting(self.settingApikey, None)
-        self.settings.registerChildSetting(self.settingLanguage, None)
-        self.settings.registerChildSetting(self.settingUnitSystem, None)
-        self.settings.registerChildSetting(self.settingPoliticalView, None)
+        self.options = CasaGeoToolsOptions(self)
 
     def initProcessing(self) -> None:
         """
@@ -204,7 +157,7 @@ class CasaGeoToolsPlugin:
         This is the main entry point of the plugin, which initializes
         all graphical and processing components.
         """
-        from .options import CasaGeoToolsOptionsWidgetFactory
+        from .optionsgui import CasaGeoToolsOptionsWidgetFactory
 
         self.initProcessing()
 
@@ -289,20 +242,20 @@ class CasaGeoToolsPlugin:
 
         locale = QLocale()
         client = CasaGeoClient(
-            self.settingApikey.value(),
+            self.options.apikey.value(),
             network_backend=QgisNetworkBackend(feedback=feedback),
             preferred_language=(
-                self.settingLanguage.value()
+                self.options.language.value()
                 or ",".join(preferredLanguagesFromLocale(locale))
                 or None
             ),
             preferred_unit_system=(
-                self.settingUnitSystem.value()
+                self.options.unitSystem.value()
                 or preferredUnitSystemFromLocale(locale)
                 or None
             ),
             preferred_political_view=(
-                self.settingPoliticalView.value()
+                self.options.politicalView.value()
                 or preferredPoliticalViewFromLocale(locale)
                 or None
             ),
@@ -449,3 +402,54 @@ class CasaGeoToolsPlugin:
     def showSettings(self) -> None:
         """Show the plugin settings dialog."""
         self.iface.showOptionsDialog(self.iface.mainWindow(), self.identifier)
+
+
+class CasaGeoToolsOptions:
+    __tr = TrMethod()
+
+    def __init__(self, plugin: "CasaGeoToolsPlugin"):
+        # The settings tree system is kind of unintuitive and/or buggy
+        # regarding the registration of child settings. What seems to
+        # work is creating the child setting with the plugin identifier
+        # and then manually registering it afterward (even though it
+        # should register itself automatically).
+
+        self._plugin = plugin
+        self._node = ensure(QgsSettingsTree.createPluginTreeNode(plugin.identifier))
+        self._node.registerChildSetting(self.apikey, None)
+        self._node.registerChildSetting(self.language, None)
+        self._node.registerChildSetting(self.unitSystem, None)
+        self._node.registerChildSetting(self.politicalView, None)
+
+    @cached_property
+    def apikey(self) -> QgsSettingsEntryString:
+        return QgsSettingsEntryString(
+            "apikey",
+            self._plugin.identifier,
+            description=self.__tr("casaGeo API Key"),
+            maxLength=64,
+        )
+
+    @cached_property
+    def language(self) -> QgsSettingsEntryString:
+        return QgsSettingsEntryString(
+            "language",
+            self._plugin.identifier,
+            description=self.__tr("Preferred output language"),
+        )
+
+    @cached_property
+    def unitSystem(self) -> QgsSettingsEntryString:
+        return QgsSettingsEntryString(
+            "unitSystem",
+            self._plugin.identifier,
+            description=self.__tr("Preferred unit system"),
+        )
+
+    @cached_property
+    def politicalView(self) -> QgsSettingsEntryString:
+        return QgsSettingsEntryString(
+            "politicalView",
+            self._plugin.identifier,
+            description=self.__tr("Preferred political view"),
+        )

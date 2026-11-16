@@ -68,27 +68,27 @@ class CasaGeoToolsOptionsPage(QgsOptionsPageWidget):
         self.loadSettings()
 
     def loadSettings(self) -> None:
-        self._ui.apikeyLineEdit.setText(self._plugin.settingApikey.value())
-        self._ui.languagePrefLineEdit.setText(self._plugin.settingLanguage.value())
+        self._ui.apikeyLineEdit.setText(self._plugin.options.apikey.value())
+        self._ui.languagePrefLineEdit.setText(self._plugin.options.language.value())
         self._ui.unitsPrefComboBox.setCurrentIndex(
             self._ui.unitsPrefComboBox.findData(pref)
-            if (pref := self._plugin.settingUnitSystem.value())
+            if (pref := self._plugin.options.unitSystem.value())
             else 0
         )
         self._ui.politicalPrefComboBox.setCurrentIndex(
             self._ui.politicalPrefComboBox.findData(pref)
-            if (pref := self._plugin.settingPoliticalView.value())
+            if (pref := self._plugin.options.politicalView.value())
             else 0
         )
 
     @override
     def apply(self) -> None:
-        self._plugin.settingApikey.setValue(self._ui.apikeyLineEdit.text())
-        self._plugin.settingLanguage.setValue(self._ui.languagePrefLineEdit.text())
-        self._plugin.settingUnitSystem.setValue(
+        self._plugin.options.apikey.setValue(self._ui.apikeyLineEdit.text())
+        self._plugin.options.language.setValue(self._ui.languagePrefLineEdit.text())
+        self._plugin.options.unitSystem.setValue(
             self._ui.unitsPrefComboBox.currentData()
         )
-        self._plugin.settingPoliticalView.setValue(
+        self._plugin.options.politicalView.setValue(
             self._ui.politicalPrefComboBox.currentData()
         )
 

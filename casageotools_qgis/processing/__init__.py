@@ -172,7 +172,7 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
                 )
                 return
 
-            if not self.plugin.settingApikey.value():
+            if not self.plugin.options.apikey.value():
                 self.status_ok = False
                 self.status_message = self.__tr(
                     "Please input your API key in the settings. "

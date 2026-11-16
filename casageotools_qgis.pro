@@ -5,7 +5,7 @@ SOURCES = \
     casageotools_qgis/__init__.py \
     casageotools_qgis/install.py \
     casageotools_qgis/models.py \
-    casageotools_qgis/options.py \
+    casageotools_qgis/optionsgui.py \
     casageotools_qgis/plugin.py \
     casageotools_qgis/processing/__init__.py \
     casageotools_qgis/processing/geocode.py \
