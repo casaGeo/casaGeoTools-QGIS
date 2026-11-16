@@ -2,45 +2,6 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="de_DE">
 <context>
-    <name>CasaGeoToolsCoderTranslator</name>
-    <message>
-        <location filename="../utils.py" line="95"/>
-        <source>Default</source>
-        <comment>Address names mode</comment>
-        <translation>Standard</translation>
-    </message>
-    <message>
-        <location filename="../utils.py" line="96"/>
-        <source>Matched</source>
-        <comment>Address names mode</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../utils.py" line="97"/>
-        <source>Normalized</source>
-        <comment>Address names mode</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../utils.py" line="100"/>
-        <source>Default</source>
-        <comment>Postal code mode</comment>
-        <translation>Standard</translation>
-    </message>
-    <message>
-        <location filename="../utils.py" line="101"/>
-        <source>City lookup</source>
-        <comment>Postal code mode</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../utils.py" line="102"/>
-        <source>District lookup</source>
-        <comment>Postal code mode</comment>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>CasaGeoToolsGeocodeAlgorithm</name>
     <message>
         <location filename="../processing/geocode.py" line="121"/>
@@ -60,12 +21,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/geocode.py" line="156"/>
-        <source>Input layer</source>
-        <comment>Parameter</comment>
-        <translation>Eingabe-Layer</translation>
-    </message>
-    <message>
         <location filename="../processing/geocode.py" line="165"/>
         <source>Request ID</source>
         <comment>Parameter</comment>
@@ -78,49 +33,49 @@
         <translation>Feld für Verarbeitungs-ID</translation>
     </message>
     <message>
-        <location filename="../processing/geocode.py" line="186"/>
+        <location filename="../processing/geocode.py" line="330"/>
         <source>Free-form address</source>
         <comment>Parameter</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/geocode.py" line="193"/>
+        <location filename="../processing/geocode.py" line="337"/>
         <source>Free-form address (field)</source>
         <comment>Parameter</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/geocode.py" line="204"/>
+        <location filename="../processing/geocode.py" line="312"/>
         <source>Country</source>
         <comment>Parameter</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/geocode.py" line="211"/>
+        <location filename="../processing/geocode.py" line="319"/>
         <source>Country (field)</source>
         <comment>Parameter</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/geocode.py" line="222"/>
+        <location filename="../processing/geocode.py" line="294"/>
         <source>State</source>
         <comment>Parameter</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/geocode.py" line="229"/>
+        <location filename="../processing/geocode.py" line="301"/>
         <source>State (field)</source>
         <comment>Parameter</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/geocode.py" line="240"/>
+        <location filename="../processing/geocode.py" line="276"/>
         <source>County</source>
         <comment>Parameter</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/geocode.py" line="247"/>
+        <location filename="../processing/geocode.py" line="283"/>
         <source>County (field)</source>
         <comment>Parameter</comment>
         <translation type="unfinished"></translation>
@@ -138,56 +93,62 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/geocode.py" line="276"/>
+        <location filename="../processing/geocode.py" line="240"/>
         <source>District</source>
         <comment>Parameter</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/geocode.py" line="283"/>
+        <location filename="../processing/geocode.py" line="247"/>
         <source>District (field)</source>
         <comment>Parameter</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/geocode.py" line="294"/>
+        <location filename="../processing/geocode.py" line="186"/>
         <source>Street (and optionally house number)</source>
         <comment>Parameter</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/geocode.py" line="301"/>
+        <location filename="../processing/geocode.py" line="156"/>
+        <source>Input layer</source>
+        <comment>Input Layer</comment>
+        <translation type="unfinished">Eingabe-Layer</translation>
+    </message>
+    <message>
+        <location filename="../processing/geocode.py" line="193"/>
         <source>Street (field)</source>
         <comment>Parameter</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/geocode.py" line="312"/>
+        <location filename="../processing/geocode.py" line="204"/>
         <source>House number</source>
         <comment>Parameter</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/geocode.py" line="319"/>
+        <location filename="../processing/geocode.py" line="211"/>
         <source>House number (field)</source>
         <comment>Parameter</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/geocode.py" line="330"/>
+        <location filename="../processing/geocode.py" line="222"/>
         <source>Postal code</source>
         <comment>Parameter</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/geocode.py" line="337"/>
+        <location filename="../processing/geocode.py" line="229"/>
         <source>Postal code (field)</source>
         <comment>Parameter</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="348"/>
-        <source>Search center</source>
+        <source>Search center coordinates</source>
         <comment>Parameter</comment>
         <translation type="unfinished"></translation>
     </message>
@@ -234,18 +195,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/geocode.py" line="457"/>
-        <source>Geocoded locations</source>
-        <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/geocode.py" line="465"/>
-        <source>Geocoded navigation points</source>
-        <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../processing/geocode.py" line="374"/>
         <source>Limit (field)</source>
         <comment>Parameter</comment>
@@ -267,6 +216,18 @@
         <location filename="../processing/geocode.py" line="430"/>
         <source>Postal code mode (field)</source>
         <comment>Parameter</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/geocode.py" line="457"/>
+        <source>Locations</source>
+        <comment>Output Layer</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/geocode.py" line="465"/>
+        <source>Navigation points</source>
+        <comment>Output Layer</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -300,16 +261,10 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/isoline.py" line="150"/>
-        <source>Input layer</source>
-        <comment>Parameter</comment>
-        <translation type="unfinished">Eingabe-Layer</translation>
-    </message>
-    <message>
         <location filename="../processing/isoline.py" line="159"/>
         <source>Request ID</source>
         <comment>Parameter</comment>
-        <translation type="unfinished">Verarbeitungs-ID</translation>
+        <translation>Verarbeitungs-ID</translation>
     </message>
     <message>
         <location filename="../processing/isoline.py" line="121"/>
@@ -319,6 +274,12 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../processing/isoline.py" line="150"/>
+        <source>Input layer</source>
+        <comment>Input Layer</comment>
+        <translation>Eingabe-Layer</translation>
+    </message>
+    <message>
         <location filename="../processing/isoline.py" line="169"/>
         <source>Request ID (field)</source>
         <comment>Parameter</comment>
@@ -326,7 +287,7 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
     </message>
     <message>
         <location filename="../processing/isoline.py" line="180"/>
-        <source>Location</source>
+        <source>Location coordinates</source>
         <comment>Parameter</comment>
         <translation type="unfinished"></translation>
     </message>
@@ -428,14 +389,14 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
     </message>
     <message>
         <location filename="../processing/isoline.py" line="338"/>
-        <source>Isoline polygons</source>
-        <comment>Parameter</comment>
+        <source>Polygons</source>
+        <comment>Output Layer</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../processing/isoline.py" line="346"/>
-        <source>Isoline navigation points</source>
-        <comment>Parameter</comment>
+        <source>Navigation points</source>
+        <comment>Output Layer</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -446,11 +407,6 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
 </context>
 <context>
     <name>CasaGeoToolsOptionsPage</name>
-    <message>
-        <location filename="../ui/OptionsPage.ui" line="14"/>
-        <source>Form</source>
-        <translation type="unfinished"></translation>
-    </message>
     <message>
         <location filename="../ui/OptionsPage.ui" line="20"/>
         <source>Credentials</source>
@@ -490,72 +446,72 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
 <context>
     <name>CasaGeoToolsPlugin</name>
     <message>
-        <location filename="../plugin.py" line="116"/>
+        <location filename="../plugin.py" line="115"/>
         <source>casaGeoTools</source>
         <translation>casaGeoTools</translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="141"/>
+        <location filename="../plugin.py" line="136"/>
         <source>Your casaGeo API Key</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="150"/>
+        <location filename="../plugin.py" line="145"/>
         <source>Preferred output language</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="158"/>
+        <location filename="../plugin.py" line="153"/>
         <source>Preferred unit system</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="166"/>
+        <location filename="../plugin.py" line="161"/>
         <source>Preferred political view</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="337"/>
+        <location filename="../plugin.py" line="333"/>
         <source>Install Python dependencies</source>
         <translation>Python-Abhängigkeiten installieren</translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="346"/>
+        <location filename="../plugin.py" line="342"/>
         <source>Dependencies for {plugin} are currently being installed. Please wait...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="374"/>
+        <location filename="../plugin.py" line="370"/>
         <source>Installation Successful</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="376"/>
+        <location filename="../plugin.py" line="372"/>
         <source>Dependencies for {plugin} are now installed. Please restart QGIS for the changes to take effect.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="384"/>
+        <location filename="../plugin.py" line="380"/>
         <source>Installation Failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="386"/>
+        <location filename="../plugin.py" line="382"/>
         <source>Dependencies for {plugin} could not be installed. Please check the Log Messages panel.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="418"/>
+        <location filename="../plugin.py" line="414"/>
         <source>casaGeoTools Documentation</source>
         <translation>casaGeoTools-Dokumentation</translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="420"/>
+        <location filename="../plugin.py" line="416"/>
         <source>Open casaGeoTools plugin documentation in the browser</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="449"/>
+        <location filename="../plugin.py" line="445"/>
         <source>casaGeoTools Settings</source>
         <translation>casaGeoTools-Einstellungen</translation>
     </message>
@@ -563,22 +519,10 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
 <context>
     <name>CasaGeoToolsPoiAlgorithm</name>
     <message>
-        <location filename="../processing/poi.py" line="122"/>
-        <source>Input layer</source>
-        <comment>Parameter</comment>
-        <translation type="unfinished">Eingabe-Layer</translation>
-    </message>
-    <message>
         <location filename="../processing/poi.py" line="131"/>
         <source>Request ID</source>
         <comment>Parameter</comment>
         <translation type="unfinished">Verarbeitungs-ID</translation>
-    </message>
-    <message>
-        <location filename="../processing/poi.py" line="152"/>
-        <source>Location</source>
-        <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../processing/poi.py" line="170"/>
@@ -611,10 +555,22 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../processing/poi.py" line="122"/>
+        <source>Input layer</source>
+        <comment>Input Layer</comment>
+        <translation type="unfinished">Eingabe-Layer</translation>
+    </message>
+    <message>
         <location filename="../processing/poi.py" line="141"/>
         <source>Request ID (field)</source>
         <comment>Parameter</comment>
         <translation>Feld für Verarbeitungs-ID</translation>
+    </message>
+    <message>
+        <location filename="../processing/poi.py" line="152"/>
+        <source>Location coordinates</source>
+        <comment>Parameter</comment>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../processing/poi.py" line="160"/>
@@ -654,14 +610,14 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
     </message>
     <message>
         <location filename="../processing/poi.py" line="245"/>
-        <source>POI locations</source>
-        <comment>Parameter</comment>
+        <source>Locations</source>
+        <comment>Output Layer</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../processing/poi.py" line="253"/>
-        <source>POI navigation points</source>
-        <comment>Parameter</comment>
+        <source>Navigation points</source>
+        <comment>Output Layer</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -673,113 +629,17 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
 <context>
     <name>CasaGeoToolsPoliticalViewModel</name>
     <message>
-        <location filename="../models.py" line="139"/>
-        <source>International</source>
-        <comment>Political View</comment>
-        <translation>International</translation>
-    </message>
-    <message>
-        <location filename="../models.py" line="143"/>
-        <source>Argentina</source>
-        <comment>Political View</comment>
-        <translation>Argentinien</translation>
-    </message>
-    <message>
-        <location filename="../models.py" line="144"/>
-        <source>Egypt</source>
-        <comment>Political View</comment>
-        <translation>Ägypten</translation>
-    </message>
-    <message>
-        <location filename="../models.py" line="145"/>
-        <source>Kenya</source>
-        <comment>Political View</comment>
-        <translation>Kenia</translation>
-    </message>
-    <message>
-        <location filename="../models.py" line="146"/>
-        <source>India</source>
-        <comment>Political View</comment>
-        <translation>Indien</translation>
-    </message>
-    <message>
-        <location filename="../models.py" line="147"/>
-        <source>Morocco</source>
-        <comment>Political View</comment>
-        <translation>Marokko</translation>
-    </message>
-    <message>
-        <location filename="../models.py" line="148"/>
-        <source>Pakistan</source>
-        <comment>Political View</comment>
-        <translation>Pakistan</translation>
-    </message>
-    <message>
-        <location filename="../models.py" line="149"/>
-        <source>Russia</source>
-        <comment>Political View</comment>
-        <translation>Russland</translation>
-    </message>
-    <message>
-        <location filename="../models.py" line="150"/>
-        <source>Sudan</source>
-        <comment>Political View</comment>
-        <translation>Sudan</translation>
-    </message>
-    <message>
-        <location filename="../models.py" line="151"/>
-        <source>Serbia</source>
-        <comment>Political View</comment>
-        <translation>Serbien</translation>
-    </message>
-    <message>
-        <location filename="../models.py" line="152"/>
-        <source>Suriname</source>
-        <comment>Political View</comment>
-        <translation>Suriname</translation>
-    </message>
-    <message>
-        <location filename="../models.py" line="153"/>
-        <source>Syria</source>
-        <comment>Political View</comment>
-        <translation>Syrien</translation>
-    </message>
-    <message>
-        <location filename="../models.py" line="154"/>
-        <source>Türkiye</source>
-        <comment>Political View</comment>
-        <translation>Türkei</translation>
-    </message>
-    <message>
-        <location filename="../models.py" line="192"/>
+        <location filename="../models.py" line="199"/>
         <source>System default ({value})</source>
         <translation>Systemstandard ({value})</translation>
     </message>
     <message>
-        <location filename="../models.py" line="196"/>
+        <location filename="../models.py" line="203"/>
         <source>System default, currently {value}</source>
         <translation>Systemstandard, aktuell {value}</translation>
     </message>
     <message>
-        <location filename="../models.py" line="155"/>
-        <source>Tanzania</source>
-        <comment>Political View</comment>
-        <translation>Tansania</translation>
-    </message>
-    <message>
-        <location filename="../models.py" line="156"/>
-        <source>Uruguay</source>
-        <comment>Political View</comment>
-        <translation>Uruguay</translation>
-    </message>
-    <message>
-        <location filename="../models.py" line="157"/>
-        <source>Vietnam</source>
-        <comment>Political View</comment>
-        <translation>Vietnam</translation>
-    </message>
-    <message>
-        <location filename="../models.py" line="178"/>
+        <location filename="../models.py" line="185"/>
         <source>Political View</source>
         <comment>Column Header</comment>
         <translation>Politische Sicht</translation>
@@ -921,12 +781,6 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
         <translation type="unfinished">Feld für Verarbeitungs-ID</translation>
     </message>
     <message>
-        <location filename="../processing/routes.py" line="198"/>
-        <source>Origin</source>
-        <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../processing/routes.py" line="205"/>
         <source>Origin longitude field</source>
         <comment>Parameter</comment>
@@ -939,8 +793,14 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../processing/routes.py" line="198"/>
+        <source>Origin coordinates</source>
+        <comment>Parameter</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../processing/routes.py" line="224"/>
-        <source>Destination</source>
+        <source>Destination coordinates</source>
         <comment>Parameter</comment>
         <translation type="unfinished"></translation>
     </message>
@@ -1042,14 +902,14 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
     </message>
     <message>
         <location filename="../processing/routes.py" line="383"/>
-        <source>Calculated routes</source>
-        <comment>Parameter</comment>
+        <source>Routes</source>
+        <comment>Output Layer</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../processing/routes.py" line="391"/>
-        <source>Routing navigation points</source>
-        <comment>Parameter</comment>
+        <source>Navigation points</source>
+        <comment>Output Layer</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1103,155 +963,287 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
     </message>
 </context>
 <context>
-    <name>CasaGeoToolsSpatialTranslator</name>
+    <name>CasaGeoToolsTranslations</name>
     <message>
-        <location filename="../utils.py" line="128"/>
+        <location filename="../translations.py" line="48"/>
+        <source>Metric</source>
+        <comment>Unit system</comment>
+        <translation>Metrisch</translation>
+    </message>
+    <message>
+        <location filename="../translations.py" line="49"/>
+        <source>Imperial</source>
+        <comment>Unit system</comment>
+        <translation>Angloamerikanisch</translation>
+    </message>
+    <message>
+        <location filename="../translations.py" line="52"/>
+        <source>Argentina</source>
+        <comment>Political view</comment>
+        <translation>Argentinien</translation>
+    </message>
+    <message>
+        <location filename="../translations.py" line="53"/>
+        <source>Egypt</source>
+        <comment>Political view</comment>
+        <translation>Ägypten</translation>
+    </message>
+    <message>
+        <location filename="../translations.py" line="54"/>
+        <source>Kenya</source>
+        <comment>Political view</comment>
+        <translation>Kenia</translation>
+    </message>
+    <message>
+        <location filename="../translations.py" line="55"/>
+        <source>India</source>
+        <comment>Political view</comment>
+        <translation>Indien</translation>
+    </message>
+    <message>
+        <location filename="../translations.py" line="56"/>
+        <source>Morocco</source>
+        <comment>Political view</comment>
+        <translation>Marokko</translation>
+    </message>
+    <message>
+        <location filename="../translations.py" line="57"/>
+        <source>Pakistan</source>
+        <comment>Political view</comment>
+        <translation>Pakistan</translation>
+    </message>
+    <message>
+        <location filename="../translations.py" line="58"/>
+        <source>Russia</source>
+        <comment>Political view</comment>
+        <translation>Russland</translation>
+    </message>
+    <message>
+        <location filename="../translations.py" line="59"/>
+        <source>Sudan</source>
+        <comment>Political view</comment>
+        <translation>Sudan</translation>
+    </message>
+    <message>
+        <location filename="../translations.py" line="60"/>
+        <source>Serbia</source>
+        <comment>Political view</comment>
+        <translation>Serbien</translation>
+    </message>
+    <message>
+        <location filename="../translations.py" line="61"/>
+        <source>Suriname</source>
+        <comment>Political view</comment>
+        <translation>Suriname</translation>
+    </message>
+    <message>
+        <location filename="../translations.py" line="62"/>
+        <source>Syria</source>
+        <comment>Political view</comment>
+        <translation>Syrien</translation>
+    </message>
+    <message>
+        <location filename="../translations.py" line="63"/>
+        <source>Türkiye</source>
+        <comment>Political view</comment>
+        <translation>Türkei</translation>
+    </message>
+    <message>
+        <location filename="../translations.py" line="64"/>
+        <source>Tanzania</source>
+        <comment>Political view</comment>
+        <translation>Tansania</translation>
+    </message>
+    <message>
+        <location filename="../translations.py" line="65"/>
+        <source>Uruguay</source>
+        <comment>Political view</comment>
+        <translation>Uruguay</translation>
+    </message>
+    <message>
+        <location filename="../translations.py" line="66"/>
+        <source>Vietnam</source>
+        <comment>Political view</comment>
+        <translation>Vietnam</translation>
+    </message>
+    <message>
+        <location filename="../translations.py" line="67"/>
+        <source>International</source>
+        <comment>Political view</comment>
+        <translation>International</translation>
+    </message>
+    <message>
+        <location filename="../translations.py" line="70"/>
+        <source>Default</source>
+        <comment>Address names mode</comment>
+        <translation>Standard</translation>
+    </message>
+    <message>
+        <location filename="../translations.py" line="71"/>
+        <source>Matched</source>
+        <comment>Address names mode</comment>
+        <translation>Wie angegeben</translation>
+    </message>
+    <message>
+        <location filename="../translations.py" line="72"/>
+        <source>Normalized</source>
+        <comment>Address names mode</comment>
+        <translation>Normalisiert</translation>
+    </message>
+    <message>
+        <location filename="../translations.py" line="75"/>
+        <source>Default</source>
+        <comment>Postal code mode</comment>
+        <translation>Standard</translation>
+    </message>
+    <message>
+        <location filename="../translations.py" line="76"/>
+        <source>City lookup</source>
+        <comment>Postal code mode</comment>
+        <translation>Stadt-basiert</translation>
+    </message>
+    <message>
+        <location filename="../translations.py" line="77"/>
+        <source>District lookup</source>
+        <comment>Postal code mode</comment>
+        <translation>Stadtteil-basiert</translation>
+    </message>
+    <message>
+        <location filename="../translations.py" line="80"/>
         <source>Time</source>
         <comment>Range type</comment>
         <translation>Zeit</translation>
     </message>
     <message>
-        <location filename="../utils.py" line="129"/>
+        <location filename="../translations.py" line="81"/>
         <source>Distance</source>
         <comment>Range type</comment>
         <translation>Distanz</translation>
     </message>
     <message>
-        <location filename="../utils.py" line="132"/>
+        <location filename="../translations.py" line="84"/>
         <source>Minutes</source>
         <comment>Range unit</comment>
         <translation>Minuten</translation>
     </message>
     <message>
-        <location filename="../utils.py" line="133"/>
+        <location filename="../translations.py" line="85"/>
         <source>Meters</source>
         <comment>Range unit</comment>
         <translation>Meter</translation>
     </message>
     <message>
-        <location filename="../utils.py" line="136"/>
+        <location filename="../translations.py" line="88"/>
         <source>Car</source>
         <comment>Transport mode</comment>
         <translation>PKW</translation>
     </message>
     <message>
-        <location filename="../utils.py" line="137"/>
+        <location filename="../translations.py" line="89"/>
         <source>Pedestrian</source>
         <comment>Transport mode</comment>
         <translation>Fußgänger</translation>
     </message>
     <message>
-        <location filename="../utils.py" line="138"/>
+        <location filename="../translations.py" line="90"/>
         <source>Bicycle</source>
         <comment>Transport mode</comment>
         <translation>Fahrrad</translation>
     </message>
     <message>
-        <location filename="../utils.py" line="139"/>
+        <location filename="../translations.py" line="91"/>
         <source>Truck</source>
         <comment>Transport mode</comment>
         <translation>LKW</translation>
     </message>
     <message>
-        <location filename="../utils.py" line="142"/>
+        <location filename="../translations.py" line="94"/>
         <source>Fast</source>
         <comment>Routing mode</comment>
         <translation>Schnellste Route</translation>
     </message>
     <message>
-        <location filename="../utils.py" line="143"/>
+        <location filename="../translations.py" line="95"/>
         <source>Short</source>
         <comment>Routing mode</comment>
         <translation>Kürzeste Route</translation>
     </message>
     <message>
-        <location filename="../utils.py" line="146"/>
+        <location filename="../translations.py" line="98"/>
         <source>Outgoing (From)</source>
         <comment>Direction type</comment>
-        <translation type="unfinished"></translation>
+        <translation>Vom Startpunkt weg</translation>
     </message>
     <message>
-        <location filename="../utils.py" line="147"/>
+        <location filename="../translations.py" line="99"/>
         <source>Incoming (To)</source>
         <comment>Direction type</comment>
-        <translation type="unfinished"></translation>
+        <translation>Zum Zielpunkt hin</translation>
     </message>
     <message>
-        <location filename="../utils.py" line="150"/>
+        <location filename="../translations.py" line="102"/>
         <source>Car shuttle trains</source>
         <comment>Avoidable feature</comment>
-        <translation type="unfinished"></translation>
+        <translation>Autoreisezüge</translation>
     </message>
     <message>
-        <location filename="../utils.py" line="152"/>
+        <location filename="../translations.py" line="104"/>
         <source>Controlled access highways</source>
         <comment>Avoidable feature</comment>
-        <translation type="unfinished"></translation>
+        <translation>Autobahnen</translation>
     </message>
     <message>
-        <location filename="../utils.py" line="154"/>
+        <location filename="../translations.py" line="106"/>
         <source>Dirt roads</source>
         <comment>Avoidable feature</comment>
-        <translation type="unfinished"></translation>
+        <translation>Unbefestigte Straßen</translation>
     </message>
     <message>
-        <location filename="../utils.py" line="155"/>
+        <location filename="../translations.py" line="107"/>
         <source>Ferries</source>
         <comment>Avoidable feature</comment>
-        <translation type="unfinished"></translation>
+        <translation>Fähren</translation>
     </message>
     <message>
-        <location filename="../utils.py" line="156"/>
+        <location filename="../translations.py" line="108"/>
         <source>Seasonal closures</source>
         <comment>Avoidable feature</comment>
-        <translation type="unfinished"></translation>
+        <translation>Saisonale Sperrungen</translation>
     </message>
     <message>
-        <location filename="../utils.py" line="157"/>
+        <location filename="../translations.py" line="109"/>
         <source>Toll roads</source>
         <comment>Avoidable feature</comment>
-        <translation type="unfinished"></translation>
+        <translation>Mautstraßen</translation>
     </message>
     <message>
-        <location filename="../utils.py" line="158"/>
+        <location filename="../translations.py" line="110"/>
         <source>Tunnels</source>
         <comment>Avoidable feature</comment>
-        <translation type="unfinished"></translation>
+        <translation>Tunnel</translation>
     </message>
     <message>
-        <location filename="../utils.py" line="159"/>
+        <location filename="../translations.py" line="111"/>
         <source>U-turns</source>
         <comment>Avoidable feature</comment>
-        <translation type="unfinished"></translation>
+        <translation>Wendemanöver</translation>
     </message>
 </context>
 <context>
     <name>CasaGeoToolsUnitSystemModel</name>
     <message>
-        <location filename="../models.py" line="77"/>
-        <source>Metric</source>
-        <comment>Unit System</comment>
-        <translation>Metrisch</translation>
-    </message>
-    <message>
-        <location filename="../models.py" line="78"/>
-        <source>Imperial</source>
-        <comment>Unit System</comment>
-        <translation>Angloamerikanisch</translation>
-    </message>
-    <message>
-        <location filename="../models.py" line="98"/>
+        <location filename="../models.py" line="105"/>
         <source>Unit System</source>
         <comment>Column Header</comment>
         <translation>Einheitensystem</translation>
     </message>
     <message>
-        <location filename="../models.py" line="111"/>
+        <location filename="../models.py" line="118"/>
         <source>System default ({value})</source>
         <translation>Systemstandard ({value})</translation>
     </message>
     <message>
-        <location filename="../models.py" line="115"/>
+        <location filename="../models.py" line="122"/>
         <source>System default, currently {value}</source>
         <translation>Systemstandard, aktuell {value}</translation>
     </message>
