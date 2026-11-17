@@ -7,18 +7,18 @@
         <location filename="../processing/geocode.py" line="121"/>
         <source>Geocode</source>
         <comment>Algorithm</comment>
-        <translation type="unfinished"></translation>
+        <translation>Geocode</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="123"/>
         <source>Geocode (batch)</source>
         <comment>Algorithm</comment>
-        <translation type="unfinished"></translation>
+        <translation>Geocode (Tabelle)</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="135"/>
         <source>Geocodes addresses.</source>
-        <translation type="unfinished"></translation>
+        <translation>Geocodiert Adressen.</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="165"/>
@@ -36,79 +36,79 @@
         <location filename="../processing/geocode.py" line="330"/>
         <source>Free-form address</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Adresse in Textform</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="337"/>
         <source>Free-form address (field)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Feld für Adresse in Textform</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="312"/>
         <source>Country</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Land</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="319"/>
         <source>Country (field)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Feld für Land</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="294"/>
         <source>State</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Bundesland</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="301"/>
         <source>State (field)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Feld für Bundesland</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="276"/>
         <source>County</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Kreis</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="283"/>
         <source>County (field)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Feld für Kreis</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="258"/>
         <source>City</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Stadt</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="265"/>
         <source>City (field)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Feld für Stadt</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="240"/>
         <source>District</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Stadtteil</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="247"/>
         <source>District (field)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Feld für Stadtteil</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="186"/>
         <source>Street (and optionally house number)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Straße, optional mit Hausnummer</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="156"/>
@@ -120,73 +120,73 @@
         <location filename="../processing/geocode.py" line="193"/>
         <source>Street (field)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Feld für Straße, optional mit Hausnummer</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="204"/>
         <source>House number</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Hausnummer</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="211"/>
         <source>House number (field)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Feld für Hausnummer</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="222"/>
         <source>Postal code</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Postleitzahl</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="229"/>
         <source>Postal code (field)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Feld für Postleitzahl</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="348"/>
         <source>Search center coordinates</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Koordinaten des Suchzentrums</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="355"/>
         <source>Use geometry centroid as search center</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Zentroid der Datensatz-Geometrie als Suchzentrum verwenden</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="364"/>
         <source>Limit</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Ergebnislimit</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="385"/>
         <source>Search countries (separated by commas)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Suche nur in diesen Ländern, kommagetrennt</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="403"/>
         <source>Address names mode</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Adressnamensmodus</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="422"/>
         <source>Postal code mode</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Postleitzahlmodus</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="441"/>
         <source>Include address details</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Adressdetails hinzufügen</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="449"/>
@@ -198,7 +198,7 @@
         <location filename="../processing/geocode.py" line="374"/>
         <source>Limit (field)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Feld für Ergebnislimit</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="392"/>
@@ -228,17 +228,17 @@
         <location filename="../processing/geocode.py" line="465"/>
         <source>Navigation points</source>
         <comment>Output Layer</comment>
-        <translation type="unfinished"></translation>
+        <translation>Navigationspunkte</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="582"/>
         <source>At least one input field must be specified</source>
-        <translation type="unfinished"></translation>
+        <translation>Mindestens ein Eingabefeld muss Daten enthalten</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="692"/>
         <source>Geocoding addresses</source>
-        <translation type="unfinished"></translation>
+        <translation>Geocodiere Adressen</translation>
     </message>
 </context>
 <context>
@@ -397,7 +397,7 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
         <location filename="../processing/isoline.py" line="346"/>
         <source>Navigation points</source>
         <comment>Output Layer</comment>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Navigationspunkte</translation>
     </message>
     <message>
         <location filename="../processing/isoline.py" line="486"/>
@@ -531,7 +531,7 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
         <location filename="../processing/poi.py" line="170"/>
         <source>Limit (field)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Feld für Ergebnislimit</translation>
     </message>
     <message>
         <location filename="../processing/poi.py" line="188"/>
@@ -579,25 +579,25 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
         <location filename="../processing/poi.py" line="160"/>
         <source>Limit</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Ergebnislimit</translation>
     </message>
     <message>
         <location filename="../processing/poi.py" line="181"/>
         <source>Search countries (separated by commas)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Suche nur in diesen Ländern, kommagetrennt</translation>
     </message>
     <message>
         <location filename="../processing/poi.py" line="199"/>
         <source>Address names mode</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Adressnamensmodus</translation>
     </message>
     <message>
         <location filename="../processing/poi.py" line="218"/>
         <source>Postal code mode</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Postleitzahlmodus</translation>
     </message>
     <message>
         <location filename="../processing/poi.py" line="226"/>
@@ -609,7 +609,7 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
         <location filename="../processing/poi.py" line="237"/>
         <source>Include address details</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Adressdetails hinzufügen</translation>
     </message>
     <message>
         <location filename="../processing/poi.py" line="245"/>
@@ -621,7 +621,7 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
         <location filename="../processing/poi.py" line="253"/>
         <source>Navigation points</source>
         <comment>Output Layer</comment>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Navigationspunkte</translation>
     </message>
     <message>
         <location filename="../processing/poi.py" line="390"/>
@@ -653,77 +653,77 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
     <message>
         <location filename="../processing/__init__.py" line="158"/>
         <source>Failed to parse version information for the {module} Python module. Please reinstall the module under Plugins &gt; {plugin} &gt; Install Python dependencies.</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Versionsinformationen des Python-Moduls {module} konnten nicht gelesen werden. Bitte reinstallieren Sie das Modul unter „Erweiterungen &gt; {plugin} &gt; Python-Abhängigkeiten installieren“.</translation>
     </message>
     <message>
         <location filename="../processing/__init__.py" line="166"/>
         <source>The {module} library is outdated, please install at least version {version}. You can update the library under Plugins &gt; {plugin} &gt; Install Python dependencies.</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Python-Bibliothek {module} ist veraltet, es wird mindestens Version {version} benötigt. Sie können die Bibliothek aktualisieren, indem Sie auf „Erweiterungen &gt; {plugin} &gt; Python-Abhängigkeiten installieren“ klicken.</translation>
     </message>
     <message>
         <location filename="../processing/__init__.py" line="178"/>
         <source>Please input your API key in the settings. You can access the plugin settings under Settings &gt; Options &gt; {plugin}.</source>
-        <translation type="unfinished"></translation>
+        <translation>Bitte geben Sie in den Einstellungen Ihren API-Key ein. Die Plugin-Einstellungen befinden sich unter „Einstellungen &gt; Optionen &gt; {plugin}“.</translation>
     </message>
     <message>
         <location filename="../processing/__init__.py" line="187"/>
         <source>The {module} Python module is not installed. You can install missing Python modules under Plugins &gt; {plugin} &gt; Install Python dependencies.</source>
-        <translation type="unfinished"></translation>
+        <translation>Das Python-Modul {module} ist nicht installiert. Sie können fehlende Module installieren, indem Sie auf „Erweiterungen &gt; {plugin} &gt; Python-Abhängigkeiten installieren“ klicken.</translation>
     </message>
     <message>
         <location filename="../processing/__init__.py" line="193"/>
         <source>The {module} module could not be imported: {err}</source>
-        <translation type="unfinished"></translation>
+        <translation>Das Python-Modul {module} konnte nicht importiert werden: {err}</translation>
     </message>
     <message>
         <location filename="../processing/__init__.py" line="198"/>
         <source>An error occurred while initializing the algorithm: {err}</source>
-        <translation type="unfinished"></translation>
+        <translation>Bei der Initialisierung des Verarbeitungs-Algorithmus ist ein Fehler aufgetreten: {err}</translation>
     </message>
     <message>
         <location filename="../processing/__init__.py" line="249"/>
         <source>No valid features in input layer</source>
-        <translation type="unfinished"></translation>
+        <translation>Im Eingabe-Layer befinden sich keine passenden Datensätze</translation>
     </message>
     <message>
         <location filename="../processing/__init__.py" line="259"/>
         <source>Converting input geometries</source>
-        <translation type="unfinished"></translation>
+        <translation>Konvertiere Eingabegeometrien</translation>
     </message>
     <message>
         <location filename="../processing/__init__.py" line="270"/>
         <source>Calculating results</source>
-        <translation type="unfinished"></translation>
+        <translation>Berechne Ergebnisse</translation>
     </message>
     <message>
         <location filename="../processing/__init__.py" line="282"/>
         <source>Converting results</source>
-        <translation type="unfinished"></translation>
+        <translation>Konvertiere Ergebnisse</translation>
     </message>
     <message>
         <location filename="../processing/__init__.py" line="350"/>
         <source>Unable to construct a coordinate transformation from {sourcecrs} to {destcrs} for parameter {parameter}</source>
-        <translation type="unfinished"></translation>
+        <translation>Es konnte keine Koordinatentransformation von {sourcecrs} zu {destcrs} für den Parameter {parameter} erstellt werden</translation>
     </message>
     <message>
         <location filename="../processing/__init__.py" line="362"/>
         <source>Coordinate transformation failed for parameter {parameter}: {error}</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Koordinatentransformation für den Parameter {parameter} ist fehlgeschlagen: {error}</translation>
     </message>
     <message>
         <location filename="../processing/__init__.py" line="386"/>
         <source>Error ({code}): {message}</source>
-        <translation type="unfinished"></translation>
+        <translation>Fehler ({code}): {message}</translation>
     </message>
     <message>
         <location filename="../processing/__init__.py" line="390"/>
         <source>Error ({code})</source>
-        <translation type="unfinished"></translation>
+        <translation>Fehler ({code})</translation>
     </message>
     <message>
         <location filename="../processing/__init__.py" line="397"/>
         <source>Reprojection of feature {featid} failed</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Reprojektion des Datensatzes {featid} ist fehlgeschlagen</translation>
     </message>
 </context>
 <context>
@@ -913,7 +913,7 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
         <location filename="../processing/routes.py" line="391"/>
         <source>Navigation points</source>
         <comment>Output Layer</comment>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Navigationspunkte</translation>
     </message>
     <message>
         <location filename="../processing/routes.py" line="554"/>
