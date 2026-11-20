@@ -261,10 +261,6 @@ class CasaGeoToolsPlugin:
             ),
         )
 
-        # Workaround for older server versions.
-        if client.preferred_political_view == "XXX":
-            client.preferred_political_view = None
-
         return client
 
     def helpFile(self, path: str = "index.html") -> str:
