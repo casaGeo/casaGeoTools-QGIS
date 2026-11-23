@@ -335,7 +335,7 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
         self._addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT_ISOLINES,
-                self.__tr("Polygons", "Output Layer"),
+                self.__tr("Isolines", "Output Layer"),
                 Qgis.ProcessingSourceType.VectorPolygon,
             )
         )

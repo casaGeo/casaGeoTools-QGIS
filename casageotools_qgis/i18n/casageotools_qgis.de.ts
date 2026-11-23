@@ -192,7 +192,7 @@
         <location filename="../processing/geocode.py" line="449"/>
         <source>Include match quality</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Match-Genauigkeit hinzufügen</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="374"/>
@@ -204,25 +204,25 @@
         <location filename="../processing/geocode.py" line="392"/>
         <source>Search countries (field)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Feld für die Suche nur in diesen Ländern, kommagetrennt</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="411"/>
         <source>Address names mode (field)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Feld für Adressnamensmodus</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="430"/>
         <source>Postal code mode (field)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Feld für Postleitzahlmodus</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="457"/>
         <source>Locations</source>
         <comment>Output Layer</comment>
-        <translation type="unfinished"></translation>
+        <translation>Orte</translation>
     </message>
     <message>
         <location filename="../processing/geocode.py" line="465"/>
@@ -247,13 +247,13 @@
         <location filename="../processing/isoline.py" line="102"/>
         <source>Isoline</source>
         <comment>Algorithm</comment>
-        <translation type="unfinished"></translation>
+        <translation>Isoline</translation>
     </message>
     <message>
         <location filename="../processing/isoline.py" line="104"/>
         <source>Isoline (batch)</source>
         <comment>Algorithm</comment>
-        <translation type="unfinished"></translation>
+        <translation>Isoline (Tabelle)</translation>
     </message>
     <message>
         <location filename="../processing/isoline.py" line="116"/>
@@ -289,7 +289,7 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
         <location filename="../processing/isoline.py" line="180"/>
         <source>Location coordinates</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Koordinaten des Zentralpunktes</translation>
     </message>
     <message>
         <location filename="../processing/isoline.py" line="189"/>
@@ -319,111 +319,111 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
         <location filename="../processing/isoline.py" line="225"/>
         <source>Transport mode</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Transportmodus</translation>
     </message>
     <message>
         <location filename="../processing/isoline.py" line="233"/>
         <source>Transport mode (field)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Feld für Transportmodus</translation>
     </message>
     <message>
         <location filename="../processing/isoline.py" line="244"/>
         <source>Routing mode</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Routingmodus</translation>
     </message>
     <message>
         <location filename="../processing/isoline.py" line="252"/>
         <source>Routing mode (field)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Feld für Routingmodus</translation>
     </message>
     <message>
         <location filename="../processing/isoline.py" line="263"/>
         <source>Direction</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Richtung</translation>
     </message>
     <message>
         <location filename="../processing/isoline.py" line="271"/>
         <source>Direction (field)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Feld für Richtung</translation>
     </message>
     <message>
         <location filename="../processing/isoline.py" line="282"/>
         <source>Time of departure/arrival</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Abfahrtszeit/Ankunftszeit</translation>
     </message>
     <message>
         <location filename="../processing/isoline.py" line="289"/>
         <source>Time of departure/arrival (field)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Feld für Abfahrtszeit/Ankunftszeit</translation>
     </message>
     <message>
         <location filename="../processing/isoline.py" line="300"/>
         <source>Avoid features</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Features zum Vermeiden</translation>
     </message>
     <message>
         <location filename="../processing/isoline.py" line="309"/>
         <source>Avoid features (field)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Feld für Features zum Vermeiden</translation>
     </message>
     <message>
         <location filename="../processing/isoline.py" line="320"/>
         <source>Exclude countries (separated by commas)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Länder zum Ausschließen, kommagetrennt</translation>
     </message>
     <message>
         <location filename="../processing/isoline.py" line="327"/>
         <source>Exclude countries (field)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Feld für Länder zum Ausschließen, kommagetrennt</translation>
     </message>
     <message>
         <location filename="../processing/isoline.py" line="338"/>
-        <source>Polygons</source>
+        <source>Isolines</source>
         <comment>Output Layer</comment>
-        <translation type="unfinished"></translation>
+        <translation>Isochronen</translation>
     </message>
     <message>
         <location filename="../processing/isoline.py" line="346"/>
         <source>Navigation points</source>
         <comment>Output Layer</comment>
-        <translation type="unfinished">Navigationspunkte</translation>
+        <translation>Navigationspunkte</translation>
     </message>
     <message>
         <location filename="../processing/isoline.py" line="486"/>
         <source>Calculating isolines</source>
-        <translation type="unfinished"></translation>
+        <translation>Berechne Isochronen</translation>
     </message>
 </context>
 <context>
     <name>CasaGeoToolsOptions</name>
     <message>
-        <location filename="../plugin.py" line="429"/>
+        <location filename="../plugin.py" line="425"/>
         <source>casaGeo API Key</source>
         <translation>casaGeo API-Schlüssel</translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="438"/>
+        <location filename="../plugin.py" line="434"/>
         <source>Preferred output language</source>
         <translation>Ausgabesprache</translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="446"/>
+        <location filename="../plugin.py" line="442"/>
         <source>Preferred unit system</source>
         <translation>Einheitensystem</translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="454"/>
+        <location filename="../plugin.py" line="450"/>
         <source>Preferred political view</source>
         <translation>Politische Sicht</translation>
     </message>
@@ -474,47 +474,47 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
         <translation>casaGeoTools</translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="286"/>
+        <location filename="../plugin.py" line="282"/>
         <source>Install Python dependencies</source>
         <translation>Python-Abhängigkeiten installieren</translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="295"/>
+        <location filename="../plugin.py" line="291"/>
         <source>Dependencies for {plugin} are currently being installed. Please wait...</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Python-Abhängigkeiten für {plugin} werden installiert. Bitte warten...</translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="323"/>
+        <location filename="../plugin.py" line="319"/>
         <source>Installation Successful</source>
-        <translation type="unfinished"></translation>
+        <translation>Installation erfolgreich</translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="325"/>
+        <location filename="../plugin.py" line="321"/>
         <source>Dependencies for {plugin} are now installed. Please restart QGIS for the changes to take effect.</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Python-Abhängigkeiten für {plugin} sind jetzt installiert. Bitte starten sie QGIS neu um die Änderungen anzuwenden.</translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="333"/>
+        <location filename="../plugin.py" line="329"/>
         <source>Installation Failed</source>
-        <translation type="unfinished"></translation>
+        <translation>Installation fehlgeschlagen</translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="335"/>
+        <location filename="../plugin.py" line="331"/>
         <source>Dependencies for {plugin} could not be installed. Please check the Log Messages panel.</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Python-Abhängigkeiten für {plugin} konnten nicht installiert werden. Bitte überprüfen Sie das Protokoll-Bedienfeld.</translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="367"/>
+        <location filename="../plugin.py" line="363"/>
         <source>casaGeoTools Documentation</source>
         <translation>casaGeoTools-Dokumentation</translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="369"/>
+        <location filename="../plugin.py" line="365"/>
         <source>Open casaGeoTools plugin documentation in the browser</source>
-        <translation type="unfinished"></translation>
+        <translation>Die casaGeoTools Plugin-Dokumentation im Browser öffnen</translation>
     </message>
     <message>
-        <location filename="../plugin.py" line="398"/>
+        <location filename="../plugin.py" line="394"/>
         <source>casaGeoTools Settings</source>
         <translation>casaGeoTools-Einstellungen</translation>
     </message>
@@ -531,31 +531,31 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
         <location filename="../processing/poi.py" line="170"/>
         <source>Limit (field)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished">Feld für Ergebnislimit</translation>
+        <translation>Feld für Ergebnislimit</translation>
     </message>
     <message>
         <location filename="../processing/poi.py" line="188"/>
         <source>Search countries (field)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Feld für die Suche nur in diesen Ländern, kommagetrennt</translation>
     </message>
     <message>
         <location filename="../processing/poi.py" line="207"/>
         <source>Address names mode (field)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Feld für Adressnamensmodus</translation>
     </message>
     <message>
         <location filename="../processing/poi.py" line="91"/>
         <source>POI</source>
         <comment>Algorithm</comment>
-        <translation type="unfinished"></translation>
+        <translation>POI</translation>
     </message>
     <message>
         <location filename="../processing/poi.py" line="93"/>
         <source>POI (batch)</source>
         <comment>Algorithm</comment>
-        <translation type="unfinished"></translation>
+        <translation>POI (Tabelle)</translation>
     </message>
     <message>
         <location filename="../processing/poi.py" line="122"/>
@@ -573,60 +573,60 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
         <location filename="../processing/poi.py" line="152"/>
         <source>Location coordinates</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Koordinaten des Suchzentrums</translation>
     </message>
     <message>
         <location filename="../processing/poi.py" line="160"/>
         <source>Limit</source>
         <comment>Parameter</comment>
-        <translation type="unfinished">Ergebnislimit</translation>
+        <translation>Ergebnislimit</translation>
     </message>
     <message>
         <location filename="../processing/poi.py" line="181"/>
         <source>Search countries (separated by commas)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished">Suche nur in diesen Ländern, kommagetrennt</translation>
+        <translation>Suche nur in diesen Ländern, kommagetrennt</translation>
     </message>
     <message>
         <location filename="../processing/poi.py" line="199"/>
         <source>Address names mode</source>
         <comment>Parameter</comment>
-        <translation type="unfinished">Adressnamensmodus</translation>
+        <translation>Adressnamensmodus</translation>
     </message>
     <message>
         <location filename="../processing/poi.py" line="218"/>
         <source>Postal code mode</source>
         <comment>Parameter</comment>
-        <translation type="unfinished">Postleitzahlmodus</translation>
+        <translation>Postleitzahlmodus</translation>
     </message>
     <message>
         <location filename="../processing/poi.py" line="226"/>
         <source>Postal code mode (field)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Feld für Postleitzahlmodus</translation>
     </message>
     <message>
         <location filename="../processing/poi.py" line="237"/>
         <source>Include address details</source>
         <comment>Parameter</comment>
-        <translation type="unfinished">Adressdetails hinzufügen</translation>
+        <translation>Adressdetails hinzufügen</translation>
     </message>
     <message>
         <location filename="../processing/poi.py" line="245"/>
         <source>Locations</source>
         <comment>Output Layer</comment>
-        <translation type="unfinished"></translation>
+        <translation>Orte</translation>
     </message>
     <message>
         <location filename="../processing/poi.py" line="253"/>
         <source>Navigation points</source>
         <comment>Output Layer</comment>
-        <translation type="unfinished">Navigationspunkte</translation>
+        <translation>Navigationspunkte</translation>
     </message>
     <message>
         <location filename="../processing/poi.py" line="390"/>
         <source>Searching for POIs</source>
-        <translation type="unfinished"></translation>
+        <translation>Suche nach POIs</translation>
     </message>
 </context>
 <context>
@@ -732,44 +732,44 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
         <location filename="../processing/routes.py" line="109"/>
         <source>Routes</source>
         <comment>Algorithm</comment>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../processing/routes.py" line="111"/>
         <source>Routes (batch)</source>
         <comment>Algorithm</comment>
-        <translation type="unfinished"></translation>
+        <translation>Routes (Tabelle)</translation>
     </message>
     <message>
         <location filename="../processing/routes.py" line="113"/>
         <source>Routes (line segment)</source>
         <comment>Algorithm</comment>
-        <translation type="unfinished"></translation>
+        <translation>Routes (Tabelle mit Liniensegmenten)</translation>
     </message>
     <message>
         <location filename="../processing/routes.py" line="129"/>
         <source>Calculate routes between two locations.</source>
-        <translation type="unfinished"></translation>
+        <translation>Berechnet Routen zwischen zwei Orten.</translation>
     </message>
     <message>
         <location filename="../processing/routes.py" line="132"/>
         <source>Calculate routes between pairs of locations where the origin and destination are specified as numeric coordinates.</source>
-        <translation type="unfinished"></translation>
+        <translation>Berechnet Routen zwischen Ortspaaren in Form numerischer Koordinaten.</translation>
     </message>
     <message>
         <location filename="../processing/routes.py" line="136"/>
         <source>Calculate routes between pairs of locations where the origin and destination are specified as a line segment.</source>
-        <translation type="unfinished"></translation>
+        <translation>Berechnet Routen zwischen Ortspaaren in Form von Liniensegmenten.</translation>
     </message>
     <message>
         <location filename="../processing/routes.py" line="160"/>
         <source>Layer of origin and destination coordinates</source>
-        <translation type="unfinished"></translation>
+        <translation>Layer mit Start- und Zielkoordinaten</translation>
     </message>
     <message>
         <location filename="../processing/routes.py" line="168"/>
         <source>Layer of line segments defining origin and destination</source>
-        <translation type="unfinished"></translation>
+        <translation>Layer mit Liniensegmenten</translation>
     </message>
     <message>
         <location filename="../processing/routes.py" line="177"/>
@@ -787,143 +787,143 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
         <location filename="../processing/routes.py" line="205"/>
         <source>Origin longitude field</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Feld für den Längengrad des Startpunktes</translation>
     </message>
     <message>
         <location filename="../processing/routes.py" line="214"/>
         <source>Origin latitude field</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Feld für den Breitengrad des Startpunktes</translation>
     </message>
     <message>
         <location filename="../processing/routes.py" line="198"/>
         <source>Origin coordinates</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Koordinaten des Startpunktes</translation>
     </message>
     <message>
         <location filename="../processing/routes.py" line="224"/>
         <source>Destination coordinates</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Koordinaten des Zielpunktes</translation>
     </message>
     <message>
         <location filename="../processing/routes.py" line="231"/>
         <source>Destination longitude field</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Feld für den Längengrad des Zielpunktes</translation>
     </message>
     <message>
         <location filename="../processing/routes.py" line="240"/>
         <source>Destination latitude field</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Feld für den Breitengrad des Zielpunktes</translation>
     </message>
     <message>
         <location filename="../processing/routes.py" line="250"/>
         <source>Number of alternative routes</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Anzahl an Alternativrouten</translation>
     </message>
     <message>
         <location filename="../processing/routes.py" line="260"/>
         <source>Number of alternative routes (field)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Feld für Anzahl an Alternativrouten</translation>
     </message>
     <message>
         <location filename="../processing/routes.py" line="271"/>
         <source>Transport mode</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Transportmodus</translation>
     </message>
     <message>
         <location filename="../processing/routes.py" line="279"/>
         <source>Transport mode (field)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Feld für Transportmodus</translation>
     </message>
     <message>
         <location filename="../processing/routes.py" line="290"/>
         <source>Routing mode</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Routingmodus</translation>
     </message>
     <message>
         <location filename="../processing/routes.py" line="298"/>
         <source>Routing mode (field)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Feld für Routingmodus</translation>
     </message>
     <message>
         <location filename="../processing/routes.py" line="309"/>
         <source>Departure time</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Ab­fahrts­zeit</translation>
     </message>
     <message>
         <location filename="../processing/routes.py" line="316"/>
         <source>Departure time (field)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Feld für Ab­fahrts­zeit</translation>
     </message>
     <message>
         <location filename="../processing/routes.py" line="327"/>
         <source>Arrival time</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Ankunftszeit</translation>
     </message>
     <message>
         <location filename="../processing/routes.py" line="334"/>
         <source>Arrival time (field)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Feld für Ankunftszeit</translation>
     </message>
     <message>
         <location filename="../processing/routes.py" line="345"/>
         <source>Avoid features</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Features zum Vermeiden</translation>
     </message>
     <message>
         <location filename="../processing/routes.py" line="354"/>
         <source>Avoid features (field)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Feld für Features zum Vermeiden</translation>
     </message>
     <message>
         <location filename="../processing/routes.py" line="365"/>
         <source>Exclude countries (separated by commas)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Länder zum Ausschließen, kommagetrennt</translation>
     </message>
     <message>
         <location filename="../processing/routes.py" line="372"/>
         <source>Exclude countries (field)</source>
         <comment>Parameter</comment>
-        <translation type="unfinished"></translation>
+        <translation>Feld für Länder zum Ausschließen, kommagetrennt</translation>
     </message>
     <message>
         <location filename="../processing/routes.py" line="383"/>
         <source>Routes</source>
         <comment>Output Layer</comment>
-        <translation type="unfinished"></translation>
+        <translation>Routen</translation>
     </message>
     <message>
         <location filename="../processing/routes.py" line="391"/>
         <source>Navigation points</source>
         <comment>Output Layer</comment>
-        <translation type="unfinished">Navigationspunkte</translation>
+        <translation>Navigationspunkte</translation>
     </message>
     <message>
         <location filename="../processing/routes.py" line="554"/>
         <source>Invalid geometry on feature {featureid}: {error}</source>
-        <translation type="unfinished"></translation>
+        <translation>Fehlerhafte Geometrie in Datensatz {featureid}: {error}</translation>
     </message>
     <message>
         <location filename="../processing/routes.py" line="602"/>
         <source>Calculating routes</source>
-        <translation type="unfinished"></translation>
+        <translation>Berechne Routen</translation>
     </message>
 </context>
 <context>
@@ -962,7 +962,7 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
     <message>
         <location filename="../processing/routes.py" line="804"/>
         <source>Calculating routes</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Berechne Routen</translation>
     </message>
 </context>
 <context>
@@ -1139,7 +1139,7 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
         <location filename="../translations.py" line="88"/>
         <source>Car</source>
         <comment>Transport mode</comment>
-        <translation>PKW</translation>
+        <translation>Pkw</translation>
     </message>
     <message>
         <location filename="../translations.py" line="89"/>
@@ -1157,7 +1157,7 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
         <location filename="../translations.py" line="91"/>
         <source>Truck</source>
         <comment>Transport mode</comment>
-        <translation>LKW</translation>
+        <translation>Lkw</translation>
     </message>
     <message>
         <location filename="../translations.py" line="94"/>
