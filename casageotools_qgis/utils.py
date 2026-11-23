@@ -39,7 +39,6 @@ if TYPE_CHECKING:
     from shapely.geometry.base import BaseGeometry as ShapelyBaseGeometry
 
 
-
 def QT_VERSION_CHECK(major: int, minor: int = 0, patch: int = 0, /) -> int:
     return major << 16 | minor << 8 | patch
 
@@ -54,6 +53,12 @@ class Box[T]:
     @override
     def __repr__(self) -> str:
         return f"{type(self).__name__}({self.value!r})"
+
+
+class ModuleNotAvailableError(Exception):
+    def __init__(self, name: str):
+        super().__init__(f"Module {name!r} is not available")
+        self.name = name
 
 
 class TrMethod:

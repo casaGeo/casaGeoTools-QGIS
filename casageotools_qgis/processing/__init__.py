@@ -27,6 +27,8 @@ from qgis.core import (
     QgsCsException,  # pyright: ignore[reportAttributeAccessIssue]
     QgsFeature,
     QgsFeatureRequest,
+    QgsGeometry,
+    QgsNotSupportedException,  # pyright: ignore[reportAttributeAccessIssue]
     QgsPointXY,
     QgsProcessingAlgorithm,
     QgsProcessingContext,
@@ -40,8 +42,11 @@ from qgis.core import (
 from ..resources import LIBRARY_IDENTIFIER, MINIMUM_REQUIRED_LIBRARY_VERSION
 from ..utils import (
     Box,
+    ModuleNotAvailableError,
     ProcessingFeatureSinkDefinition,
     TrMethod,
+    geometry_as_shapely,
+    geometry_from_shapely,
     parameter_crs_pairs,
     version_tuple,
 )
@@ -147,6 +152,12 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
     def initAlgorithm(self, configuration: dict[str, Any] | None = None) -> None:
         import importlib.metadata
 
+        # Most of these checks can probably be done once and the results cached
+        # in the plugin object. That would force users to restart QGIS after
+        # installing dependencies. We just have to make sure we import all
+        # required modules so Python keeps them loaded even if they are removed
+        # from disk.
+
         try:
             version_s = importlib.metadata.version(LIBRARY_IDENTIFIER)
 
@@ -172,6 +183,12 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
                 )
                 return
 
+            try:
+                geom = QgsGeometry.fromPointXY(QgsPointXY())
+                geometry_from_shapely(geometry_as_shapely(geom))
+            except QgsNotSupportedException as err:
+                raise ModuleNotAvailableError("shapely") from err
+
             if not self.plugin.options.apikey.value():
                 self.status_ok = False
                 self.status_message = self.__tr(
@@ -181,11 +198,12 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
                 return
 
             self._initAlgorithm(configuration)
-        except ModuleNotFoundError as err:
+        except (ModuleNotAvailableError, ModuleNotFoundError) as err:
             self.status_ok = False
             self.status_message = self.__tr(
                 "The {module} Python module is not installed. "
-                "You can install missing Python modules under Plugins > {plugin} > Install Python dependencies."
+                "You can install missing Python modules under Plugins > {plugin} > Install Python dependencies. "
+                "Restart QGIS afterwards for the changes to take effect."
             ).format(module=err.name, plugin=self.plugin.name)
         except ImportError as err:
             self.status_ok = False

@@ -651,77 +651,77 @@ The input points will be converted into EPSG:4326 and the resulting isolines are
 <context>
     <name>CasaGeoToolsProcessingAlgorithm</name>
     <message>
-        <location filename="../processing/__init__.py" line="158"/>
+        <location filename="../processing/__init__.py" line="169"/>
         <source>Failed to parse version information for the {module} Python module. Please reinstall the module under Plugins &gt; {plugin} &gt; Install Python dependencies.</source>
         <translation>Die Versionsinformationen des Python-Moduls {module} konnten nicht gelesen werden. Bitte reinstallieren Sie das Modul unter „Erweiterungen &gt; {plugin} &gt; Python-Abhängigkeiten installieren“.</translation>
     </message>
     <message>
-        <location filename="../processing/__init__.py" line="166"/>
+        <location filename="../processing/__init__.py" line="177"/>
         <source>The {module} library is outdated, please install at least version {version}. You can update the library under Plugins &gt; {plugin} &gt; Install Python dependencies.</source>
         <translation>Die Python-Bibliothek {module} ist veraltet, es wird mindestens Version {version} benötigt. Sie können die Bibliothek aktualisieren, indem Sie auf „Erweiterungen &gt; {plugin} &gt; Python-Abhängigkeiten installieren“ klicken.</translation>
     </message>
     <message>
-        <location filename="../processing/__init__.py" line="178"/>
+        <location filename="../processing/__init__.py" line="195"/>
         <source>Please input your API key in the settings. You can access the plugin settings under Settings &gt; Options &gt; {plugin}.</source>
         <translation>Bitte geben Sie in den Einstellungen Ihren API-Key ein. Die Plugin-Einstellungen befinden sich unter „Einstellungen &gt; Optionen &gt; {plugin}“.</translation>
     </message>
     <message>
-        <location filename="../processing/__init__.py" line="187"/>
-        <source>The {module} Python module is not installed. You can install missing Python modules under Plugins &gt; {plugin} &gt; Install Python dependencies.</source>
-        <translation>Das Python-Modul {module} ist nicht installiert. Sie können fehlende Module installieren, indem Sie auf „Erweiterungen &gt; {plugin} &gt; Python-Abhängigkeiten installieren“ klicken.</translation>
+        <location filename="../processing/__init__.py" line="204"/>
+        <source>The {module} Python module is not installed. You can install missing Python modules under Plugins &gt; {plugin} &gt; Install Python dependencies. Restart QGIS afterwards for the changes to take effect.</source>
+        <translation>Das Python-Modul {module} ist nicht installiert. Sie können fehlende Module installieren, indem Sie auf „Erweiterungen &gt; {plugin} &gt; Python-Abhängigkeiten installieren“ klicken. Anschließend müssen Sie QGIS neu starten um die Änderungen anzuwenden.</translation>
     </message>
     <message>
-        <location filename="../processing/__init__.py" line="193"/>
+        <location filename="../processing/__init__.py" line="211"/>
         <source>The {module} module could not be imported: {err}</source>
         <translation>Das Python-Modul {module} konnte nicht importiert werden: {err}</translation>
     </message>
     <message>
-        <location filename="../processing/__init__.py" line="198"/>
+        <location filename="../processing/__init__.py" line="216"/>
         <source>An error occurred while initializing the algorithm: {err}</source>
         <translation>Bei der Initialisierung des Verarbeitungs-Algorithmus ist ein Fehler aufgetreten: {err}</translation>
     </message>
     <message>
-        <location filename="../processing/__init__.py" line="249"/>
+        <location filename="../processing/__init__.py" line="267"/>
         <source>No valid features in input layer</source>
         <translation>Im Eingabe-Layer befinden sich keine passenden Datensätze</translation>
     </message>
     <message>
-        <location filename="../processing/__init__.py" line="259"/>
+        <location filename="../processing/__init__.py" line="277"/>
         <source>Converting input geometries</source>
         <translation>Konvertiere Eingabegeometrien</translation>
     </message>
     <message>
-        <location filename="../processing/__init__.py" line="270"/>
+        <location filename="../processing/__init__.py" line="288"/>
         <source>Calculating results</source>
         <translation>Berechne Ergebnisse</translation>
     </message>
     <message>
-        <location filename="../processing/__init__.py" line="282"/>
+        <location filename="../processing/__init__.py" line="300"/>
         <source>Converting results</source>
         <translation>Konvertiere Ergebnisse</translation>
     </message>
     <message>
-        <location filename="../processing/__init__.py" line="350"/>
+        <location filename="../processing/__init__.py" line="368"/>
         <source>Unable to construct a coordinate transformation from {sourcecrs} to {destcrs} for parameter {parameter}</source>
         <translation>Es konnte keine Koordinatentransformation von {sourcecrs} zu {destcrs} für den Parameter {parameter} erstellt werden</translation>
     </message>
     <message>
-        <location filename="../processing/__init__.py" line="362"/>
+        <location filename="../processing/__init__.py" line="380"/>
         <source>Coordinate transformation failed for parameter {parameter}: {error}</source>
         <translation>Die Koordinatentransformation für den Parameter {parameter} ist fehlgeschlagen: {error}</translation>
     </message>
     <message>
-        <location filename="../processing/__init__.py" line="386"/>
+        <location filename="../processing/__init__.py" line="404"/>
         <source>Error ({code}): {message}</source>
         <translation>Fehler ({code}): {message}</translation>
     </message>
     <message>
-        <location filename="../processing/__init__.py" line="390"/>
+        <location filename="../processing/__init__.py" line="408"/>
         <source>Error ({code})</source>
         <translation>Fehler ({code})</translation>
     </message>
     <message>
-        <location filename="../processing/__init__.py" line="397"/>
+        <location filename="../processing/__init__.py" line="415"/>
         <source>Reprojection of feature {featid} failed</source>
         <translation>Die Reprojektion des Datensatzes {featid} ist fehlgeschlagen</translation>
     </message>
