@@ -236,24 +236,6 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
         self._addParameter(
             QgsProcessingParameterString(
-                self.DISTRICT,
-                self.__tr("District", "Parameter"),
-                optional=True,
-            )
-        )
-        self._addParameter(
-            QgsProcessingParameterField(
-                self.DISTRICT_FIELD,
-                self.__tr("District (field)", "Parameter"),
-                parentLayerParameterName=self.INPUT_LAYER,
-                type=Qgis.ProcessingFieldParameterDataType.String,
-                optional=True,
-            ),
-            modes={self.Mode.BATCH},
-        )
-
-        self._addParameter(
-            QgsProcessingParameterString(
                 self.CITY,
                 self.__tr("City", "Parameter"),
                 optional=True,
@@ -263,6 +245,42 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
             QgsProcessingParameterField(
                 self.CITY_FIELD,
                 self.__tr("City (field)", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
+                type=Qgis.ProcessingFieldParameterDataType.String,
+                optional=True,
+            ),
+            modes={self.Mode.BATCH},
+        )
+
+        self._addParameter(
+            QgsProcessingParameterString(
+                self.COUNTRY,
+                self.__tr("Country", "Parameter"),
+                optional=True,
+            )
+        )
+        self._addParameter(
+            QgsProcessingParameterField(
+                self.COUNTRY_FIELD,
+                self.__tr("Country (field)", "Parameter"),
+                parentLayerParameterName=self.INPUT_LAYER,
+                type=Qgis.ProcessingFieldParameterDataType.String,
+                optional=True,
+            ),
+            modes={self.Mode.BATCH},
+        )
+
+        self._addParameter(
+            QgsProcessingParameterString(
+                self.DISTRICT,
+                self.__tr("District", "Parameter"),
+                optional=True,
+            )
+        )
+        self._addParameter(
+            QgsProcessingParameterField(
+                self.DISTRICT_FIELD,
+                self.__tr("District (field)", "Parameter"),
                 parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,
@@ -299,24 +317,6 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
             QgsProcessingParameterField(
                 self.STATE_FIELD,
                 self.__tr("State (field)", "Parameter"),
-                parentLayerParameterName=self.INPUT_LAYER,
-                type=Qgis.ProcessingFieldParameterDataType.String,
-                optional=True,
-            ),
-            modes={self.Mode.BATCH},
-        )
-
-        self._addParameter(
-            QgsProcessingParameterString(
-                self.COUNTRY,
-                self.__tr("Country", "Parameter"),
-                optional=True,
-            )
-        )
-        self._addParameter(
-            QgsProcessingParameterField(
-                self.COUNTRY_FIELD,
-                self.__tr("Country (field)", "Parameter"),
                 parentLayerParameterName=self.INPUT_LAYER,
                 type=Qgis.ProcessingFieldParameterDataType.String,
                 optional=True,

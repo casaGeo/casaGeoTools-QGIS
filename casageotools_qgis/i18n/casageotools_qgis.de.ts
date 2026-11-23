@@ -45,61 +45,61 @@
         <translation>Feld für Adresse in Textform</translation>
     </message>
     <message>
-        <location filename="../processing/geocode.py" line="312"/>
+        <location filename="../processing/geocode.py" line="258"/>
         <source>Country</source>
         <comment>Parameter</comment>
         <translation>Land</translation>
     </message>
     <message>
-        <location filename="../processing/geocode.py" line="319"/>
+        <location filename="../processing/geocode.py" line="265"/>
         <source>Country (field)</source>
         <comment>Parameter</comment>
         <translation>Feld für Land</translation>
     </message>
     <message>
-        <location filename="../processing/geocode.py" line="294"/>
+        <location filename="../processing/geocode.py" line="312"/>
         <source>State</source>
         <comment>Parameter</comment>
         <translation>Bundesland</translation>
     </message>
     <message>
-        <location filename="../processing/geocode.py" line="301"/>
+        <location filename="../processing/geocode.py" line="319"/>
         <source>State (field)</source>
         <comment>Parameter</comment>
         <translation>Feld für Bundesland</translation>
     </message>
     <message>
-        <location filename="../processing/geocode.py" line="276"/>
+        <location filename="../processing/geocode.py" line="294"/>
         <source>County</source>
         <comment>Parameter</comment>
         <translation>Kreis</translation>
     </message>
     <message>
-        <location filename="../processing/geocode.py" line="283"/>
+        <location filename="../processing/geocode.py" line="301"/>
         <source>County (field)</source>
         <comment>Parameter</comment>
         <translation>Feld für Kreis</translation>
     </message>
     <message>
-        <location filename="../processing/geocode.py" line="258"/>
+        <location filename="../processing/geocode.py" line="240"/>
         <source>City</source>
         <comment>Parameter</comment>
         <translation>Stadt</translation>
     </message>
     <message>
-        <location filename="../processing/geocode.py" line="265"/>
+        <location filename="../processing/geocode.py" line="247"/>
         <source>City (field)</source>
         <comment>Parameter</comment>
         <translation>Feld für Stadt</translation>
     </message>
     <message>
-        <location filename="../processing/geocode.py" line="240"/>
+        <location filename="../processing/geocode.py" line="276"/>
         <source>District</source>
         <comment>Parameter</comment>
         <translation>Stadtteil</translation>
     </message>
     <message>
-        <location filename="../processing/geocode.py" line="247"/>
+        <location filename="../processing/geocode.py" line="283"/>
         <source>District (field)</source>
         <comment>Parameter</comment>
         <translation>Feld für Stadtteil</translation>
