@@ -252,11 +252,12 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
             modes={self.Mode.BATCH},
         )
 
+        # TODO: Require at least one of these in batch-mode.
         self._addParameter(
             QgsProcessingParameterString(
                 self.COUNTRY,
                 self.__tr("Country", "Parameter"),
-                optional=True,
+                optional=(self.mode == self.Mode.BATCH),
             )
         )
         self._addParameter(
@@ -329,7 +330,9 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 self.ADDRESS,
                 self.__tr("Free-form address", "Parameter"),
                 optional=True,
-            )
+            ),
+            # TODO: Should this be enabled in batch-mode or not at all?
+            modes={self.Mode.BATCH},
         )
         self._addParameter(
             QgsProcessingParameterField(
