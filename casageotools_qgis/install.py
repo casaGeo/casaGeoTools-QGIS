@@ -16,7 +16,7 @@ CONSTRAINTS_RX = re.compile("(gdal|numpy|pyqt.*?|sip)==", re.ASCII | re.IGNORECA
 class CasaGeoToolsInstallRequirementsTask(QgsTask):
     def __init__(self, filename: str, description: str | None = None):
         # TODO: Make this task cancellable and adjust the flags afterwards.
-        super().__init__(description, QgsTask.Flags())
+        super().__init__(description, QgsTask.Flags())  # pyright: ignore[reportAttributeAccessIssue]
         self.filename = filename
 
     @override

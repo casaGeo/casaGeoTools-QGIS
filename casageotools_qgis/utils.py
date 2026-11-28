@@ -177,7 +177,7 @@ def geometry_from_shapely(geometry: "ShapelyBaseGeometry", /) -> "QgsGeometry":
 
 def parameter_crs_pairs(
     definitions: Iterable["QgsProcessingParameterDefinition"],
-    parameters: dict[str, Any],
+    parameters: dict[str | None, Any],
     context: "QgsProcessingContext",
 ) -> Generator[
     tuple["QgsProcessingParameterDefinition", "QgsCoordinateReferenceSystem"]

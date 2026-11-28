@@ -135,7 +135,7 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
         return self.__tr("Geocodes addresses.")
 
     @override
-    def _initAlgorithm(self, configuration: dict[str, Any] | None) -> None:
+    def _initAlgorithm(self, configuration: dict[str | None, Any] | None) -> None:
         from casageo.coder import (
             DEFAULT_ADDRESS_NAMES_MODE,
             DEFAULT_GEOCODE_LIMIT,
@@ -471,7 +471,7 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
     def sinkProperties(
         self,
         sink: str | None,
-        parameters: dict[str, Any],
+        parameters: dict[str | None, Any],
         context: QgsProcessingContext,
         sourceProperties: dict[str | None, QgsProcessingAlgorithm.VectorProperties],
     ) -> QgsProcessingAlgorithm.VectorProperties:
@@ -553,7 +553,7 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
     @override
     def checkParameterValues(
         self,
-        parameters: dict[str, Any],
+        parameters: dict[str | None, Any],
         context: QgsProcessingContext,
     ) -> tuple[bool, str]:
         if not any(
@@ -586,7 +586,7 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
     @override
     def _convertInputGeometries(
         self,
-        parameters: dict[str, Any],
+        parameters: dict[str | None, Any],
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
     ) -> "DataFrame":
@@ -598,7 +598,7 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
     def _convertInputGeometriesSingle(
         self,
-        parameters: dict[str, Any],
+        parameters: dict[str | None, Any],
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
     ) -> "DataFrame":
@@ -612,7 +612,7 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
     def _convertInputGeometriesBatch(
         self,
-        parameters: dict[str, Any],
+        parameters: dict[str | None, Any],
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
     ) -> "DataFrame":
@@ -694,7 +694,7 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
     @override
     def _calculateResults(
         self,
-        parameters: dict[str, Any],
+        parameters: dict[str | None, Any],
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
         queries: "DataFrame",
@@ -758,7 +758,7 @@ class CasaGeoToolsGeocodeAlgorithm(CasaGeoToolsProcessingAlgorithm):
     @override
     def _writeOutputGeometries(
         self,
-        parameters: dict[str, Any],
+        parameters: dict[str | None, Any],
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
         results: "DataFrame",

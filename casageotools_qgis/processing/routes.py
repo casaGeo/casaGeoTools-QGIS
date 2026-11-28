@@ -137,7 +137,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
                 )
 
     @override
-    def _initAlgorithm(self, configuration: dict[str, Any] | None) -> None:
+    def _initAlgorithm(self, configuration: dict[str | None, Any] | None) -> None:
         from casageo.spatial import (
             DEFAULT_ALTERNATIVE_ROUTES,
             DEFAULT_ROUTING_MODE,
@@ -397,7 +397,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
     def sinkProperties(
         self,
         sink: str | None,
-        parameters: dict[str, Any],
+        parameters: dict[str | None, Any],
         context: QgsProcessingContext,
         sourceProperties: dict[str | None, QgsProcessingAlgorithm.VectorProperties],
     ) -> QgsProcessingAlgorithm.VectorProperties:
@@ -440,7 +440,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
     @override
     def _convertInputGeometries(
         self,
-        parameters: dict[str, Any],
+        parameters: dict[str | None, Any],
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
     ) -> "DataFrame":
@@ -456,7 +456,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
     def _convertInputGeometriesSingle(
         self,
-        parameters: dict[str, Any],
+        parameters: dict[str | None, Any],
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
     ) -> "DataFrame":
@@ -480,7 +480,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
     def _convertInputGeometriesBatch(
         self,
-        parameters: dict[str, Any],
+        parameters: dict[str | None, Any],
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
     ) -> "DataFrame":
@@ -536,7 +536,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
     def _convertInputGeometriesLineSegment(
         self,
-        parameters: dict[str, Any],
+        parameters: dict[str | None, Any],
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
     ) -> "DataFrame":
@@ -604,7 +604,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
     @override
     def _calculateResults(
         self,
-        parameters: dict[str, Any],
+        parameters: dict[str | None, Any],
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
         queries: "DataFrame",
@@ -663,7 +663,7 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
     @override
     def _writeOutputGeometries(
         self,
-        parameters: dict[str, Any],
+        parameters: dict[str | None, Any],
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
         results: "DataFrame",
@@ -737,7 +737,7 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
         return self.__tr("Calculate routes passing through a list of points.")
 
     @override
-    def _initAlgorithm(self, configuration: dict[str, Any] | None) -> None:
+    def _initAlgorithm(self, configuration: dict[str | None, Any] | None) -> None:
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
@@ -765,7 +765,7 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
     @override
     def _convertInputGeometries(
         self,
-        parameters: dict[str, Any],
+        parameters: dict[str | None, Any],
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
     ) -> "DataFrame":
@@ -806,7 +806,7 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
     @override
     def _calculateResults(
         self,
-        parameters: dict[str, Any],
+        parameters: dict[str | None, Any],
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
         queries: "DataFrame",
@@ -825,7 +825,7 @@ class CasaGeoToolsRoutesViaAlgorithm(CasaGeoToolsProcessingAlgorithm):
     @override
     def _writeOutputGeometries(
         self,
-        parameters: dict[str, Any],
+        parameters: dict[str | None, Any],
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
         results: "DataFrame",

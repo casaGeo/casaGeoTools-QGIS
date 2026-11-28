@@ -124,7 +124,7 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
         )
 
     @override
-    def _initAlgorithm(self, configuration: dict[str, Any] | None) -> None:
+    def _initAlgorithm(self, configuration: dict[str | None, Any] | None) -> None:
         from casageo.spatial import (
             DEFAULT_DIRECTION,
             DEFAULT_RANGE_UNIT,
@@ -352,7 +352,7 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
     def sinkProperties(
         self,
         sink: str | None,
-        parameters: dict[str, Any],
+        parameters: dict[str | None, Any],
         context: QgsProcessingContext,
         sourceProperties: dict[str | None, QgsProcessingAlgorithm.VectorProperties],
     ) -> QgsProcessingAlgorithm.VectorProperties:
@@ -398,7 +398,7 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
     @override
     def _convertInputGeometries(
         self,
-        parameters: dict[str, Any],
+        parameters: dict[str | None, Any],
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
     ) -> "DataFrame":
@@ -410,7 +410,7 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
     def _convertInputGeometriesSingle(
         self,
-        parameters: dict[str, Any],
+        parameters: dict[str | None, Any],
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
     ) -> "DataFrame":
@@ -429,7 +429,7 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
 
     def _convertInputGeometriesBatch(
         self,
-        parameters: dict[str, Any],
+        parameters: dict[str | None, Any],
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
     ) -> "DataFrame":
@@ -488,7 +488,7 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
     @override
     def _calculateResults(
         self,
-        parameters: dict[str, Any],
+        parameters: dict[str | None, Any],
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
         queries: "DataFrame",
@@ -553,7 +553,7 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
     @override
     def _writeOutputGeometries(
         self,
-        parameters: dict[str, Any],
+        parameters: dict[str | None, Any],
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
         results: "DataFrame",

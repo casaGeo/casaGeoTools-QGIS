@@ -32,6 +32,7 @@ dev = [
 [tool.basedpyright]
 typeCheckingMode = "standard"
 allowedUntypedLibraries = ["qgis"]
+exclude = ["build/"]
 ignore = ["casageotools_qgis/ui/*.py"]
 reportImplicitOverride = "warning"
 

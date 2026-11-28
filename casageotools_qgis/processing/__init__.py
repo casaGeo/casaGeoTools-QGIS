@@ -24,15 +24,15 @@ from qgis.core import (
     Qgis,
     QgsCoordinateReferenceSystem,
     QgsCoordinateTransform,
-    QgsCsException,  # pyright: ignore[reportAttributeAccessIssue]
+    QgsCsException,
     QgsFeature,
     QgsFeatureRequest,
     QgsGeometry,
-    QgsNotSupportedException,  # pyright: ignore[reportAttributeAccessIssue]
+    QgsNotSupportedException,
     QgsPointXY,
     QgsProcessingAlgorithm,
     QgsProcessingContext,
-    QgsProcessingException,  # pyright: ignore[reportAttributeAccessIssue]
+    QgsProcessingException,
     QgsProcessingFeatureSource,
     QgsProcessingFeedback,
     QgsProcessingParameterDefinition,
@@ -149,7 +149,7 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
         ).toString()
 
     @override
-    def initAlgorithm(self, configuration: dict[str, Any] | None = None) -> None:
+    def initAlgorithm(self, configuration: dict[str | None, Any] | None = None) -> None:
         import importlib.metadata
 
         # Most of these checks can probably be done once and the results cached
@@ -216,7 +216,7 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
                 "An error occurred while initializing the algorithm: {err}"
             ).format(err=str(err))
 
-    def _initAlgorithm(self, configuration: dict[str, Any] | None) -> None:
+    def _initAlgorithm(self, configuration: dict[str | None, Any] | None) -> None:
         pass
 
     def _addParameter(
@@ -236,7 +236,7 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
 
     @override
     def validateInputCrs(
-        self, parameters: dict[str, Any], context: QgsProcessingContext
+        self, parameters: dict[str | None, Any], context: QgsProcessingContext
     ) -> bool:
         return super().validateInputCrs(parameters, context) and all(
             QgsCoordinateTransform.isTransformationPossible(crs, self.HERE_CRS)
@@ -249,7 +249,7 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
     @override
     def processAlgorithm(
         self,
-        parameters: dict[str, Any],
+        parameters: dict[str | None, Any],
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback | None,
     ) -> dict[str, Any]:
@@ -278,7 +278,7 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
 
     def _convertInputGeometries(
         self,
-        parameters: dict[str, Any],
+        parameters: dict[str | None, Any],
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
     ) -> "DataFrame":
@@ -289,7 +289,7 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
 
     def _calculateResults(
         self,
-        parameters: dict[str, Any],
+        parameters: dict[str | None, Any],
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
         queries: "DataFrame",
@@ -301,7 +301,7 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
 
     def _writeOutputGeometries(
         self,
-        parameters: dict[str, Any],
+        parameters: dict[str | None, Any],
         context: QgsProcessingContext,
         feedback: QgsProcessingFeedback,
         results: "DataFrame",
@@ -313,7 +313,7 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
     def _getSource(
         self,
         name: str,
-        parameters: dict[str, Any],
+        parameters: dict[str | None, Any],
         context: QgsProcessingContext,
     ) -> QgsProcessingFeatureSource:
         source = self.parameterAsSource(parameters, name, context)
@@ -324,7 +324,7 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
     def _getSink(
         self,
         name: str,
-        parameters: dict[str, Any],
+        parameters: dict[str | None, Any],
         context: QgsProcessingContext,
     ) -> ProcessingFeatureSinkDefinition:
         props = self.sinkProperties(name, parameters, context, {})
@@ -353,7 +353,7 @@ class CasaGeoToolsProcessingAlgorithm(QgsProcessingAlgorithm):
         self,
         name: str,
         crs: QgsCoordinateReferenceSystem,
-        parameters: dict[str, Any],
+        parameters: dict[str | None, Any],
         context: QgsProcessingContext,
     ) -> QgsPointXY:
         point = self.parameterAsPoint(parameters, name, context)
