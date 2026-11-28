@@ -18,7 +18,7 @@ from collections.abc import Callable, Generator, Iterable, Iterator
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, LiteralString, cast, overload, override
 
-from qgis.PyQt.QtCore import QCoreApplication
+from qgis.PyQt.QtCore import QCoreApplication, Qt
 
 if TYPE_CHECKING:
     import datetime
@@ -246,6 +246,10 @@ def parameter_crs_pairs(
                     definition, parameters, context
                 ),
             )
+
+
+def isodatetime(dt: "QDateTime", /) -> str | None:
+    return dt.toString(Qt.DateFormat.ISODateWithMs) if dt.isValid() else None
 
 
 def pydatetime(dt: "QDateTime", /) -> "datetime.datetime | None":

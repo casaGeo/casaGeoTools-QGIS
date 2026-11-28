@@ -48,7 +48,7 @@ from ..utils import (
     features_of,
     geometry_as_shapely,
     geometry_from_shapely,
-    pydatetime,
+    isodatetime,
 )
 from . import CasaGeoToolsProcessingAlgorithm
 
@@ -524,9 +524,9 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             if f := routing_mode_field:
                 row["routing_mode"] = feature[f]
             if f := departure_time_field:
-                row["departure_time"] = pydatetime(feature[f])
+                row["departure_time"] = isodatetime(feature[f])
             if f := arrival_time_field:
-                row["arrival_time"] = pydatetime(feature[f])
+                row["arrival_time"] = isodatetime(feature[f])
             if f := avoid_features_field:
                 row["avoid_features"] = feature[f]
             if f := exclude_countries_field:
@@ -587,9 +587,9 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             if f := routing_mode_field:
                 row["routing_mode"] = feature[f]
             if f := departure_time_field:
-                row["departure_time"] = pydatetime(feature[f])
+                row["departure_time"] = isodatetime(feature[f])
             if f := arrival_time_field:
-                row["arrival_time"] = pydatetime(feature[f])
+                row["arrival_time"] = isodatetime(feature[f])
             if f := avoid_features_field:
                 row["avoid_features"] = feature[f]
             if f := exclude_countries_field:
@@ -641,8 +641,8 @@ class CasaGeoToolsRoutesAlgorithm(CasaGeoToolsProcessingAlgorithm):
             "alternatives": alternatives,
             "transport_mode": TRANSPORT_MODES[transport_index],
             "routing_mode": ROUTING_MODES[routing_index],
-            "departure_time": pydatetime(departure_time),
-            "arrival_time": pydatetime(arrival_time),
+            "departure_time": isodatetime(departure_time),
+            "arrival_time": isodatetime(arrival_time),
             "traffic": departure_time.isValid() or arrival_time.isValid(),
             "avoid_features": [AVOIDABLE_FEATURES[i] for i in avoid_features_indices],
             "exclude_countries": exclude_countries,

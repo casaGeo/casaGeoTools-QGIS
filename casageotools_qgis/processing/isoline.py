@@ -45,7 +45,7 @@ from ..utils import (
     features_of,
     geometry_as_shapely,
     geometry_from_shapely,
-    pydatetime,
+    isodatetime,
 )
 from . import CasaGeoToolsProcessingAlgorithm
 
@@ -470,7 +470,7 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
             if f := direction_field:
                 row["direction"] = feature[f]
             if f := datetime_field:
-                time = pydatetime(feature[f])
+                time = isodatetime(feature[f])
                 row["departure_time"] = time
                 row["arrival_time"] = time
                 row["traffic"] = bool(time)
@@ -531,8 +531,8 @@ class CasaGeoToolsIsolineAlgorithm(CasaGeoToolsProcessingAlgorithm):
             "transport_mode": TRANSPORT_MODES[transport_index],
             "routing_mode": ROUTING_MODES[routing_index],
             "direction": DIRECTION_TYPES[direction_index],
-            "departure_time": pydatetime(date_and_time),
-            "arrival_time": pydatetime(date_and_time),
+            "departure_time": isodatetime(date_and_time),
+            "arrival_time": isodatetime(date_and_time),
             "traffic": date_and_time.isValid(),
             "avoid_features": [AVOIDABLE_FEATURES[i] for i in avoid_features_indices],
             "exclude_countries": exclude_countries,
